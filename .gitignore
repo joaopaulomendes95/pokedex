@@ -4,4 +4,3 @@ dist/
 
 # logs
 repl.log
-dist/repl.js
