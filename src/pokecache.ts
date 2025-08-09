@@ -1,4 +1,4 @@
-export type CacheEntry<T> = {
+type CacheEntry<T> = {
     createdAt: number;
     val: T;
 };
@@ -21,24 +21,33 @@ export class Cache {
         this.#cache.set(key, entry);
     }
 
-    get<T>(key: string): CacheEntry<T> | undefined {
-        return this.#cache.get(key);
+    get<T>(key: string) {
+        const entry = this.#cache.get(key);
+        if (entry !== undefined) {
+            return entry.val as T;
+        }
+        return undefined;
     }
 
     #reap() {
-        for (const [key, entry] of this.#cache.entries()) {
-            if (entry.createdAt < Date.now() - this.#interval) {
+        const now = Date.now();
+        for (const [key, entry] of this.#cache) {
+            if (now - entry.createdAt > this.#interval) {
                 this.#cache.delete(key);
             }
         }
     }
 
     #startReapLoop() {
-        this.#reapIntervalId = setInterval(() => this.#reap(), this.#interval);
+        this.#reapIntervalId = setInterval(() => {
+            this.#reap();
+        }, this.#interval);
     }
 
     stopReapLoop() {
-        clearInterval(this.#reapIntervalId);
-        this.#reapIntervalId = undefined;
+        if (this.#reapIntervalId) {
+            clearInterval(this.#reapIntervalId);
+            this.#reapIntervalId = undefined;
+        }
     }
 }
