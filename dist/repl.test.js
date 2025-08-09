@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
 import { cleanInput } from "./utils/clean_input";
-
 describe.each([
     {
         input: "  hello  world  ",
@@ -30,7 +29,6 @@ describe.each([
 ])("cleanInput($input)", ({ input, expected }) => {
     test(`Expected: ${expected}`, () => {
         const actual = cleanInput(input);
-
         // The `expect` and `toHaveLength` functions are from vitest
         // they will fail the test if the condition is not met
         expect(actual).toHaveLength(expected.length);
