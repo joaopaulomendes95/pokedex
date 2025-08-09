@@ -1,16 +1,20 @@
 import { commandHelp } from "./commands/help.js";
 import { commandExit } from "./commands/exit.js";
 import { createInterface, type Interface } from "readline";
+import { PokeAPI } from "./pokeapi.js";
 
 export type CLICommand = {
   name: string;
   description: string;
-  callback: (state: State) => void;
+  callback: (state: State) => Promise<void>;
 };
 
 export type State = {
     rl: Interface;
     commands: Record<string, CLICommand>;
+    pokeapi: PokeAPI;
+    nextLocationsURL: string | null;
+    prevLocationsURL: string | null;
 };
 
 export function initState(): State {

@@ -4,7 +4,7 @@ import { commandExit } from "./commands/exit.js";
 // import { getCommands } from "./commands/get_commands.js";
 import { type State } from "./state.js";
 
-export function startREPL(state: State) {
+export async function startREPL(state: State) {
     const rl = state.rl;
     const commands = state.commands;
 
