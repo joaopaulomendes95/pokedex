@@ -7,7 +7,7 @@ const STORAGE_KEY = 'poke-league-theme';
 
 /**
  * Applies a `data-theme` attribute on <html> (light/dark), mirrored by CSS
- * tokens. Also carries the APP/ `ThemeService` CSS-variable API (getRootVar /
+ * tokens. Also carries the `ThemeService` CSS-variable API (getRootVar /
  * setHue / setSat) so accent hues and saturations can be tweaked at runtime.
  */
 @Service()
@@ -43,7 +43,7 @@ export class ThemeService {
     return 'light';
   }
 
-  // ---- APP/ ThemeService CSS-variable API ----
+  // ---- ThemeService CSS-variable API ---------
 
   getRootVar(name: string): string {
     return getComputedStyle(this.document.documentElement).getPropertyValue(name).trim();

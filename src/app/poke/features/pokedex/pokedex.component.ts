@@ -82,7 +82,7 @@ export class PokedexComponent {
     { key: 'types', header: 'Types', filterable: true },
   ];
 
-  /** Tile click → slide-in DetailDialog (APP pattern). */
+  /** Tile click → slide-in DetailDialog */
   openDetail(row: DexRow): void {
     // Remember the pre-dialog selection so the dialog doesn't leak a global
     // `selected` into Squad/Market (that was an exploit).

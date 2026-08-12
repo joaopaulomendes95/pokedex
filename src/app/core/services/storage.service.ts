@@ -2,7 +2,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { inject, PLATFORM_ID, Service } from '@angular/core';
 
 /**
- * Thin, environment-safe localStorage wrapper (ported from APP/):
+ * Thin, environment-safe localStorage wrapper:
  * guards against non-browser platforms and keeps persistence calls in one place.
  */
 @Service()

@@ -736,7 +736,7 @@ body {
 }
 
 // =====================================================================
-// APP/ design system — shared visual language (ported 1:1 from APP/src/styles.scss)
+// design system — shared visual language
 // =====================================================================
 
 // colors
@@ -1419,7 +1419,7 @@ input[type='number'] {
   }
 }
 
-// Overlay toasts (APP/ pattern): each toast is its own CDK overlay, top-right.
+// Overlay toasts: each toast is its own CDK overlay, top-right.
 .app-toast-overlay {
   pointer-events: auto;
   z-index: 1100;

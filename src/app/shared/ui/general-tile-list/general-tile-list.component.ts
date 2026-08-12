@@ -9,7 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { GeneralListBase } from '@shared/ui/general-tile-list/general-list-base';
 
 /**
- * APP/GeneralTileList port — a searchable/sortable/filterable, paginated CSS-grid
+ * GeneralTileList — a searchable/sortable/filterable, paginated CSS-grid
  * of tiles. Rows come from `dataProvider`, the per-tile look comes from a
  * projected `#tile` template (`{ $implicit: row, index: $index }`).
  */

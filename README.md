@@ -6,12 +6,6 @@ instant auto-resolved battles, collect coins (idle income every real second +
 match payouts), buy/train creatures, and climb a 5-tier ladder (Novice →
 Champion Cup) into infinite Elite Series.
 
-> This project doubles as a **training ground for the work codebase** (`APP/`
-> reference): it mirrors the same architecture — path aliases
-> (`@core/` `@shared/` `@layout/` `@poke/`), `@Service()` decorators, `inject()`,
-> overlay-based toasts, injection-token config, global error handling — so
-> every pattern used here transfers directly.
-
 ## Commands
 
 ```bash
@@ -60,7 +54,7 @@ src/app/
 │   ├── models/       shared interfaces (dialogs, notifications, loader)
 │   └── services/     StorageService, NotificationService (CDK overlay toasts),
 │                     AppLoaderService, ErrorReportingService
-├── layout/        # navbar + toast + pop-loader (ported from APP/)
+├── layout/        # navbar + toast + pop-loader
 ├── poke/          # the game
 │   ├── features/     squad-builder, pokedex, adventure, arena, user, quests,
 │   │                 shared (detail-panel, shop-dialog, poke-details-content)
@@ -68,7 +62,7 @@ src/app/
 │   └── *.service.ts  game.service (state machine), poke-data.service,
 │                     match.runner, battle.service, missions, auto-battle,
 │                     cup-run, theme, xp-display, ui-state
-└── shared/ui/     # reusable design system (ported from APP/): basic-view,
+└── shared/ui/     # reusable design system: basic-view,
                    # kpi-block, custom-chip, progress-gauge, container-mark,
                    # object-container, general-tile-list + dialog system
 ```
@@ -99,5 +93,3 @@ Key patterns:
 
 - The app needs the network at runtime (PokeAPI) — there is no local data
   snapshot; sprites come from the PokeAPI CDN.
-- `APP/` (the work project) is deliberately **not** part of this repo — it's
-  used as a pattern reference only.

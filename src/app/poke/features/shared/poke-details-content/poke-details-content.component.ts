@@ -15,7 +15,7 @@ export interface PokeDetailsContentData {
 /**
  * Content component embedded in the slide-in "DetailDialog" (DetailsBlock).
  * Renders a Pokémon's artwork, type chips and a read-only stat/profile section
- * grid composed from APP/DetailsSections.
+ * grid composed from DetailsSections.
  */
 @Component({
   selector: 'app-poke-details-content',

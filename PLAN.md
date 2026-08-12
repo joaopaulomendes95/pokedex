@@ -14,7 +14,7 @@ Comprehensive fixes for UX, UI, and gameplay issues identified in the Poké-Liga
 
 **Requirements**:
 
-- Persistent left sidebar navigation (like APP/ reference)
+- Persistent left sidebar navigation
 - Always visible, not tab-based
 - Contains: Squad, Pokédex, Market, Adventure, Arena, Idle, Save
 - Collapsible on mobile
@@ -119,7 +119,7 @@ Comprehensive fixes for UX, UI, and gameplay issues identified in the Poké-Liga
 
 **Fix**:
 
-- Price formula: baseStatTotal * levelMultiplier * rarityFactor
+- Price formula: baseStatTotal *levelMultiplier* rarityFactor
 - Disable "Use" button for energy drink when `energy >= 100`
 - Show "Max Energy" tooltip
 
@@ -224,13 +224,13 @@ purple + shadows). `ThemeService` sets `document.documentElement.dataset.theme`,
 
 ---
 
-## 15. APP/ Design-System Migration
+## 15. Design-System
 
 **Priority**: High  
 **Status**: Done (foundation + screens)  
 **Files**: `src/app/shared/ui/*`, `src/styles.scss`, `src/app/poke/features/**`
 
-Bring the game's look-and-feel up to parity with the work repo's `APP/` design system so it doubles
+Bring the game's look-and-feel up to parity with the work repo's design system so it doubles
 as practice for the job project:
 
 - **Font Awesome** installed (`@fortawesome/fontawesome-free`) as the icon set (chips, KPIs,
@@ -243,7 +243,7 @@ as practice for the job project:
   paging engine (signal-driven base) with a projected `#tile` template.
 - **Screens**: Pokédex rebuilt on `app-general-tile-list` + `app-basic-view` with slide-in
   DetailDialog on tile click; Market, Squad, Save, Arena, Adventure all wrapped in
-  `app-basic-view` with the APP page header.
+  `app-basic-view` with the page header.
 - **Confirmations wired**: prestige (`quests`), full save wipe (`user`), cup entry + forfeit
   (`arena`) now go through `AppDialogService.open()`.
 - Shared type→chip color util (`poke-type-color.ts`), `KpiBlock` / `ContainerMark` /
@@ -285,13 +285,12 @@ the generated types, not raw JSON shapes.
 9. ~~**Arena tournaments + UI** (endgame)~~ done
 10. ~~**Idle missions** (retention)~~ done
 11. ~~**Light/Dark theme** (cross-cutting; unblocks dark focus in new features)~~ done
-12. ~~**APP/ design-system migration** (dialogs + tile lists + basic-view screens + confirmations)~~ done
+12. ~~**design-system migration** (dialogs + tile lists + basic-view screens + confirmations)~~ done
 13. **PokeAPI deep-dives** (codex / moves / abilities / compare)
 
 ---
 
 ## Notes
 
-- Reference APP/ design system in `/home/joao/personal/projects/dream-xi/APP/src/styles.scss` for sidebar, containers, chips, buttons
 - All new components should use `poke/shared/ui/` pattern
 - Test after each major change: `npm run build && npx ng test --watch=false`

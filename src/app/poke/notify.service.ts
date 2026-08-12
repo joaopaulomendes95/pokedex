@@ -2,7 +2,7 @@ import { inject, Service } from '@angular/core';
 import { NotificationService } from '@core/services/notifications/notification.service';
 
 /**
- * Thin game-facing facade over the APP/ overlay NotificationService so every
+ * Thin game-facing facade over the overlay NotificationService so every
  * screen keeps its `show` / `showError` / `showSuccess` calls.
  */
 @Service()

@@ -11,11 +11,6 @@ Everything above a thin UI shell is powered by `httpResource` from the
 and the card detail is a **request derived from a signal** (`selected()`),
 with an in-memory cache so flipping the dex never re-fetches.
 
-> The project is a **training ground for the work codebase** (the `APP/`
-> reference lives outside this repo): it mirrors the same architecture —
-> path aliases, `@Service()` + `inject()`, overlay toasts, injection-token
-> config, global error handling — so every pattern used here transfers.
-
 **No router** — screens are tabs driven by `UiStateService` signals; the root
 component (`app.component.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
 
@@ -46,7 +41,7 @@ component (`app.component.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
   `services/storage.service.ts` (the only place that touches `localStorage`),
   `services/notifications/notification.service.ts` (CDK-overlay toasts),
   `services/error-reporting/error-reporting.service.ts`, `models/*`.
-- **UI building blocks in `shared/ui/`** (ported from `APP/`): `basic-view`,
+- **UI building blocks in `shared/ui/`**: `basic-view`,
   `kpi-block`, `custom-chip`, `progress-gauge`, `container-mark`,
   `object-container`, `general-tile-list` (+ `GeneralListBase` engine), and
   the dialog system (`AppDialogService`, `ConfirmationDialogComponent`,

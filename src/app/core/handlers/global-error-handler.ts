@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorReportingService } from '../services/error-reporting/error-reporting.service';
 
 /**
- * App-wide error handler (ported from APP/ `core/handlers/global-error-handler`):
+ * App-wide error handler:
  * logs every uncaught error and forwards a sanitized report to the reporting
  * sink. HttpErrorResponse is skipped — those are handled at the HTTP layer.
  */

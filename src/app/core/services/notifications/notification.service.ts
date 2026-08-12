@@ -32,8 +32,7 @@ interface ActiveToast {
 }
 
 /**
- * Overlay-based toast notifications (ported from APP/
- * `core/services/notifications/notification.service`): each toast lives in its
+ * Overlay-based toast notifications: each toast lives in its
  * own CDK overlay at the top-right, stacking downward so they never overlap.
  */
 @Service()

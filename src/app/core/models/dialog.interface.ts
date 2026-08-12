@@ -57,7 +57,7 @@ export interface ActionResult {
 }
 
 // ---------------------------------------------------------------------------
-// Details dialog (slide-in record viewer) — the APP "DetailDialog" pattern
+// Details dialog (slide-in record viewer)
 // ---------------------------------------------------------------------------
 
 export interface DetailsBadge {

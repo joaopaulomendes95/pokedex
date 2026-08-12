@@ -1,6 +1,6 @@
 import { type CustomChipColor } from '@shared/ui';
 
-/** Type → chip colour (APP/CustomChip palette). */
+/** Type → chip colour */
 const TYPE_COLORS: Record<string, CustomChipColor> = {
   normal: 'desat',
   fire: 'orange',

@@ -12,7 +12,7 @@ import { CustomChipComponent, KpiBlockComponent } from '@shared/ui';
 
 /**
  * Merged Shop + Bag: buy items and use bag consumables from one place,
- * reachable any time (pairs with the APP/ `details-dialog` slide-in sheet).
+ * reachable any time.
  */
 @Component({
   selector: 'app-shop-dialog',
@@ -43,9 +43,7 @@ export class ShopDialogComponent {
   energyPct = computed(() => this.game.energyPct());
 
   /** Total stocked items in the bag (not spent ones). */
-  ownedCount = computed(() =>
-    Object.values(this.game.inventory()).reduce((sum, n) => sum + n, 0),
-  );
+  ownedCount = computed(() => Object.values(this.game.inventory()).reduce((sum, n) => sum + n, 0));
 
   /** Effective price: consumables scale with tier. */
   getPrice(item: ShopItem): number {

@@ -4,7 +4,7 @@ import { LoaderData } from '@core/models/loader.interface';
 import { PopLoaderComponent } from '@layout/loaders/pop-loader.component/pop-loader.component';
 
 /**
- * Blocking loading overlay (ported from APP/ `core/services/app-loader`):
+ * Blocking loading overlay:
  * opens a non-dismissible MatDialog spinner/bar while a long operation runs.
  */
 @Service()

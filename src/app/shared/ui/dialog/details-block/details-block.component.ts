@@ -6,7 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DetailsDialogData, DialogAction } from '@core/models/dialog.interface';
 
 /**
- * Slide-in "DetailDialog" host (mirrors APP/.details-block): identity header +
+ * Slide-in "DetailDialog" host: identity header +
  * badges, an embedded content component via NgComponentOutlet, and a reactive
  * action footer. Opened through AppDialogService.openDetails().
  */

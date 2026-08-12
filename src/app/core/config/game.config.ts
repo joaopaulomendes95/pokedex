@@ -1,8 +1,7 @@
 import { InjectionToken } from '@angular/core';
 
 /**
- * Central, injectable game tuning (mirrors APP/ `SETTINGS_TOKEN` + settings
- * loading): instead of sprinkling magic numbers, services read from
+ * Central, injectable game tuning: instead of sprinkling magic numbers, services read from
  * `GAME_CONFIG` and a provider can override it per environment.
  */
 export interface GameConfig {

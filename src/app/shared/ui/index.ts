@@ -1,4 +1,7 @@
-export { CustomChipComponent, type CustomChipColor } from '@shared/ui/custom-chip/custom-chip.component';
+export {
+  CustomChipComponent,
+  type CustomChipColor,
+} from '@shared/ui/custom-chip/custom-chip.component';
 export {
   KpiBlockComponent,
   type MetricData,
@@ -13,9 +16,12 @@ export {
   type ObjectContainerHeaderButton,
 } from '@shared/ui/object-container/object-container.component';
 export { GeneralTileList as GeneralTileListComponent } from '@shared/ui/general-tile-list/general-tile-list.component';
-export { type ColumnDefinition, type RowAction } from '@shared/ui/general-tile-list/general-list.model';
+export {
+  type ColumnDefinition,
+  type RowAction,
+} from '@shared/ui/general-tile-list/general-list.model';
 
-// ---- Dialog system (ported from APP/ – AppDialogService + dialogs) ----
+// ---- Dialog system ----------------------------------------------------
 export { AppDialogService } from '@shared/ui/dialog/app-dialog.service';
 export { ConfirmationDialogComponent } from '@shared/ui/dialog/confirmation-dialog/confirmation-dialog.component';
 export { FormDialogComponent } from '@shared/ui/dialog/form-dialog/form-dialog.component';

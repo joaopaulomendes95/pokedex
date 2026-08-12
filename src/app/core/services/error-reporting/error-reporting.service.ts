@@ -10,8 +10,7 @@ export interface ErrorReportEntry {
 const MAX_RETAINED = 20;
 
 /**
- * In-memory error sink (ported from APP/ `ErrorReportingService`, modernized
- * for a single-player app): APP POSTs to a backend; here we keep the last N
+ * In-memory error sink  here we keep the last N
  * errors in a signal so the game can surface them (e.g. on the Save screen).
  */
 @Service()
