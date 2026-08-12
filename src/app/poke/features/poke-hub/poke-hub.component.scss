@@ -1,0 +1,87 @@
+.appbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--color-main-50);
+  color: var(--mat-sys-on-primary);
+  box-shadow: var(--small-shadow);
+
+  .brand {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-size: 1.1rem;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    opacity: 0.9;
+    padding: 0 8px;
+    border-radius: 8px;
+    transition: background var(--default-transition);
+
+    &:hover {
+      background: var(--mat-sys-primary-container);
+    }
+
+    mat-icon {
+      font-size: 1.2rem;
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+  }
+
+  .gen-picker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.1);
+
+    .gen-label {
+      font-weight: 600;
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+
+    .gen-value {
+      font-weight: 700;
+      font-size: 1rem;
+      min-width: 1.5em;
+      text-align: center;
+    }
+  }
+}
+
+.tab-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .appbar {
+    padding: 0 12px;
+    height: 52px;
+  }
+
+  .stat span {
+    display: none;
+  }
+
+  .tab-content {
+    padding: 16px 8px;
+  }
+}

@@ -1,0 +1,106 @@
+<div class="pokedex">
+  <app-basic-view
+    pageTitle="Pokédex"
+    headline="Search every creature, see where they live, and jump straight there to catch them."
+    faIcon="dragon"
+  >
+    <div class="gen-picker">
+      <span class="gen-label">Gen</span>
+      <span class="gen-value">{{ genFilter.maxGen() }}</span>
+    </div>
+
+    @if (data.dexLoading()) {
+      <mat-spinner diameter="32"></mat-spinner>
+    } @else if (data.dexError()) {
+      <p class="error">
+        Couldn't load the dex. <button mat-stroked-button (click)="data.retryDex()">Retry</button>
+      </p>
+    } @else {
+      <app-general-tile-list
+        [dataProvider]="rows()"
+        [columns]="columns"
+        [initialPageSize]="30"
+        [pageSizeOptions]="[10, 30]"
+        [showSearchInput]="true"
+        (searchChanged)="data.searchQuery.set($event)"
+        (rowClick)="openDetail($event)"
+        [tileMinWidth]="180"
+      >
+        @if (data.searchLoading()) {
+          <p class="error">Searching the whole Pokédex…</p>
+        }
+        <ng-template #tile let-row>
+          <div class="dex-tile" [class.owned]="row.owned">
+            <img [src]="spriteFor(row)" alt="" />
+            <div class="dex-tile-name">{{ row.name }}</div>
+            <div class="dex-tile-id">#{{ row.id }}</div>
+            <div class="dex-tile-types">
+              @for (t of row.types; track t) {
+                <span class="dex-tile-type">{{ t }}</span>
+              }
+            </div>
+          </div>
+        </ng-template>
+      </app-general-tile-list>
+
+      <div class="pager">
+        <button
+          mat-icon-button
+          [disabled]="!data.hasPrevPage()"
+          (click)="data.firstDexPage()"
+          aria-label="First page"
+        >
+          <mat-icon>first_page</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [disabled]="!data.hasPrevPage()"
+          (click)="data.prevDexPage()"
+          aria-label="Previous page"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <span class="page-num">
+          Page
+          <input
+            type="number"
+            [value]="data.dexPage() + 1"
+            (change)="data.goToDexPage($event.target.valueAsNumber - 1)"
+            min="1"
+            [max]="data.dexMaxPage() + 1"
+            class="page-input"
+          />
+          of {{ data.dexMaxPage() + 1 }}
+        </span>
+        <button
+          mat-icon-button
+          [disabled]="!data.hasNextPage()"
+          (click)="data.nextDexPage()"
+          aria-label="Next page"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [disabled]="!data.hasNextPage()"
+          (click)="data.lastDexPage()"
+          aria-label="Last page"
+        >
+          <mat-icon>last_page</mat-icon>
+        </button>
+        <mat-form-field appearance="outline" class="page-size-field">
+          <mat-label>Per page</mat-label>
+          <mat-select
+            [value]="data.dexPageSize()"
+            (selectionChange)="data.setDexPageSize($event.value)"
+          >
+            <mat-option value="10">10</mat-option>
+            <mat-option value="30">30</mat-option>
+            <mat-option value="50">50</mat-option>
+            <mat-option value="100">100</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    }
+  </app-basic-view>
+</div>

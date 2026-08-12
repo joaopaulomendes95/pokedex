@@ -1,9 +1,5 @@
-import { startREPL } from "./repl.js";
-import { initState } from "./state.js";
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+import { appConfig } from './app/app.config';
 
-async function main() {
-    const state = initState(1000 * 60 * 5); // Cache interval of 5 minutes
-    await startREPL(state);
-}
-
-main();
+bootstrapApplication(AppComponent, appConfig).catch((err) => console.error(err));

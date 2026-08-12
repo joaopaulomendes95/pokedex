@@ -1,0 +1,119 @@
+.pokedex {
+  app-basic-view {
+    display: block;
+  }
+
+  .gen-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--color-desat-80);
+    border-radius: 999px;
+    background: var(--mat-sys-surface);
+    font-size: 0.85rem;
+
+    .gen-label {
+      color: var(--color-desat-50);
+    }
+
+    .gen-value {
+      font-weight: 700;
+      color: var(--color-main);
+    }
+  }
+
+  .error {
+    color: var(--color-red);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 1.25rem;
+
+    .page-num {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0 0.5rem;
+      font-size: 0.85rem;
+      color: var(--color-desat-50);
+    }
+
+    .page-input {
+      width: 3rem;
+      padding: 0.25rem 0.35rem;
+      border: 1px solid var(--color-desat-80);
+      border-radius: 6px;
+      background: var(--mat-sys-surface);
+      color: var(--color-text);
+      text-align: center;
+    }
+
+    .page-size-field {
+      width: 7rem;
+      margin-left: 0.5rem;
+
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        height: 2.5rem;
+      }
+
+      ::ng-deep .mat-mdc-form-field-infix {
+        min-height: 0;
+        padding: 0.5rem 0;
+      }
+    }
+  }
+}
+
+.dex-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+
+  img {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .dex-tile-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: capitalize;
+    color: var(--color-text);
+  }
+
+  .dex-tile-id {
+    font-size: 0.75rem;
+    color: var(--color-desat-50);
+  }
+
+  .dex-tile-types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    justify-content: center;
+  }
+
+  .dex-tile-type {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    background: var(--color-container-primary);
+    color: var(--color-desat-70);
+  }
+}

@@ -1,0 +1,119 @@
+.user {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  text-align: left;
+}
+
+.page-head {
+  margin-bottom: 20px;
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 1.6rem;
+  }
+
+  p {
+    margin: 0;
+    opacity: 0.7;
+  }
+}
+
+.save-card {
+  margin-bottom: 16px;
+
+  mat-card-subtitle code {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.8em;
+  }
+
+  .save-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.03);
+
+      mat-icon {
+        color: #1e6f2f;
+        margin-bottom: 4px;
+      }
+
+      .label {
+        font-size: 0.75rem;
+        opacity: 0.65;
+      }
+
+      .value {
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+    }
+  }
+
+  .hint {
+    margin: 0 0 12px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    line-height: 1.4;
+  }
+}
+
+.danger-card {
+  border-color: rgba(179, 38, 30, 0.35);
+
+  mat-card-header mat-card-title {
+    color: #b3261e;
+  }
+
+  .hint {
+    margin: 0 0 12px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    line-height: 1.4;
+  }
+
+  .gen-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+    padding: 8px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.03);
+
+    .gen-label {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .gen-value {
+      font-weight: 700;
+      font-size: 1.1rem;
+      min-width: 1.5em;
+      text-align: center;
+    }
+
+    .gen-note {
+      margin-left: auto;
+      font-size: 0.75rem;
+      opacity: 0.6;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}

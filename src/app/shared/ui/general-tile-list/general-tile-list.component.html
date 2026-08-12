@@ -1,0 +1,111 @@
+<div class="tile-list-container">
+  <div class="tile-toolbar">
+    @if (showSearchInput()) {
+      <mat-form-field
+        class="toolbar-search hide-bottom-content dim-input low-input"
+        appearance="outline"
+      >
+        <mat-label>Search</mat-label>
+        <mat-icon matPrefix><i class="fa-solid fa-magnifying-glass"></i></mat-icon>
+        <input
+          matInput
+          type="text"
+          [value]="searchTerm()"
+          (input)="onSearch($any($event.currentTarget).value)"
+        />
+      </mat-form-field>
+    }
+
+    @if (sortableColumns().length > 0) {
+      <mat-form-field
+        class="toolbar-select toolbar-sort hide-bottom-content dim-input low-input"
+        appearance="outline"
+      >
+        <mat-label>Sort</mat-label>
+        <mat-select [value]="sortColumn()" (selectionChange)="onSort($event.value)">
+          @for (column of sortableColumns(); track column.key) {
+            <mat-option [value]="column.key">{{ column.header }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (sortColumn()) {
+        <button
+          mat-icon-button
+          type="button"
+          class="toolbar-sort-dir"
+          (click)="toggleSortDirection()"
+          title="Toggle sort direction"
+        >
+          <i
+            class="fa-solid"
+            [class]="
+              sortDirection() === 'asc' ? 'fa-arrow-up-wide-short' : 'fa-arrow-down-wide-short'
+            "
+          ></i>
+        </button>
+      }
+    }
+
+    @for (column of filterableColumns(); track column.key) {
+      <mat-form-field
+        class="toolbar-select toolbar-filter hide-bottom-content dim-input low-input"
+        appearance="outline"
+      >
+        <mat-label>{{ column.header }}</mat-label>
+        <mat-select
+          multiple
+          [value]="getColumnFilterValue(column.key)"
+          (selectionChange)="onColumnFilterChange(column.key, $event.value)"
+          placeholder="All"
+        >
+          <mat-option value="">All</mat-option>
+          @for (option of getColumnFilterOptions(column.key); track option) {
+            <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (selectedFilters().length > 0 || searchTerm()) {
+      <button mat-stroked-button type="button" class="toolbar-reset" (click)="resetFilters()">
+        Reset
+      </button>
+    }
+  </div>
+
+  <div class="tile-grid" [style.grid-template-columns]="gridTemplateColumns()">
+    @for (row of pagedData(); track $index) {
+      <div
+        class="tile-item"
+        [class.highlighted]="rowHighlight()(row)"
+        role="button"
+        tabindex="0"
+        (click)="onRowClick(row)"
+        (keydown.enter)="onRowClick(row)"
+        (keydown.space)="$event.preventDefault(); onRowClick(row)"
+      >
+        @if (tile) {
+          <ng-container
+            *ngTemplateOutlet="tile; context: { $implicit: row, index: $index }"
+          ></ng-container>
+        }
+      </div>
+    }
+    @if (pagedData().length === 0) {
+      <div class="no-data">No data found.</div>
+    }
+  </div>
+
+  @if (filteredData().length > initialPageSize()) {
+    <mat-paginator
+      [length]="filteredData().length"
+      [pageSize]="initialPageSize()"
+      [pageIndex]="currentPageIndex()"
+      [pageSizeOptions]="pageSizeOptions()"
+      [showFirstLastButtons]="true"
+      (page)="handlePageEvent($event)"
+      aria-label="Select page"
+    ></mat-paginator>
+  }
+</div>

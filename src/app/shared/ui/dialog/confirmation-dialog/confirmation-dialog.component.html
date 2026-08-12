@@ -1,0 +1,18 @@
+<div class="dialog-header">
+  <div class="dialog-icon" [class]="dialogData.type">
+    <i class="fa-solid" [class]="'fa-' + dialogData.faIcon"></i>
+  </div>
+  <p mat-dialog-title>{{ dialogData.title }}</p>
+</div>
+<div class="dialog-body">
+  <p>{{ dialogData.message }}</p>
+  @if (dialogData.warning) {
+    <p class="warning">{{ dialogData.warning }}</p>
+  }
+</div>
+<mat-dialog-actions align="end">
+  <button matButton (click)="cancel()" class="faded">Cancel</button>
+  <button matButton="filled" (click)="confirm()" [class]="dialogData.type">
+    {{ dialogData.actionLabel || 'Confirm' }}
+  </button>
+</mat-dialog-actions>

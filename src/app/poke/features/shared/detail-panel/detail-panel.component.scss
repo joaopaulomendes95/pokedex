@@ -1,0 +1,146 @@
+.detail {
+  text-align: center;
+
+  img.mat-mdc-card-image {
+    width: 100%;
+    max-height: 240px;
+    object-fit: contain;
+  }
+
+  h3 {
+    margin: 12px 0 6px;
+    text-transform: capitalize;
+
+    .id {
+      opacity: 0.5;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.types {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 12px;
+
+  .type-chip {
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  text-align: left;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 6px 4px;
+
+    span {
+      opacity: 0.6;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.train-actions {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+
+  .level-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+
+    .xp-bar {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+
+      .xp-fill {
+        height: 100%;
+        background: #1e6f2f;
+        border-radius: 999px;
+        transition: width 0.2s ease;
+
+        &.ready {
+          position: relative;
+          overflow: hidden;
+
+          &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+            animation: shimmer 1.4s linear infinite;
+          }
+        }
+      }
+    }
+
+    .xp-text {
+      opacity: 0.6;
+      white-space: nowrap;
+    }
+  }
+
+  .xp-text-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+
+    .xp-toggle {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+  }
+}
+
+button {
+  width: 100%;
+}
+
+.level-up {
+  --mdc-filled-button-container-color: #b26a00;
+  --mdc-filled-button-label-text-color: #fff;
+}
+
+.empty {
+  opacity: 0.6;
+}
+
+.error {
+  color: #b3261e;
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}

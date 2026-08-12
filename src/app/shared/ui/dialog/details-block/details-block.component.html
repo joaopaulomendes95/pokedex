@@ -1,0 +1,52 @@
+<div class="container-header">
+  <div class="leading-icon">
+    <i class="fa-solid" [class]="'fa-' + (dialogData.faIcon || 'list')"></i>
+  </div>
+  <div class="head-info">
+    <span class="head-title">{{ dialogData.name }}</span>
+    <span class="head-desc">{{ dialogData.headline }}</span>
+  </div>
+  <button matIconButton class="close-button" [matTooltip]="'Close'" (click)="cancel()">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+</div>
+
+@if ((dialogData.badges ?? []).length > 0) {
+  <div class="badges-row">
+    @for (badge of dialogData.badges ?? []; track $index) {
+      <div class="badge" [class]="badge.color ?? 'primary'">{{ badge.label }}</div>
+    }
+  </div>
+}
+
+<div class="details-dialog-body">
+  @if (dialogData.description) {
+    <div class="description color-label">{{ dialogData.description }}</div>
+  }
+  @if (dialogData.content) {
+    <ng-container
+      [ngComponentOutlet]="dialogData.content"
+      [ngComponentOutletInputs]="{ data: dialogData.contentData }"
+    />
+  }
+</div>
+
+@if (dialogActions().length > 0) {
+  <div class="actions-buttons">
+    @for (action of dialogActions(); track $index) {
+      @if (!action.hidden) {
+        <button
+          [disabled]="action.disabled"
+          [matButton]="action.appearance ?? 'filled'"
+          (click)="handleAction(action)"
+          [class]="action.variant ?? 'main'"
+        >
+          @if (action.icon) {
+            <i class="fa-solid" [class]="'fa-' + action.icon"></i>
+          }
+          {{ action.label }}
+        </button>
+      }
+    }
+  </div>
+}

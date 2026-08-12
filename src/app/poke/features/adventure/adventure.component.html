@@ -1,0 +1,175 @@
+<div class="adventure">
+  <app-basic-view
+    pageTitle="Adventure"
+    headline="Travel from zone to adjacent zone, find wild Pokémon, and catch them with Pokéballs!"
+    faIcon="map-location-dot"
+  >
+    @if (!isExploring()) {
+      <!-- World map: a chain of regions that unlock as you explore -->
+      <section class="map-view">
+        <div class="region-rail">
+          @for (region of regStatuses(); track region.def.id) {
+            <button
+              class="region-chip"
+              [class.active]="region.index === current().index"
+              [class.locked]="!region.unlocked"
+              [class.cleared]="region.cleared"
+              (click)="goToRegion(region.index)"
+            >
+              <mat-icon>{{
+                region.cleared ? 'check_circle' : region.unlocked ? 'map' : 'lock'
+              }}</mat-icon>
+              <span>{{ region.def.name }}</span>
+              @if (region.unlocked) {
+                <span class="progress"
+                  >{{ region.visitedCount }}/{{ region.def.areas.length }}</span
+                >
+              }
+            </button>
+          }
+        </div>
+
+        <div class="region-card">
+          <div class="region-art">
+            <img [src]="regionArt(current().index)" alt="" />
+            <div class="region-tint"></div>
+            <div class="region-title">
+              <h2>{{ current().def.name }}</h2>
+              <p>{{ current().def.tagline }}</p>
+            </div>
+          </div>
+
+          <div class="region-progress">
+            <span
+              >Explored {{ current().visitedCount }} of {{ current().def.areas.length }} zones</span
+            >
+            <div class="xp-bar">
+              <div
+                class="xp-fill"
+                [style.width.%]="(current().visitedCount / current().def.areas.length) * 100"
+              ></div>
+            </div>
+          </div>
+
+          <div class="region-nav">
+            <button
+              mat-stroked-button
+              [disabled]="!canGoPrev()"
+              (click)="goPrev()"
+              aria-label="Previous region"
+            >
+              <mat-icon>arrow_back</mat-icon>
+              <span>{{ regStatuses()[current().index - 1]?.def.name ?? '' }}</span>
+            </button>
+            <button
+              mat-flat-button
+              color="primary"
+              [disabled]="!canGoNext()"
+              (click)="goNext()"
+              aria-label="Next region"
+            >
+              <span>{{ regStatuses()[current().index + 1]?.def.name ?? 'Finale' }}</span>
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+          @if (!canGoNext()) {
+            <p class="hint">
+              Explore every zone above to unlock the next region. No skipping ahead!
+            </p>
+          }
+        </div>
+
+        <div class="area-grid">
+          @for (loc of current().def.areas; track loc.url) {
+            <button class="area-card" [class.visited]="isVisited(loc)" (click)="explore(loc)">
+              <img [src]="locationImage(loc)" alt="" />
+              <div class="area-overlay">
+                <span class="area-name">{{ loc.name }}</span>
+                @if (isVisited(loc)) {
+                  <mat-icon class="checked">check_circle</mat-icon>
+                } @else {
+                  <mat-icon>explore</mat-icon>
+                }
+              </div>
+            </button>
+          }
+        </div>
+      </section>
+    } @else {
+      <!-- Area Exploration View -->
+      <section class="area-view">
+        <div class="area-header">
+          <button mat-icon-button (click)="leaveArea()" aria-label="Back to map">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <h2>{{ currentArea() }}</h2>
+          <span class="area-hint">Wild Pokémon encountered here:</span>
+        </div>
+
+        @if (data.areaLoading()) {
+          <mat-spinner diameter="32"></mat-spinner>
+        } @else if (data.areaError()) {
+          <p class="error">
+            Couldn't load area. <button mat-stroked-button (click)="data.retryArea()">Retry</button>
+          </p>
+        } @else {
+          <div class="encounter-grid">
+            @for (enc of encounters(); track enc.pokemon.name) {
+              <button
+                class="encounter-card"
+                [class.selected]="selectedWild()?.name === enc.pokemon.name"
+                (click)="selectWild(enc)"
+              >
+                <img [src]="data.spriteUrlOrEmpty(enc.pokemon.name)" alt="" />
+                <span class="enc-name">{{ enc.pokemon.name }}</span>
+              </button>
+            } @empty {
+              <p class="empty">No wild Pokémon found in this area (for current generation).</p>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Catch Panel (when a wild Pokémon is selected) -->
+    @if (selectedWild(); as wild) {
+      <div class="catch-panel">
+        <div class="wild-preview">
+          <img [src]="wild.sprite" alt="" />
+          <div class="wild-info">
+            <h3>{{ wild.name }}</h3>
+            <div class="catch-stats">
+              <span class="stat"><mat-icon>casino</mat-icon> {{ catchPct() }}% catch rate</span>
+              <span class="stat"
+                ><mat-icon>sports_handball</mat-icon> {{ bestBall()?.name ?? 'None' }}
+                {{ bestBall() ? ' (×' + bestBall()?.mult + ')' : '' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        @if (catchResult(); as result) {
+          <div class="catch-result" [class.success]="result.success" [class.fail]="!result.success">
+            <mat-icon>{{ result.success ? 'check_circle' : 'cancel' }}</mat-icon>
+            <span>{{ result.message }}</span>
+          </div>
+        }
+
+        <button
+          mat-raised-button
+          color="primary"
+          class="throw-ball-btn"
+          (click)="throwBall()"
+          [disabled]="!bestBall()"
+        >
+          <mat-icon>sports_handball</mat-icon>
+          Throw {{ bestBall()?.name ?? 'Pokéball' }}
+        </button>
+
+        @if (!bestBall()) {
+          <p class="hint">No Pokéballs! Buy some in the Market.</p>
+        }
+      </div>
+    }
+  </app-basic-view>
+</div>

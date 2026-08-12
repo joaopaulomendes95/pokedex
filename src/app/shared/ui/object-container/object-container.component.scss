@@ -1,0 +1,61 @@
+@use '@angular/material' as mat;
+
+.object-container {
+  padding: 1rem;
+  background-color: var(--mat-sys-surface);
+  border-radius: 1rem;
+
+  &.main {
+    .leading-icon {
+      color: var(--mat-sys-surface);
+      background-color: var(--color-main-50);
+    }
+  }
+
+  &.dim {
+    .leading-icon {
+      color: var(--mat-sys-surface);
+      background-color: var(--color-desat-80);
+    }
+  }
+
+  &.tonal {
+    .leading-icon {
+      color: var(--color-main-60);
+      background-color: var(--color-main-90);
+    }
+  }
+}
+
+.head-title {
+  font: var(--mat-sys-title-medium);
+  text-transform: uppercase;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.head-desc {
+  font: var(--mat-sys-body-small);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.object-body {
+  margin-top: 1rem;
+}
+
+.section-actions {
+  margin-top: 1rem;
+
+  display: flex;
+  gap: 0.5rem;
+  justify-content: end;
+}
+
+.header-action-button {
+  @include mat.icon-button-density(0);
+}
+
+.action-button {
+  font-size: 1.375rem;
+}

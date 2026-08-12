@@ -1,0 +1,110 @@
+<div class="quests">
+  <div class="page-head">
+    <h1 class="text-header">Idle Hub</h1>
+    <p class="color-label">
+      Your income grows with your collection, prestige shards make every run faster, and missions
+      hand out coins as you grind.
+    </p>
+  </div>
+
+  <div class="kpis">
+    <app-kpi-block [metricData]="incomeMetric()"></app-kpi-block>
+    <app-kpi-block [metricData]="prestigeMetric()"></app-kpi-block>
+    <app-kpi-block [metricData]="rosterMetric()"></app-kpi-block>
+    <app-kpi-block [metricData]="missionsMetric()"></app-kpi-block>
+  </div>
+
+  <mat-card class="prestige-card">
+    <app-container-mark title="Prestige" edge="main">
+      <div class="prestige-grid">
+        <div class="gauge">
+          <app-progress-gauge
+            [actual]="game.tier() + 1"
+            [goal]="5"
+            suffix="tiers"
+            size="11rem"
+          ></app-progress-gauge>
+        </div>
+        <div class="prestige-info">
+          <h2 class="text-topic-title">Shards: {{ game.prestige() }}</h2>
+          <p class="hint">
+            Each shard permanently boosts idle income by +25% and passive XP by +1/sec. Reach the
+            Champion Cup tier to reset your run and bank
+            <strong>{{ game.prestigeGain() }}</strong> more
+            {{ game.prestigeGain() === 1 ? 'shard' : 'shards' }}.
+          </p>
+          <div class="actions">
+            <button
+              mat-raised-button
+              color="primary"
+              [disabled]="!game.canPrestige()"
+              (click)="prestige()"
+            >
+              Prestige Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </app-container-mark>
+  </mat-card>
+
+  <div class="missions-head">
+    <h2 class="text-topic-title">
+      Missions <span class="color-label">— Tier {{ missions.missionTier() }}</span>
+    </h2>
+    <p class="color-label">
+      {{ doneCount() }} / {{ missions.missions().length }} done · {{ claimedCount() }} claimed
+    </p>
+  </div>
+
+  <div class="tier-bar">
+    <span class="color-label">
+      Tier {{ missions.missionTier() }} progress — claim everything to unlock the next tier:
+    </span>
+    <mat-progress-bar mode="determinate" [value]="tierProgress()"></mat-progress-bar>
+  </div>
+
+  <div class="mission-list">
+    @for (m of missions.missions(); track m.id) {
+      <mat-card class="mission-card">
+        <div class="mission-head">
+          <mat-icon class="mission-icon">{{ m.icon }}</mat-icon>
+          <div class="mission-text">
+            <span class="color-main">{{ m.title }}</span>
+            <span class="color-label">{{ m.description }}</span>
+          </div>
+          <app-custom-chip
+            [color]="missions.claimed().has(m.id) ? 'desat' : missions.isDone(m) ? 'green' : 'main'"
+            [label]="
+              missions.claimed().has(m.id)
+                ? 'Claimed'
+                : missions.isDone(m)
+                  ? 'Ready!'
+                  : missions.progressOf(m) + ' / ' + m.goal
+            "
+            [faIcon]="
+              missions.claimed().has(m.id) ? 'check' : missions.isDone(m) ? 'bolt' : 'tasks'
+            "
+          ></app-custom-chip>
+        </div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="missions.progressPct(m) * 100"
+        ></mat-progress-bar>
+        <div class="mission-foot">
+          <span class="color-label">Reward: +{{ m.reward }}¢</span>
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="!missions.canClaim(m)"
+            (click)="claim(m)"
+          >
+            Claim
+          </button>
+        </div>
+      </mat-card>
+    } @empty {
+      <p class="color-label">No missions available yet.</p>
+    }
+  </div>
+</div>

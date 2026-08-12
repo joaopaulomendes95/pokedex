@@ -1,0 +1,51 @@
+<mat-toolbar class="appbar" color="primary">
+  <span class="brand">Poké-Liga Idle</span>
+  <span class="spacer"></span>
+  <span class="stat">
+    <mat-icon>emoji_events</mat-icon>
+    {{ tierName() }} · {{ winsDisplay() }} wins
+  </span>
+  <span class="stat">
+    <mat-icon>hourglass_bottom</mat-icon>
+    {{ income() }}
+  </span>
+  <span class="stat">
+    <mat-icon>monetization_on</mat-icon>
+    {{ coins() | number }}¢
+  </span>
+  <span class="stat">
+    <mat-icon>bolt</mat-icon>
+    {{ energy() }}/100
+  </span>
+  <span class="stat build-tag" title="build">v4</span>
+  <div class="gen-picker">
+    <span class="gen-label">Gen</span>
+    <span class="gen-value">{{ genFilter.maxGen() }}</span>
+  </div>
+</mat-toolbar>
+
+<div class="tab-content">
+  @switch (tab()) {
+    @case (0) {
+      <app-poke-squad />
+    }
+    @case (1) {
+      <app-poke-pokedex />
+    }
+    @case (2) {
+      <app-poke-adventure />
+    }
+    @case (3) {
+      <app-poke-arena />
+    }
+    @case (4) {
+      <app-poke-user />
+    }
+    @case (5) {
+      <app-poke-quests />
+    }
+    @default {
+      <app-poke-squad />
+    }
+  }
+</div>

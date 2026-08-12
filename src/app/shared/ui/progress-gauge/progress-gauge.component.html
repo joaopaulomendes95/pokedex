@@ -1,0 +1,14 @@
+<div
+  class="progress-area"
+  [style.--goal-hue]="goalHue()"
+  [style.--progress]="goalPercentage()"
+  [style.--progress-gauge-size]="size()"
+></div>
+
+<div class="progress-value">
+  <p class="percentage">{{ goalPercentage() }}%</p>
+
+  <p class="amount">
+    <span class="dim">{{ actual() }}</span> {{ suffix() }}
+  </p>
+</div>

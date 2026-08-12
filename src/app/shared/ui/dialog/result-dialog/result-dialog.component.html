@@ -1,0 +1,8 @@
+<div class="result-alert" [class]="dialogData.success ? 'success' : 'error'">
+  <span class="icon"><i class="fa-solid" [class]="'fa-' + faIcon"></i></span>
+  <p class="title">{{ title }}</p>
+  @if (message) {
+    <p class="message">{{ message }}</p>
+  }
+  <button matButton="tonal" (click)="close()">OK</button>
+</div>

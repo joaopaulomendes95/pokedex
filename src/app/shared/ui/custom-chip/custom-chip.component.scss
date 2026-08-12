@@ -1,0 +1,68 @@
+:host {
+  width: fit-content;
+  border-radius: 999px;
+  display: block;
+  overflow: hidden;
+}
+
+.chip-body {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+
+  &:has(.chip-icon) {
+    padding: 0.25rem 0.75rem 0.25rem 0.375rem;
+  }
+
+  &.color-main {
+    background-color: var(--color-main-a);
+  }
+  &.color-green {
+    background-color: var(--color-green-a);
+  }
+  &.color-red {
+    background-color: var(--color-red-a);
+  }
+  &.color-yellow {
+    background-color: var(--color-yellow-a);
+  }
+  &.color-orange {
+    background-color: var(--color-orange-a);
+  }
+  &.color-purple {
+    background-color: var(--color-purple-a);
+  }
+  &.color-desat {
+    background-color: var(--color-desat-a);
+  }
+  &.color-main-light {
+    background-color: var(--color-main-a);
+  }
+}
+
+.chip-icon {
+  &.color-main {
+    color: var(--color-main-50);
+  }
+  &.color-green {
+    color: var(--color-green);
+  }
+  &.color-red {
+    color: var(--color-red);
+  }
+  &.color-yellow {
+    color: var(--color-yellow);
+  }
+  &.color-orange {
+    color: var(--color-orange);
+  }
+  &.color-purple {
+    color: var(--color-purple);
+  }
+}
+
+.chip-label {
+  line-height: 1;
+  font-weight: 600;
+}

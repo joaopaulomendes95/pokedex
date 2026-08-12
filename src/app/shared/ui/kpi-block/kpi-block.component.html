@@ -1,0 +1,29 @@
+<div class="metric-header">
+  <span class="text-topic-title">{{ metricData().name }}</span>
+
+  @if (metricData().faIcon) {
+    <div class="kpi-icon" [class]="'color-' + (metricData().color || 'main')">
+      <i class="fa-solid" [class]="'fa-' + metricData().faIcon"></i>
+    </div>
+  }
+</div>
+<div class="metric-values">
+  <div class="metric-current">
+    <span class="metric-current-value">{{ metricData().current }}</span>
+
+    @if (metricData().fluctuation !== undefined && metricData().fluctuation !== null) {
+      <app-custom-chip
+        [color]="chipData().color"
+        [label]="chipData().label"
+        [faIcon]="chipData().faIcon"
+      >
+      </app-custom-chip>
+    }
+  </div>
+
+  @if (metricData().lastMonth) {
+    <p class="metric-last-month">vs. {{ metricData().goal }} last month.</p>
+  } @else if (metricData().goal) {
+    <p class="metric-goal">of {{ metricData().goal }}</p>
+  }
+</div>

@@ -1,0 +1,8 @@
+<div class="container-mark" [class]="'edge-' + edge()" [class.inverted]="inverted()">
+  <div [class]="headerLarge() ? 'container-mark-header-big' : 'container-mark-header'">
+    {{ title() }}
+  </div>
+  <div class="container-mark-body">
+    <ng-content></ng-content>
+  </div>
+</div>

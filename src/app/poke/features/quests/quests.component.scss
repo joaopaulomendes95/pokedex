@@ -1,0 +1,172 @@
+.quests {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 20px 16px;
+  text-align: left;
+}
+
+.page-head {
+  margin-bottom: 18px;
+
+  h1 {
+    margin: 0 0 4px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.prestige-card {
+  margin-bottom: 18px;
+  padding: 6px 8px;
+
+  .prestige-grid {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 12px 16px 16px;
+
+    .gauge {
+      flex: 0 0 auto;
+    }
+  }
+
+  .prestige-info {
+    flex: 1 1 260px;
+    min-width: 0;
+
+    .hint {
+      margin: 8px 0 0;
+      font-size: 0.86rem;
+      color: var(--color-desat-50);
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+  }
+}
+
+.missions-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 0 8px;
+
+  .text-topic-title {
+    margin: 0;
+  }
+
+  .color-label {
+    margin: 0;
+    font-size: 0.86rem;
+  }
+}
+
+.tier-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 0.86rem;
+
+  mat-progress-bar {
+    height: 8px;
+  }
+}
+
+.mission-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+
+  .mission-card {
+    padding: 4px 8px;
+
+    .mission-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+
+      .mission-icon {
+        color: var(--color-desat-50);
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+
+      .mission-text {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+      }
+    }
+
+    mat-progress-bar {
+      height: 6px;
+    }
+
+    .mission-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+  }
+}
+
+.mission-list {
+  gap: 12px;
+
+  .mission-card {
+    padding: 4px 8px;
+
+    .mission-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+
+      .mission-icon {
+        color: var(--color-desat-50);
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+
+      .mission-text {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+      }
+    }
+
+    .mission-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+  }
+}

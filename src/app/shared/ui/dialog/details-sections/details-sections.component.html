@@ -1,0 +1,47 @@
+@for (section of sections(); track $index) {
+  <div class="details-section">
+    @if (section.name || (section.sectionActions && section.sectionActions.length > 0)) {
+      <div class="section-header">
+        @if (section.name) {
+          <p class="section-title">{{ section.name }}</p>
+        }
+        <div class="header-actions">
+          @for (action of section.sectionActions; track $index) {
+            @if (!action.hidden) {
+              <a class="ghost-button" (click)="headerAction(action)" tabindex="1">
+                {{ action.label }}
+                @if (action.icon) {
+                  <i [class]="'fa-regular fa-' + action.icon"></i>
+                }
+              </a>
+            }
+          }
+        </div>
+      </div>
+    }
+    <div class="details-block">
+      @for (row of section.rows; track $index) {
+        <div class="row" [class]="'cols-' + row.cols">
+          @for (item of row.items; track $index) {
+            <div class="block">
+              <div class="block-header">
+                <span class="block-label" [class.spaced]="item.faIcon">
+                  {{ item.label }}
+                </span>
+              </div>
+              @for (content of item.data; track $index) {
+                <span class="block-body">
+                  @if (item.faIcon) {
+                    <i class="fa-icon-prefix fa-solid" [class]="'fa-' + item.faIcon"></i>
+                  }
+                  {{ content | blockDetailsDataPipe }}
+                  {{ item.suffix }}
+                </span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

@@ -1,0 +1,10 @@
+<div class="chip-body" [class]="'color-' + color()">
+  @if (faIcon()) {
+    <span class="chip-icon" [class]="'color-' + color()">
+      <i class="fa-solid" [class]="'fa-' + faIcon()"></i>
+    </span>
+  }
+  <span class="chip-label">
+    {{ label() }}
+  </span>
+</div>

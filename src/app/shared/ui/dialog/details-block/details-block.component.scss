@@ -1,0 +1,82 @@
+:host {
+  height: 100%;
+  padding: 2rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  box-sizing: border-box;
+}
+
+.container-header {
+  margin-bottom: 0;
+}
+
+.close-button {
+  i {
+    font-size: 1.1rem;
+  }
+}
+
+.actions-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.badges-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  .badge {
+    width: fit-content;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+
+    font: var(--mat-sys-label-medium);
+    font-weight: 600;
+
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0px;
+      opacity: 0.25;
+    }
+
+    &.primary::before {
+      background-color: var(--color-main-50);
+    }
+
+    &.success::before {
+      background-color: var(--color-green);
+    }
+
+    &.delete::before {
+      background-color: var(--color-red);
+    }
+
+    &.warn::before {
+      background-color: var(--color-orange);
+    }
+  }
+}
+
+.description {
+  font: var(--mat-sys-body-medium);
+  margin-bottom: 0.5rem;
+}
+
+.details-dialog-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

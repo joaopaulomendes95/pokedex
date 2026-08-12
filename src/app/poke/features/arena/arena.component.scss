@@ -1,0 +1,279 @@
+.arena {
+  .fight-card {
+    margin-bottom: 28px;
+    .stage {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr;
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 16px;
+      .side {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        .side-label {
+          font-weight: 700;
+          font-size: 0.9rem;
+          opacity: 0.7;
+        }
+        &.player .side-label {
+          color: var(--color-green);
+        }
+        &.rival .side-label {
+          color: var(--color-red);
+          text-align: right;
+        }
+        .fighter {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px;
+          border-radius: 10px;
+          background: rgba(0, 0, 0, 0.03);
+          img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            image-rendering: pixelated;
+          }
+          .fighter-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            .f-name {
+              font-weight: 600;
+              font-size: 0.85rem;
+              text-transform: capitalize;
+            }
+            .f-level {
+              font-size: 0.75rem;
+              opacity: 0.6;
+            }
+          }
+          .hp-bar {
+            width: 60px;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            .hp-fill {
+              height: 100%;
+              background: var(--color-green);
+              border-radius: 999px;
+              transition: width 0.3s ease;
+              &.rival {
+                background: var(--color-red);
+              }
+            }
+          }
+        }
+        .sprite-placeholder {
+          width: 48px;
+          height: 48px;
+          border-radius: 8px;
+          background: repeating-linear-gradient(
+            45deg,
+            rgba(0, 0, 0, 0.03),
+            rgba(0, 0, 0, 0.03) 8px,
+            rgba(0, 0, 0, 0.06) 8px,
+            rgba(0, 0, 0, 0.06) 16px
+          );
+        }
+        .label.empty {
+          opacity: 0.35;
+          font-style: italic;
+          margin: 0;
+        }
+      }
+      .vs {
+        align-self: center;
+        text-align: center;
+        font-weight: 800;
+        font-size: 1.6rem;
+        opacity: 0.5;
+      }
+    }
+  }
+  .result-panel {
+    min-height: 180px;
+    margin-bottom: 14px;
+    .thinking,
+    .result-empty {
+      text-align: center;
+      opacity: 0.5;
+      font-style: italic;
+      padding: 20px;
+    }
+    .result-summary {
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.03);
+      margin-bottom: 10px;
+      .outcome {
+        margin: 0;
+        font-weight: 800;
+        font-size: 1.2rem;
+      }
+      &.win .outcome {
+        color: var(--color-green);
+      }
+      &.loss .outcome {
+        color: var(--color-red);
+      }
+      .breakdown {
+        margin: 4px 0 0;
+        opacity: 0.6;
+        font-size: 0.8rem;
+      }
+    }
+    .battle-log {
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 8px;
+      padding: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.75rem;
+      font-family: monospace;
+      .log-entry {
+        display: flex;
+        gap: 8px;
+        padding: 2px 6px;
+        border-left: 3px solid transparent;
+        &.player {
+          border-left-color: var(--color-green);
+        }
+        &.rival {
+          border-left-color: var(--color-red);
+        }
+        &.ko {
+          background: rgba(255, 0, 0, 0.07);
+        }
+        .log-text {
+          flex: 1;
+          opacity: 0.85;
+        }
+        .damage {
+          font-weight: 700;
+          color: var(--color-red);
+        }
+      }
+    }
+  }
+  /* Cup progress bar */
+  .cup-progress {
+    margin-bottom: 12px;
+    .progress-label {
+      display: block;
+      text-align: right;
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+  }
+  .cup-track {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0 16px;
+    flex-wrap: wrap;
+    .track-dot {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.08);
+      opacity: 0.6;
+      &.win {
+        background: #e8f5e9;
+        color: var(--color-green);
+        opacity: 1;
+      }
+      &.loss {
+        background: #fdeaea;
+        color: var(--color-red);
+        opacity: 1;
+      }
+      &.current {
+        outline: 2px solid var(--color-orange);
+        background: #fff3e0;
+        color: var(--color-orange);
+        opacity: 1;
+      }
+    }
+  }
+  .cup-rivals {
+    margin-bottom: 12px;
+    .label {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+    .mini-team {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      .mini-fighter {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        img {
+          width: 56px;
+          height: 56px;
+          object-fit: contain;
+          image-rendering: pixelated;
+        }
+        span {
+          font-size: 0.75rem;
+          text-transform: capitalize;
+          font-weight: 600;
+        }
+        .lv {
+          opacity: 0.6;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+  /* Cup cards grid */
+  .cup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .cup-card {
+    .cup-icon {
+      font-size: 2.2rem;
+      width: 2.2rem;
+      height: 2.2rem;
+      color: var(--color-orange);
+      margin-right: 12px;
+    }
+    .cup-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.85rem;
+      span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        mat-icon {
+          font-size: 1.1rem;
+          width: 1.1rem;
+          height: 1.1rem;
+          opacity: 0.7;
+        }
+      }
+    }
+  }
+  @media (max-width: 640px) {
+    .fight-card .stage {
+      grid-template-columns: 1fr 56px 1fr;
+      gap: 10px;
+    }
+  }
+}

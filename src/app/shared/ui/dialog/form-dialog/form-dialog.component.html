@@ -1,0 +1,70 @@
+<div class="dialog-header">
+  <div class="dialog-icon" [class]="dialogData.type">
+    <i class="fa-solid" [class]="'fa-' + dialogData.faIcon"></i>
+  </div>
+  <p mat-dialog-title>{{ dialogData.title }}</p>
+</div>
+<div class="dialog-body">
+  @if (dialogData.message) {
+    <p>{{ dialogData.message }}</p>
+  }
+  @if (dialogData.warning) {
+    <p class="warning">{{ dialogData.warning }}</p>
+  }
+  <form [formGroup]="form" (submit)="confirm()">
+    @for (field of dialogData.form; track field.inputKey) {
+      @switch (field.inputType) {
+        @case ('select') {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ field.label }}</mat-label>
+            <mat-select [formControlName]="field.inputKey">
+              @for (option of field.inputOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+        @case ('textarea') {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ field.label }}</mat-label>
+            <textarea
+              matInput
+              rows="4"
+              [formControlName]="field.inputKey"
+            ></textarea>
+          </mat-form-field>
+        }
+        @case ('checkbox') {
+          <mat-checkbox [formControlName]="field.inputKey">{{ field.label }}</mat-checkbox>
+        }
+        @case ('radio') {
+          <mat-label class="radio-label">{{ field.label }}</mat-label>
+          <mat-radio-group [formControlName]="field.inputKey">
+            @for (option of field.inputOptions; track option.value) {
+              <mat-radio-button [value]="option.value">{{ option.label }}</mat-radio-button>
+            }
+          </mat-radio-group>
+        }
+        @default {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ field.label }}</mat-label>
+            <input
+              matInput
+              [type]="field.inputType"
+              [formControlName]="field.inputKey"
+            />
+            @if (field.inputRequired) {
+              <mat-error>{{ field.label }} is required</mat-error>
+            }
+          </mat-form-field>
+        }
+      }
+    }
+  </form>
+</div>
+<mat-dialog-actions align="end">
+  <button matButton (click)="cancel()" class="faded">Cancel</button>
+  <button matButton="filled" (click)="confirm()" [class]="dialogData.type">
+    {{ dialogData.actionLabel || 'Confirm' }}
+  </button>
+</mat-dialog-actions>

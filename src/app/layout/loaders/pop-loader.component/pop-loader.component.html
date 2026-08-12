@@ -1,0 +1,16 @@
+@if (loaderData.backBlur) {
+  <div class="blur"></div>
+}
+
+<div class="pop-loader">
+  @if (loaderData.type === 'spinner') {
+    <mat-spinner diameter="80"></mat-spinner>
+  } @else {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <div>
+    <h2 class="title">{{ loaderData.title || 'Loading...' }}</h2>
+    <p class="message">{{ loaderData.message || 'Please wait.' }}</p>
+  </div>
+</div>

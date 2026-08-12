@@ -1,0 +1,114 @@
+@if (data.detailLoading() && !data.detail()) {
+  <mat-spinner diameter="28"></mat-spinner>
+} @else if (data.detail(); as d) {
+  <mat-card class="detail">
+    <img mat-card-image [src]="d.artworkUrl" alt="" />
+    <mat-card-content>
+      <h3>
+        {{ d.name }} <span class="id">#{{ d.id }}</span>
+      </h3>
+      <div class="types">
+        @for (t of d.types; track t) {
+          <span class="type-chip">{{ t }}</span>
+        }
+      </div>
+      <div class="stat-grid">
+        @if (ownedOwned(); as entry) {
+          @if (scaledStats(entry); as s) {
+            <div>
+              <span>HP</span><b>{{ s.hp }}</b>
+            </div>
+            <div>
+              <span>ATK</span><b>{{ s.attack }}</b>
+            </div>
+            <div>
+              <span>DEF</span><b>{{ s.defense }}</b>
+            </div>
+            <div>
+              <span>SpA</span><b>{{ s.spAtk }}</b>
+            </div>
+            <div>
+              <span>SpD</span><b>{{ s.spDef }}</b>
+            </div>
+            <div>
+              <span>SPD</span><b>{{ s.speed }}</b>
+            </div>
+          }
+        } @else {
+          <div>
+            <span>HP</span><b>{{ d.stats.hp }}</b>
+          </div>
+          <div>
+            <span>ATK</span><b>{{ d.stats.attack }}</b>
+          </div>
+          <div>
+            <span>DEF</span><b>{{ d.stats.defense }}</b>
+          </div>
+          <div>
+            <span>SpA</span><b>{{ d.stats.spAtk }}</b>
+          </div>
+          <div>
+            <span>SpD</span><b>{{ d.stats.spDef }}</b>
+          </div>
+          <div>
+            <span>SPD</span><b>{{ d.stats.speed }}</b>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+
+    @if (ownedOwned(); as entry) {
+      <mat-card-actions class="train-actions">
+        <div class="level-line">
+          <span>Level {{ entry.level }}</span>
+          <div class="xp-bar">
+            <div class="xp-fill" [class.ready]="ready()" [style.width.%]="progress(entry)"></div>
+          </div>
+          <div class="xp-text-row">
+            <span class="xp-text">{{ xpLabel(entry) }}</span>
+            <button
+              mat-icon-button
+              type="button"
+              class="xp-toggle"
+              (click)="xpDisplay.toggle()"
+              title="Toggle XP display"
+            >
+              <mat-icon>percent</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        @if (pending(entry) > 0) {
+          <button mat-flat-button color="accent" class="level-up" (click)="bank()">
+            <mat-icon>arrow_upward</mat-icon>
+            Level Up ({{ pending(entry) }} ready)
+          </button>
+        }
+
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="train()"
+          [disabled]="game.canAfford(trainCost(entry.level)) === false"
+        >
+          <mat-icon>fitness_center</mat-icon>
+          Train +1 Lv · {{ trainCost(entry.level) | number }}¢
+        </button>
+      </mat-card-actions>
+    } @else {
+      <mat-card-actions>
+        <button mat-flat-button (click)="buy()" [disabled]="game.canAfford(price()) === false">
+          <mat-icon>add_shopping_cart</mat-icon>
+          Buy · {{ price() | number }}¢
+        </button>
+      </mat-card-actions>
+    }
+
+    @if (data.detailError()) {
+      <p class="error">Failed detail fetch.</p>
+      <button mat-stroked-button (click)="data.retryDetail()">Retry</button>
+    }
+  </mat-card>
+} @else {
+  <p class="empty">Pick a monster from the dex to preview it.</p>
+}

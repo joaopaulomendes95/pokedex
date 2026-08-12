@@ -1,0 +1,94 @@
+<div class="user">
+  <app-basic-view
+    pageTitle="Save & Settings"
+    headline="The whole game lives in your browser — no account needed, nothing sent to a server."
+    faIcon="floppy-disk"
+  >
+    <mat-card class="save-card">
+      <mat-card-header>
+        <mat-card-title>Local save</mat-card-title>
+        <mat-card-subtitle
+          >Stored in your browser under <code>{{ stashKey }}</code></mat-card-subtitle
+        >
+      </mat-card-header>
+      <mat-card-content>
+        <div class="save-stats">
+          <div class="stat">
+            <mat-icon>save</mat-icon>
+            <span class="label">Last saved</span>
+            <span class="value">{{ lastSaved() }}</span>
+          </div>
+          <div class="stat">
+            <mat-icon>storage</mat-icon>
+            <span class="label">Save size</span>
+            <span class="value">{{ saveKB() }} kB</span>
+          </div>
+          <div class="stat">
+            <mat-icon>catching_pokemon</mat-icon>
+            <span class="label">Creatures owned</span>
+            <span class="value">{{ collectionSize() }}</span>
+          </div>
+          <div class="stat">
+            <mat-icon>backpack</mat-icon>
+            <span class="label">Items in bag</span>
+            <span class="value">{{ inventorySize() }}</span>
+          </div>
+        </div>
+
+        <p class="hint">
+          The game auto-saves constantly (coins, collection, squad, wins, tier, explored zones, bag
+          and squad energy). Offline time is paid out on the next visit, capped at 8 hours.
+        </p>
+
+        <div class="actions">
+          <button mat-stroked-button (click)="saveNow()">
+            <mat-icon>save</mat-icon>
+            Save now
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="danger-card">
+      <mat-card-header>
+        <mat-card-title>Restart</mat-card-title>
+        <mat-card-subtitle>Wipe this save slot and begin a brand-new run</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="hint">
+          You'll keep your browser, but lose every Pokémon, coin, item, zone and win — the legendary
+          trio is waiting again. This can't be undone.
+        </p>
+
+        <div class="gen-row">
+          <span class="gen-label">Next run is Gen</span>
+          <button
+            mat-icon-button
+            (click)="decGen()"
+            [disabled]="newGen() === 1"
+            aria-label="Previous generation"
+          >
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <span class="gen-value">{{ newGen() }}</span>
+          <button
+            mat-icon-button
+            (click)="incGen()"
+            [disabled]="newGen() === 9"
+            aria-label="Next generation"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <span class="gen-note">Generation is fixed when the save starts.</span>
+        </div>
+
+        <div class="actions">
+          <button mat-flat-button color="warn" (click)="doReset()">
+            <mat-icon>restart_alt</mat-icon>
+            Restart game
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </app-basic-view>
+</div>

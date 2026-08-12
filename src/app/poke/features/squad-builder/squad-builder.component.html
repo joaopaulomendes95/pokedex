@@ -1,0 +1,152 @@
+<div class="squad-builder">
+  <app-basic-view
+    pageTitle="Your Squad"
+    headline="Pick up to 6 creatures to take into the arena — the rest bank XP while they wait."
+    faIcon="people-group"
+  >
+    @if (hasAnyPending()) {
+      <button mat-flat-button color="accent" (click)="levelUpAll()" class="level-up-all">
+        <mat-icon>arrow_upward</mat-icon>
+        Level Up All Ready ({{ totalPending() }})
+      </button>
+    }
+
+    <div
+      class="fielded"
+      cdkDropList
+      id="squad-drop"
+      [cdkDropListData]="game.squad()"
+      (cdkDropListDropped)="onDrop($event)"
+      [cdkDropListConnectedTo]="['collection-drop']"
+    >
+      @for (slot of slots; track slot) {
+        <div class="slot">
+          @if (game.squad()[slot]; as name) {
+            <div
+              class="slot-ava"
+              cdkDrag
+              [cdkDragData]="name"
+              (click)="inspect(name)"
+              (dblclick)="onSquadDblClick(name)"
+            >
+              @if (sprite(name)) {
+                <img [src]="sprite(name)" alt="" />
+              } @else {
+                <div class="sprite-placeholder"></div>
+              }
+              <span class="slot-name">{{ name }}</span>
+              @if (pending(name) > 0) {
+                <span class="ready-chip">+{{ pending(name) }}</span>
+              }
+            </div>
+          } @else {
+            <div class="slot-empty" cdkDropListPlaceholder>Drop here</div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="collection-layout">
+      <section>
+        <div class="collection-head"><h2>Collection</h2><button mat-icon-button type="button" (click)="xpDisplay.toggle()" title="Toggle XP display"><mat-icon>percent</mat-icon></button></div>
+
+        <div
+          class="grid"
+          cdkDropList
+          id="collection-drop"
+          [cdkDropListData]="collectionNames()"
+          (cdkDropListDropped)="onDrop($event)"
+          [cdkDropListConnectedTo]="['squad-drop']"
+        >
+          @for (row of team(); track row.owned.name) {
+            <mat-card
+              class="card"
+              [class.fielded]="row.isFielded"
+              [class.selected]="data.selected()?.name === row.owned.name"
+              cdkDrag
+              [cdkDragData]="row.owned.name"
+              (click)="inspect(row.owned.name, $event)"
+              (dblclick)="onCollectionDblClick(row.owned.name)"
+            >
+              @if (sprite(row.owned.name)) {
+                <img mat-card-image [src]="sprite(row.owned.name)" alt="" />
+              } @else {
+                <div class="sprite-placeholder"></div>
+              }
+              <mat-card-content>
+                <p class="name">{{ row.owned.name }}</p>
+                <p class="meta">Lv {{ row.owned.level }}</p>
+                <div class="xp-bar">
+                  <div
+                    class="xp-fill"
+                    [class.ready]="pending(row.owned.name) > 0"
+                    [style.width.%]="xpPct(row.owned)"
+                  ></div>
+                </div>
+                <div class="xp-text">{{ xpLabel(row.owned) }}</div>
+                @if (pending(row.owned.name) > 0) {
+                  <p class="pending">Ready: Level up!</p>
+                }
+                @if (scaledStats(row.owned); as s) {
+                  <p class="stats-mini">
+                    <span>HP {{ s.hp }}</span>
+                    <span>ATK {{ s.attack }}</span>
+                    <span>DEF {{ s.defense }}</span>
+                    <span>SpA {{ s.spAtk }}</span>
+                    <span>SpD {{ s.spDef }}</span>
+                    <span>SPD {{ s.speed }}</span>
+                  </p>
+                }
+              </mat-card-content>
+              <mat-card-actions>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="game.toggleSquad(row.owned.name); $event.stopPropagation()"
+                  class="field-toggle"
+                >
+                  <mat-icon>{{
+                    row.isFielded ? 'remove_circle_outline' : 'add_circle_outline'
+                  }}</mat-icon>
+                  {{ row.isFielded ? 'Bench' : 'Field' }}
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          } @empty {
+            <p class="empty">Your collection is empty — grab a star in the Market.</p>
+          }
+        </div>
+      </section>
+
+      <section class="card-col">
+        <app-poke-detail-panel />
+      </section>
+    </div>
+  </app-basic-view>
+
+  @if (swapModal(); as modal) {
+    <div class="swap-modal-overlay" (click)="cancelSwap()">
+      <div class="swap-modal" (click)="$event.stopPropagation()">
+        <h3>
+          Squad full — swap <b>{{ modal.incoming }}</b> with?
+        </h3>
+        <div class="swap-targets">
+          @for (name of game.squad(); track name) {
+            <button class="swap-target" (click)="confirmSwap(name)">
+              @if (sprite(name)) {
+                <img [src]="sprite(name)" alt="" />
+              } @else {
+                <div class="sprite-placeholder"></div>
+              }
+              <span>{{ name }}</span>
+              @if (pending(name) > 0) {
+                <span class="ready-chip">+{{ pending(name) }}</span>
+              }
+            </button>
+          }
+        </div>
+        <button mat-stroked-button (click)="cancelSwap()">Cancel</button>
+      </div>
+    </div>
+  }
+</div>

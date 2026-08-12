@@ -1,0 +1,13 @@
+<div class="container-header sticky">
+  <div class="leading-icon">
+    <i class="fa-solid" [class]="'fa-' + faIcon()"></i>
+  </div>
+  <div class="head-info">
+    <span class="head-title">{{ pageTitle() }}</span>
+    <span class="head-desc color-label">{{ headline() }}</span>
+  </div>
+</div>
+
+<div class="content-scroll basic-view-body" [class]="divided() ? 'two-col-field' : ''">
+  <ng-content></ng-content>
+</div>

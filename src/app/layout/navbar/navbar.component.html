@@ -1,0 +1,79 @@
+<nav
+  class="nav-body"
+  [class.opened]="isOpen()"
+  [class.hovered]="hovered()"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+  aria-label="Main navigation"
+>
+  <div class="top-wrapper">
+    <div class="nav-logo">
+      <div class="brand-icon">
+        <mat-icon class="poke-icon">catching_pokemon</mat-icon>
+      </div>
+      <div class="brand-text nav-text">Poké-Liga</div>
+    </div>
+
+    <div class="nav-links">
+      @for (item of navItems; track item.id) {
+        <button
+          class="nav-item"
+          [class.active]="currentTab() === item.id"
+          [class.has-badge]="item.badge && item.badge > 0"
+          (click)="goToTab(item.id)"
+          [matTooltip]="item.label"
+          [matTooltipPosition]="'right'"
+          [matTooltipDisabled]="isOpen()"
+          aria-label="{{ item.label }}"
+        >
+          <span class="nav-item-icon">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </span>
+
+          <span class="nav-text">{{ item.label }}</span>
+
+          @if (item.badge && item.badge > 0) {
+            <span class="nav-badge">{{ item.badge }}</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="nav-foot">
+    <button
+      class="nav-item theme-toggle"
+      (click)="openShop()"
+      [matTooltip]="'Shop & Bag: ' + totalItems() + ' items'"
+      [matTooltipPosition]="'right'"
+      [matTooltipDisabled]="isOpen()"
+      aria-label="Open shop and bag"
+    >
+      <span class="nav-item-icon">
+        <mat-icon>storefront</mat-icon>
+      </span>
+      <span class="nav-text">Shop ({{ totalItems() }})</span>
+    </button>
+    <button
+      class="nav-item theme-toggle"
+      (click)="toggleTheme()"
+      [matTooltip]="themeMode() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+      [matTooltipPosition]="'right'"
+      [matTooltipDisabled]="isOpen()"
+      aria-label="Toggle theme"
+    >
+      <span class="nav-item-icon">
+        <mat-icon>{{ themeMode() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </span>
+      <span class="nav-text">{{ themeMode() === 'dark' ? 'Light' : 'Dark' }}</span>
+    </button>
+    <div class="coins-display" [matTooltip]="'Coins: ' + game.coins() | number">
+      <mat-icon>monetization_on</mat-icon>
+      <span class="coins-value nav-text">{{ game.coins() | number }}</span>
+    </div>
+    <div class="income-display" [matTooltip]="'Income: ' + game.incomePerSec().toFixed(1) + '¢/s'">
+      <mat-icon>hourglass_bottom</mat-icon>
+      <span class="income-value nav-text">{{ game.incomePerSec().toFixed(1) }}</span>
+    </div>
+  </div>
+</nav>

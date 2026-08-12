@@ -1,0 +1,30 @@
+<article
+  class="toast"
+  [class.exiting]="isExiting()"
+  [style.--toast-color]="toast.color"
+  role="status"
+  #toastEl
+  (animationend)="onAnimationEnd($event)"
+  tabindex="-1"
+>
+  <span class="icon" aria-hidden="true">
+    <mat-icon>{{ toast.icon }}</mat-icon>
+  </span>
+
+  <div class="details">
+    <p class="title">{{ toast.title }}</p>
+    @if (toast.message) {
+      <p class="message">{{ toast.message }}</p>
+    }
+  </div>
+
+  <button class="dismiss" type="button" aria-label="Close notification" (click)="dismiss()">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <span
+    class="progress"
+    [style.--toast-duration]="toast.duration + 'ms'"
+    aria-hidden="true"
+  ></span>
+</article>

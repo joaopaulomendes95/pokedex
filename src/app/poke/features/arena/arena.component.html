@@ -1,0 +1,262 @@
+<div class="arena">
+  <app-basic-view
+    pageTitle="Arena"
+    headline="Quick fights for XP, and tournaments with an entry fee and a prize pool."
+    faIcon="trophy"
+  >
+    @if (game.squad().length === 0) {
+      <div class="empty-state">
+        <p class="hint">Field at least one creature in the Squad screen first.</p>
+      </div>
+    }
+
+    <!-- Quick Fight -->
+    <mat-card class="fight-card">
+      <mat-card-header>
+        <mat-card-title>Quick Fight</mat-card-title>
+        <mat-card-subtitle
+          >An instant match against a small rival team tuned to your tier.</mat-card-subtitle
+        >
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stage">
+          <div class="side player">
+            <span class="side-label">You</span>
+            @for (f of runner.player(); track f.name; let i = $index) {
+              <div class="fighter">
+                <img [src]="data.spriteUrlOrEmpty(f.name)" alt="" />
+                <div class="fighter-info">
+                  <span class="f-name">{{ f.name }}</span>
+                  <span class="f-level">Lv {{ f.fighter.level ?? 1 }}</span>
+                </div>
+                <div class="hp-bar">
+                  <div class="hp-fill" [style.width.%]="hpPct(f.fighter)"></div>
+                </div>
+              </div>
+            } @empty {
+              <div class="sprite-placeholder"></div>
+              <p class="label empty">No fighter</p>
+            }
+          </div>
+
+          <div class="vs"><span>VS</span></div>
+
+          <div class="side rival">
+            <span class="side-label">Rival</span>
+            @for (f of runner.rival(); track f.name; let i = $index) {
+              <div class="fighter">
+                <img [src]="data.spriteUrlOrEmpty(f.name)" alt="" />
+                <div class="fighter-info">
+                  <span class="f-name">{{ f.name }}</span>
+                  <span class="f-level">Lv {{ f.fighter.level ?? 1 }}</span>
+                </div>
+                <div class="hp-bar">
+                  <div class="hp-fill rival" [style.width.%]="hpPct(f.fighter)"></div>
+                </div>
+              </div>
+            } @empty {
+              <div class="sprite-placeholder"></div>
+              <p class="label empty">???</p>
+            }
+          </div>
+        </div>
+
+        <div class="result-panel">
+          @if (runner.busy()) {
+            <div class="thinking">Resolving the fight…</div>
+          } @else if (runner.result(); as res) {
+            <div
+              class="result-summary"
+              [class.win]="res.winner === 'player'"
+              [class.loss]="res.winner === 'rival'"
+            >
+              @if (summary(); as s) {
+                <p class="outcome">{{ res.winner === 'player' ? 'You won!' : 'The rival won.' }}</p>
+                <p class="breakdown">
+                  You dealt {{ s.playerDamage }} · rival {{ s.rivalDamage }} ·
+                  {{ s.rounds }} knockout{{ s.rounds === 1 ? '' : 's' }}
+                </p>
+              }
+            </div>
+            <div class="battle-log">
+              @for (ev of res.events; track $index) {
+                <div
+                  class="log-entry"
+                  [class.ko]="ev.ko"
+                  [class.player]="ev.from === 'player'"
+                  [class.rival]="ev.from === 'rival'"
+                >
+                  <span class="log-text">{{ ev.text }}</span>
+                  @if (ev.damage > 0) {
+                    <span class="damage">{{ ev.damage }}</span>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="result-empty">Pick a fight to see the result here.</div>
+          }
+        </div>
+
+        <div class="controls">
+          <div class="energy-pill" [class.low]="game.energy() < quickCost">
+            <mat-icon>bolt</mat-icon>
+            {{ game.energyInt() }}/100 energy ({{ quickCost }} per fight)
+          </div>
+          @if (!auto.autoPlaying()) {
+            <button mat-stroked-button (click)="auto.toggle()" [disabled]="!canBattle()">
+              <mat-icon>play_circle</mat-icon>
+              Auto fight
+            </button>
+          } @else {
+            <button mat-stroked-button color="warn" (click)="auto.toggle()">
+              <mat-icon>stop_circle</mat-icon>
+              Auto fighting…
+            </button>
+          }
+          @if (!runner.canCollect()) {
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="start()"
+              [disabled]="!canQuick() || runner.busy()"
+            >
+              <mat-icon>fitness_center</mat-icon>
+              Fight ({{ quickCost }}⚡)
+            </button>
+          } @else {
+            <button mat-raised-button color="primary" (click)="runner.collect()">
+              <mat-icon>savings</mat-icon>
+              Collect (+{{ resultCoins() }}¢)
+            </button>
+            <button mat-stroked-button (click)="start()">
+              <mat-icon>replay</mat-icon>
+              New Fight
+            </button>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Tournaments / Cups -->
+    <section class="cups">
+      <div class="cups-head">
+        <h2>Tournaments</h2>
+        <p>
+          Pay the entry fee, win battles in a row, and collect the final trophy. Infinite series
+          after Champion Cup!
+        </p>
+      </div>
+
+      @if (cupRun(); as run) {
+        <mat-card class="cup-panel">
+          <mat-card-header>
+            <mat-card-title>{{ run.cup.name }}</mat-card-title>
+            <mat-card-subtitle>
+              @if (run.status === 'won') {
+                Cup won! Bonus +{{ run.cup.finalPrize }}¢
+              } @else if (run.status === 'lost') {
+                Eliminated at battle {{ run.wins.length }} …
+              } @else {
+                Battle {{ cupBattleIndex() }} of {{ run.cup.battles }}
+              }
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="cup-progress">
+              <mat-progress-bar
+                mode="determinate"
+                [value]="cupProgress()"
+                color="primary"
+              ></mat-progress-bar>
+              <span class="progress-label">{{ cupProgress() }}% complete</span>
+            </div>
+
+            <div class="cup-track">
+              @for (b of [0, 1, 2, 3, 4, 5, 6, 7].slice(0, run.cup.battles); track b) {
+                <span
+                  class="track-dot"
+                  [class.win]="run.wins[b] === true"
+                  [class.loss]="run.wins[b] === false"
+                  [class.current]="run.status === 'active' && b === run.wins.length"
+                  >{{ b + 1 }}</span
+                >
+              }
+            </div>
+
+            @if (run.status === 'active') {
+              <div class="cup-rivals">
+                <span class="label">Your rivals this round:</span>
+                @if (runner.rival(); as rivals) {
+                  <div class="mini-team">
+                    @for (f of rivals; track f.name) {
+                      <div class="mini-fighter">
+                        <img [src]="data.spriteUrlOrEmpty(f.name)" alt="" />
+                        <span>{{ f.name }}</span>
+                        <span class="lv">Lv {{ f.fighter.level ?? 1 }}</span>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="hint">Fight to reveal your opponents.</p>
+                }
+              </div>
+            }
+          </mat-card-content>
+
+          <mat-card-actions>
+            @if (run.status === 'active') {
+              <button
+                mat-flat-button
+                color="primary"
+                (click)="nextCupBattle()"
+                [disabled]="!canCupBattle() || runner.busy()"
+              >
+                <mat-icon>sports_score</mat-icon>
+                Fight Battle {{ cupBattleIndex() }} ({{ cupCost }}⚡)
+              </button>
+              <button mat-stroked-button (click)="leaveCup()">Forfeit</button>
+            } @else {
+              <button mat-stroked-button (click)="leaveCup()">Back to lobby</button>
+            }
+          </mat-card-actions>
+        </mat-card>
+      } @else {
+        <div class="cup-grid">
+          @for (cup of cups(); track cup.id) {
+            <mat-card class="cup-card">
+              <mat-card-header>
+                <mat-icon class="cup-icon">{{ cup.icon }}</mat-icon>
+                <mat-card-title>{{ cup.name }}</mat-card-title>
+                <mat-card-subtitle>{{ cup.tagline }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="cup-meta">
+                  <span><mat-icon>monetization_on</mat-icon> Entry {{ cup.entryFee }}c</span>
+                  <span><mat-icon>sports_score</mat-icon> {{ cup.battles }} battles</span>
+                  <span><mat-icon>groups</mat-icon> {{ cup.rivalTeamSize }} vs your squad</span>
+                  <span><mat-icon>emoji_events</mat-icon> +{{ cup.prizePerBattle }}c / win</span>
+                  <span><mat-icon>military_tech</mat-icon> Cup bonus {{ cup.finalPrize }}c</span>
+                  @if (cup.series !== undefined) {
+                    <span><mat-icon>star</mat-icon> Series {{ cup.series + 1 }}</span>
+                  }
+                </div>
+              </mat-card-content>
+              <mat-card-actions>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="enterCup(cup)"
+                  [disabled]="!canBattle() || !game.canAfford(cup.entryFee) || !!cupRun()"
+                >
+                  <mat-icon>travel_explore</mat-icon>
+                  Enter
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          }
+        </div>
+      }
+    </section>
+  </app-basic-view>
+</div>

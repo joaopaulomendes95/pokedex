@@ -1,0 +1,104 @@
+export interface Cup {
+  id: string;
+  name: string;
+  tagline: string;
+  icon: string;
+  /** Coins charged to enter. */
+  entryFee: number;
+  /** Battles the player must win in a row to lift the cup. */
+  battles: number;
+  /** Base level of the rival team for this cup. */
+  rivalLevel: number;
+  /** How many creatures the rival fields. */
+  rivalTeamSize: number;
+  /** Coin reward per won battle (on top of the normal win payout). */
+  prizePerBattle: number;
+  /** Bonus for winning the whole cup. */
+  finalPrize: number;
+  /** Series number for infinite cups (0 = base cups). */
+  series?: number;
+}
+
+/** Squad energy drained per cup battle. */
+export const CUP_BATTLE_ENERGY = 15;
+
+/** Squad energy drained per quick-fight battle. */
+export const QUICK_BATTLE_ENERGY = 10;
+
+/** Base cups available from the start. */
+export const BASE_CUPS: Cup[] = [
+  {
+    id: 'rookie',
+    name: 'Rookie Cup',
+    tagline: 'A gentle warm-up for freshly-trained trainers.',
+    icon: 'sports_esports',
+    entryFee: 40,
+    battles: 3,
+    rivalLevel: 4,
+    rivalTeamSize: 2,
+    prizePerBattle: 15,
+    finalPrize: 90,
+  },
+  {
+    id: 'pro',
+    name: 'Pro League Cup',
+    tagline: 'Proper opponents. Keep your cool and your roster.',
+    icon: 'emoji_events',
+    entryFee: 180,
+    battles: 4,
+    rivalLevel: 8,
+    rivalTeamSize: 3,
+    prizePerBattle: 55,
+    finalPrize: 260,
+  },
+  {
+    id: 'champion',
+    name: 'Champion Super Cup',
+    tagline: 'The top of the ladder. Win all five to be crowned.',
+    icon: 'military_tech',
+    entryFee: 420,
+    battles: 5,
+    rivalLevel: 13,
+    rivalTeamSize: 3,
+    prizePerBattle: 140,
+    finalPrize: 760,
+  },
+];
+
+/** Generate infinite cups for a given tier (post-Champion Cup). */
+export function generateInfiniteCups(tier: number): Cup[] {
+  const cups: Cup[] = [];
+  const series = tier - 4; // tiers 0-3 are base, 4 is Champion Cup
+  const baseRivalLevel = 15 + series * 3;
+  const baseEntryFee = 600 + series * 200;
+  const basePrizePerBattle = 200 + series * 50;
+  const baseFinalPrize = 1000 + series * 300;
+
+  for (let i = 0; i < 3; i++) {
+    const difficultyMultiplier = 1 + i * 0.25 + series * 0.15;
+    cups.push({
+      id: `series-${series}-${i}`,
+      name: `Elite Series ${series + 1}-${i + 1}`,
+      tagline: `Elite challengers await. Series ${series + 1}, Division ${i + 1}.`,
+      icon: 'military_tech',
+      entryFee: Math.round(baseEntryFee * (1 + i * 0.3)),
+      battles: 5 + i,
+      rivalLevel: Math.round(baseRivalLevel * difficultyMultiplier),
+      rivalTeamSize: 3,
+      prizePerBattle: Math.round(basePrizePerBattle * difficultyMultiplier),
+      finalPrize: Math.round(baseFinalPrize * difficultyMultiplier),
+      series,
+    });
+  }
+  return cups;
+}
+
+/** Get all available cups for a given tier. */
+export function getCupsForTier(tier: number): Cup[] {
+  if (tier < 4) {
+    return BASE_CUPS;
+  }
+  return generateInfiniteCups(tier);
+}
+
+export const CUPS = BASE_CUPS; // Backward compatibility

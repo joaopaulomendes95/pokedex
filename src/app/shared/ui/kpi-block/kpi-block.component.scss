@@ -1,0 +1,35 @@
+:host {
+  min-width: 17.5rem;
+  padding: 1.25rem 2rem;
+}
+
+.metric-header {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+
+  .kpi-icon {
+    font-size: 1.5em;
+  }
+}
+
+.metric-values {
+  .metric-current {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .metric-goal,
+  .metric-last-month {
+    margin: 0px;
+    color: var(--color-desat-50);
+  }
+
+  .metric-current-value {
+    font: var(--mat-sys-headline-large);
+    font-weight: 600;
+  }
+}

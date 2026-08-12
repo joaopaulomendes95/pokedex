@@ -1,0 +1,33 @@
+<div class="object-container flat-container" [class]="appearance()">
+  @if (hasHeaderData()) {
+    <div class="container-header">
+      @if (headerData()?.faIcon) {
+        <div class="leading-icon">
+          <i class="fa-solid" [class]="'fa-' + headerData()?.faIcon"></i>
+        </div>
+      }
+      @if (headerData()) {
+        <div class="head-info">
+          <span class="head-title">{{ headerData()?.title }}</span>
+          @if (headerData()?.desc) {
+            <span class="head-desc color-label">{{ headerData()?.desc }}</span>
+          }
+        </div>
+      }
+      @if (headerAction()) {
+        <div class="header-action-button">
+          <button
+            matIconButton
+            class="action-button"
+            [class]="'header-button ' + headerAction()?.buttonClass"
+            [matTooltip]="headerAction()?.buttonHint"
+            (click)="headerAction()?.handler()"
+          >
+            <i class="fa-duotone" [class]="'fa-' + headerAction()?.buttonIcon"></i>
+          </button>
+        </div>
+      }
+    </div>
+  }
+  <ng-content></ng-content>
+</div>

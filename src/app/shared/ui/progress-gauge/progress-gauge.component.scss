@@ -1,0 +1,63 @@
+:host {
+  width: calc(100% - var(--progress-gauge-margin, 2rem) * 2);
+  min-width: var(--progress-gauge-size, 20rem);
+  height: calc(var(--progress-gauge-size, 20rem) / 2);
+  margin: var(--progress-gauge-margin, 2rem);
+  box-sizing: border-box;
+  overflow: hidden;
+
+  display: grid;
+  place-items: center;
+
+  position: relative;
+}
+
+@keyframes appear {
+  0% {
+    transform: rotate(calc(-180deg * (var(--progress) / 100)));
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.progress-area {
+  width: var(--progress-gauge-size, 20rem);
+  height: calc(var(--progress-gauge-size, 20rem));
+  border-radius: 50%;
+
+  animation: appear 2s ease forwards;
+
+  background: conic-gradient(
+    from -90deg,
+    hsl(var(--goal-hue), 100%, 50%) 0% calc(1% * var(--progress) / 2),
+    var(--color-desat-90) calc(1% * var(--progress) / 2) 100%
+  );
+
+  -webkit-mask: radial-gradient(circle, transparent 50%, black 50.25%);
+  mask: radial-gradient(circle, transparent 50%, black 50.25%);
+}
+
+.progress-value {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  text-align: center;
+
+  .percentage {
+    font-size: 3rem;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .amount {
+    font-size: 1rem;
+    line-height: 1;
+    font-weight: 500;
+
+    .dim {
+      color: var(--color-desat-50);
+    }
+  }
+}

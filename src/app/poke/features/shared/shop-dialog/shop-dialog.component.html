@@ -1,0 +1,81 @@
+<div class="shop-sheet">
+  <mat-dialog-content class="shop-content">
+    <div class="shop-head">
+      <div class="head-copy">
+        <h2>
+          <mat-icon>storefront</mat-icon>
+          Shop &amp; Bag
+        </h2>
+        <p class="subtitle">Buy supplies and use your items — available any time.</p>
+      </div>
+      <div class="head-stats">
+        <span class="pill coins">
+          <mat-icon>monetization_on</mat-icon>
+          {{ coins() | number }}¢
+        </span>
+        <span class="pill bag">
+          <mat-icon>inventory_2</mat-icon>
+          {{ ownedCount() }}
+        </span>
+      </div>
+    </div>
+
+    <div class="kpi-strip">
+      <app-kpi-block
+        [metricData]="{ name: 'Coins', current: coins(), faIcon: 'monetization_on' }"
+      />
+      <app-kpi-block
+        [metricData]="{ name: 'Energy', current: energy(), goal: energyMax, faIcon: 'bolt' }"
+      />
+    </div>
+
+    <div class="energy-bar">
+      <mat-progress-bar mode="determinate" [value]="energyPct()" color="primary"></mat-progress-bar>
+      <span class="energy-label">{{ energy() }}/{{ energyMax }}</span>
+    </div>
+
+    <div class="item-grid">
+      @for (item of shopItems; track item.id) {
+        <div class="item-card">
+          <span class="item-icon">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </span>
+          <div class="item-info">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-desc">{{ item.description }}</span>
+            <app-custom-chip
+              [color]="game.itemCount(item.id) > 0 ? 'main' : 'desat'"
+              label="Owned {{ game.itemCount(item.id) }}"
+            />
+          </div>
+          <div class="item-actions">
+            @if (isConsumable(item.id)) {
+              <button
+                mat-stroked-button
+                color="accent"
+                (click)="use(item.id)"
+                [disabled]="game.itemCount(item.id) === 0 || isEnergyFull()"
+                [matTooltip]="isEnergyFull() ? 'Energy already full' : 'Restores ' + gainFor(item.id) + ' energy'"
+              >
+                <mat-icon>bolt</mat-icon>
+                Use
+              </button>
+            }
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="buy(item)"
+              [disabled]="!game.canAfford(getPrice(item))"
+            >
+              {{ getPrice(item) }}¢
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button (click)="close()">Close</button>
+  </mat-dialog-actions>
+</div>
