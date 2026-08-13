@@ -67,7 +67,7 @@
       </span>
       <span class="nav-text">{{ themeMode() === 'dark' ? 'Light' : 'Dark' }}</span>
     </button>
-    <div class="coins-display" [matTooltip]="'Coins: ' + game.coins() | number">
+    <div class="coins-display" [matTooltip]="'Coins: ' + (game.coins() | number)">
       <mat-icon>monetization_on</mat-icon>
       <span class="coins-value nav-text">{{ game.coins() | number }}</span>
     </div>

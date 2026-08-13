@@ -3,7 +3,7 @@
  *
  * PokeAPI has no reverse lookup (species -> location-areas), so this static
  * map powers the instant "Found in" chips for the most famous habitats. Areas
- * the player has actually explored are appended live by PokeDataService.
+ * the player has actually explored are appended live by PokeData.
  * Keys are lowercase species names (PokeAPI slugs).
  */
 export const KNOWN_HABITATS: Record<string, string[]> = {

@@ -59,7 +59,7 @@
               aria-label="Previous region"
             >
               <mat-icon>arrow_back</mat-icon>
-              <span>{{ regStatuses()[current().index - 1]?.def.name ?? '' }}</span>
+              <span>{{ regStatuses()[current().index - 1]?.def?.name ?? '' }}</span>
             </button>
             <button
               mat-flat-button
@@ -68,7 +68,7 @@
               (click)="goNext()"
               aria-label="Next region"
             >
-              <span>{{ regStatuses()[current().index + 1]?.def.name ?? 'Finale' }}</span>
+              <span>{{ regStatuses()[current().index + 1]?.def?.name ?? 'Finale' }}</span>
               <mat-icon>arrow_forward</mat-icon>
             </button>
           </div>

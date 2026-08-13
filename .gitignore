@@ -46,3 +46,9 @@ Thumbs.db
 # Session / agent logs
 session-*.md
 
+
+# Orval-generated PokeAPI client (regenerated on npm install via postinstall)
+src/app/shared/openapi
+
+# opencode session plans
+.opencode/

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BattleService, buildFighter } from '@poke/battle.service';
+import { Battle, buildFighter } from '@poke/battle';
 import { BattleTeam, Fighter } from '@poke/poke.model';
 
 function fighter(
@@ -43,8 +43,8 @@ describe('buildFighter', () => {
   });
 });
 
-describe('BattleService.simulate', () => {
-  const service = new BattleService();
+describe('Battle.simulate', () => {
+  const service = new Battle();
   const seq =
     (v: number): (() => number) =>
     () =>

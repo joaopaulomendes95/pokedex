@@ -1,0 +1,297 @@
+// Angular Material theming: overrides mixins + component tweaks
+@use '@angular/material' as mat;
+
+// Custom sign/hint, on required fields.
+.mdc-floating-label--required::after,
+.required::after {
+  content: '✱';
+  color: hsla(350, 60%, 50%, 1);
+}
+
+// BUGFIX: where cursor does not turn to "text" when hovering MatInput
+.mat-mdc-text-field-wrapper {
+  cursor: text;
+}
+
+// increase max height of mat select dropdown
+.mat-mdc-select-panel {
+  max-height: 448px;
+}
+
+// buttons styles based on angular materials vars
+button {
+  padding: 0px;
+
+  // Unsupported by the overrides mixin — kept as direct tokens.
+  --mat-button-text-ripple-color: rgba(0, 0, 0, 0.1);
+
+  @include mat.button-overrides(
+    (
+      tonal-label-text-color: var(--color-main-50),
+      tonal-disabled-container-color: var(--color-desat-90),
+      tonal-disabled-label-text-color: var(--color-desat-70),
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      disabled-icon-color: var(--color-desat-70),
+      disabled-state-layer-color: var(--color-desat-90),
+    )
+  );
+
+  &.warn {
+    @include mat.button-overrides(
+      (
+        filled-container-color: var(--color-yellow),
+        tonal-container-color: var(--color-yellow-a),
+        tonal-label-text-color: var(--color-yellow),
+        text-label-text-color: var(--color-yellow),
+        text-state-layer-color: var(--color-yellow),
+      )
+    );
+
+    @include mat.icon-button-overrides(
+      (
+        icon-color: var(--color-yellow),
+        state-layer-color: var(--color-yellow),
+      )
+    );
+  }
+  &.danger {
+    @include mat.button-overrides(
+      (
+        filled-container-color: var(--color-orange),
+        tonal-container-color: var(--color-orange-a),
+        tonal-label-text-color: var(--color-orange),
+        text-label-text-color: var(--color-orange),
+        text-state-layer-color: var(--color-orange),
+      )
+    );
+
+    @include mat.icon-button-overrides(
+      (
+        icon-color: var(--color-orange),
+        state-layer-color: var(--color-orange),
+      )
+    );
+  }
+  &.error,
+  &.delete,
+  &.cancel {
+    @include mat.button-overrides(
+      (
+        filled-container-color: var(--color-red),
+        tonal-container-color: var(--color-red-a),
+        tonal-label-text-color: var(--color-red),
+        text-label-text-color: var(--color-red),
+        text-state-layer-color: var(--color-red),
+      )
+    );
+
+    @include mat.icon-button-overrides(
+      (
+        icon-color: var(--color-red),
+        state-layer-color: var(--color-red),
+      )
+    );
+  }
+  &.confirm,
+  &.ask,
+  &.info,
+  &.main {
+    @include mat.button-overrides(
+      (
+        filled-container-color: var(--color-main-50),
+        tonal-container-color: var(--color-main-a),
+        tonal-label-text-color: var(--color-main-50),
+        text-label-text-color: var(--color-main-50),
+        text-state-layer-color: var(--color-main-50),
+      )
+    );
+
+    @include mat.icon-button-overrides(
+      (
+        icon-color: var(--color-main-50),
+        state-layer-color: var(--color-main-50),
+      )
+    );
+  }
+  &.faded {
+    @include mat.button-overrides(
+      (
+        filled-container-color: var(--color-desat-70),
+        tonal-container-color: var(--color-desat-a),
+        tonal-label-text-color: var(--color-desat),
+        text-label-text-color: var(--color-desat-70),
+        text-state-layer-color: var(--color-desat-70),
+      )
+    );
+
+    @include mat.icon-button-overrides(
+      (
+        icon-color: var(--color-desat-70),
+        state-layer-color: var(--color-desat-70),
+      )
+    );
+  }
+  &.dim {
+    @include mat.button-overrides(
+      (
+        filled-container-color: var(--color-desat-50),
+        tonal-container-color: var(--color-desat-a),
+        tonal-label-text-color: var(--color-desat),
+        text-label-text-color: var(--color-desat-50),
+        text-state-layer-color: var(--color-desat-50),
+      )
+    );
+
+    @include mat.icon-button-overrides(
+      (
+        icon-color: var(--color-desat-50),
+        state-layer-color: var(--color-desat-50),
+      )
+    );
+  }
+  &.transparent {
+    background: transparent;
+    background-color: transparent;
+    border: 0px solid transparent;
+  }
+}
+
+.svgButton,
+.mdc-icon-button:has(i) {
+  padding: 0px;
+
+  display: grid;
+  place-items: center;
+
+  font-size: calc(var(--mat-icon-button-touch-target-size, 48px) - 2rem);
+}
+
+.search-input,
+.dim-input {
+  width: 100%;
+
+  .mat-mdc-form-field-icon-prefix {
+    padding: 0;
+    margin-left: 0.5rem;
+  }
+}
+
+.low-input {
+  @include mat.form-field-overrides(
+    (
+      container-height: 2.5rem,
+      container-vertical-padding: 0.5rem,
+    )
+  );
+}
+
+.mat-mdc-form-field-infix {
+  display: flex;
+  align-items: center;
+}
+
+.flat-input {
+  .mat-mdc-form-field-underline,
+  .mat-mdc-form-field-subscript-wrapper,
+  .mat-mdc-form-field-bottom-align {
+    display: none;
+  }
+}
+
+.search-input {
+  border-radius: var(--mat-form-field-outlined-container-shape);
+  background-color: var(--mat-sys-surface);
+}
+
+.invisible-input {
+  @include mat.form-field-overrides(
+    (
+      outlined-outline-width: 0,
+      outlined-focus-outline-width: 0,
+    )
+  );
+}
+
+.dim-input {
+  @include mat.form-field-overrides(
+    (
+      outlined-outline-color: var(--color-desat-80),
+      outlined-hover-outline-color: var(--color-desat-60),
+    )
+  );
+}
+
+.bottom-outline-input {
+  // `none` isn't a valid color for the overrides mixin — kept as direct tokens.
+  --mat-form-field-filled-container-color: none;
+  --mat-form-field-state-layer-color: none;
+
+  @include mat.form-field-overrides(
+    (
+      hover-state-layer-opacity: 0,
+    )
+  );
+}
+
+.icon-button {
+  width: var(--mat-button-tonal-container-height, 40px);
+  min-width: var(--mat-button-tonal-container-height, 40px);
+  max-width: var(--mat-button-tonal-container-height, 40px);
+  padding: 0;
+  border-radius: 50%;
+}
+
+.app-dialog-container {
+  border-radius: 1rem;
+}
+
+.dialog-sm {
+  width: 280px;
+}
+.dialog-md {
+  width: 520px;
+}
+.dialog-lg {
+  width: 760px;
+}
+
+.mat-mdc-form-field-icon-prefix {
+  margin-left: 0.25rem;
+}
+
+.mat-mdc-form-field-icon-suffix {
+  margin-right: 0.5rem;
+}
+
+.hide-bottom-content {
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+.mat-mdc-chip.mdc-ripple-upgraded--background-focused::before {
+  content: none;
+}
+
+.details-dialog {
+  position: absolute !important;
+  inset: 8px 8px 8px auto !important;
+
+  // container-min-width has no overrides-mixin key — kept as a direct token.
+  --mat-dialog-container-min-width: 720px;
+
+  @include mat.dialog-overrides(
+    (
+      container-shape: 0.875rem,
+    )
+  );
+}
+
+.mat-mdc-dialog-actions {
+  min-height: 0;
+  height: fit-content;
+}

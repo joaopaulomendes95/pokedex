@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { typeMultiplier } from '@poke/type-chart';
-import { parseDetail } from '@poke/poke-data.service';
+import { parseDetail } from '@poke/poke-data';
 import { trainCost, xpForLevel } from '@poke/economy';
 
 describe('typeMultiplier', () => {

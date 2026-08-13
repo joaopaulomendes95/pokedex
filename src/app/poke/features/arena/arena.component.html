@@ -173,7 +173,7 @@
             </div>
 
             <div class="cup-track">
-              @for (b of [0, 1, 2, 3, 4, 5, 6, 7].slice(0, run.cup.battles); track b) {
+              @for (b of cupTrack(run.cup.battles); track b) {
                 <span
                   class="track-dot"
                   [class.win]="run.wins[b] === true"

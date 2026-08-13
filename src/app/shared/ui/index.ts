@@ -1,39 +1,33 @@
+export { CustomChip, type CustomChipColor } from '@shared/ui/custom-chip/custom-chip';
 export {
-  CustomChipComponent,
-  type CustomChipColor,
-} from '@shared/ui/custom-chip/custom-chip.component';
-export {
-  KpiBlockComponent,
+  KpiBlock,
   type MetricData,
   type FluctuationChipData,
-} from '@shared/ui/kpi-block/kpi-block.component';
-export { ProgressGaugeComponent } from '@shared/ui/progress-gauge/progress-gauge.component';
-export { ContainerMarkComponent } from '@shared/ui/container-mark/container-mark.component';
-export { BasicViewComponent } from '@shared/ui/basic-view/basic-view.component';
+} from '@shared/ui/kpi-block/kpi-block';
+export { ProgressGauge } from '@shared/ui/progress-gauge/progress-gauge';
+export { ContainerMark } from '@shared/ui/container-mark/container-mark';
+export { BasicView } from '@shared/ui/basic-view/basic-view';
 export {
-  ObjectContainerComponent,
+  ObjectContainer,
   type ObjectContainerHeader,
   type ObjectContainerHeaderButton,
-} from '@shared/ui/object-container/object-container.component';
-export { GeneralTileList as GeneralTileListComponent } from '@shared/ui/general-tile-list/general-tile-list.component';
+} from '@shared/ui/object-container/object-container';
+export { GeneralTileList } from '@shared/ui/general-tile-list/general-tile-list';
 export {
   type ColumnDefinition,
   type RowAction,
 } from '@shared/ui/general-tile-list/general-list.model';
 
 // ---- Dialog system ----------------------------------------------------
-export { AppDialogService } from '@shared/ui/dialog/app-dialog.service';
-export { ConfirmationDialogComponent } from '@shared/ui/dialog/confirmation-dialog/confirmation-dialog.component';
-export { FormDialogComponent } from '@shared/ui/dialog/form-dialog/form-dialog.component';
-export { ResultDialogComponent } from '@shared/ui/dialog/result-dialog/result-dialog.component';
-export { DetailsBlockComponent } from '@shared/ui/dialog/details-block/details-block.component';
-export { DetailsSectionsComponent } from '@shared/ui/dialog/details-sections/details-sections.component';
-export { BlockDetailsDataPipe } from '@shared/ui/dialog/details-block/block-details-data.pipe';
+export { AppDialog } from '@shared/ui/dialog/app-dialog';
+export { ConfirmationDialog } from '@shared/ui/dialog/confirmation-dialog/confirmation-dialog';
+export { ResultDialog } from '@shared/ui/dialog/result-dialog/result-dialog';
+export { DetailsDialog } from '@shared/ui/dialog/details-block/details-block';
+export { DetailsSections } from '@shared/ui/dialog/details-sections/details-sections';
+export { BlockDetailsDataPipe } from '@shared/ui/dialog/details-block/block-details-data-pipe';
 export {
   type DialogData,
   type DialogType,
-  type FormDialogData,
-  type FormDialogResult,
   type SelectList,
   type ActionResult,
   type DetailsDialogData,
@@ -45,4 +39,4 @@ export {
   type SectionAction,
   type DetailsDialogDataTable,
   type DetailsDialogDataTableHeader,
-} from '@core/models/dialog.interface';
+} from '@shared/ui/dialog/dialog.interface';

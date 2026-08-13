@@ -26,22 +26,22 @@
 
 <div class="tab-content">
   @switch (tab()) {
-    @case (0) {
+    @case (tabs.squad) {
       <app-poke-squad />
     }
-    @case (1) {
+    @case (tabs.pokedex) {
       <app-poke-pokedex />
     }
-    @case (2) {
+    @case (tabs.adventure) {
       <app-poke-adventure />
     }
-    @case (3) {
+    @case (tabs.arena) {
       <app-poke-arena />
     }
-    @case (4) {
+    @case (tabs.user) {
       <app-poke-user />
     }
-    @case (5) {
+    @case (tabs.quests) {
       <app-poke-quests />
     }
     @default {

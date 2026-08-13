@@ -1,8 +1,8 @@
 import { computed, inject, signal, Service } from '@angular/core';
 import { BattleResult, Fighter, PokeDetail } from '@poke/poke.model';
-import { BattleService, buildFighter } from '@poke/battle.service';
-import { GameService } from '@poke/game.service';
-import { PokeDataService } from '@poke/poke-data.service';
+import { Battle, buildFighter } from '@poke/battle';
+import { Game } from '@poke/game';
+import { PokeData } from '@poke/poke-data';
 
 /** A creature pinned into battle with its live fighter copy. */
 export interface ArenaFighter {
@@ -22,7 +22,7 @@ export interface MatchSummary {
 }
 
 /**
- * Wraps the pure `BattleService.simulate` for the live arena.
+ * Wraps the pure `Battle.simulate` for the live arena.
  *
  * Battle is INSTANT: no narration tape, no timers — run `play()`, read the
  * `result()`, then `collect()` once. A `settled` guard stops the reward from
@@ -59,8 +59,8 @@ export class MatchRunner {
     };
   });
 
-  private readonly game = inject(GameService);
-  private readonly poke = inject(PokeDataService);
+  #game = inject(Game);
+  #poke = inject(PokeData);
 
   /** Builds and resolves a match between the current squad and rival names.
    *  Returns the result immediately (the `result()` signal still updates for
@@ -70,17 +70,17 @@ export class MatchRunner {
     this.result.set(null);
     this.settled.set(false);
 
-    const squad = this.game.squad();
-    await this.poke.ensureInCache([...squad, ...rivalNames]);
+    const squad = this.#game.squad();
+    await this.#poke.ensureInCache([...squad, ...rivalNames]);
 
-    const playerTeam = this.spawn(squad, this.game.tier() + 1, false);
-    const level = rivalLevel ?? this.game.tier() + 3;
+    const playerTeam = this.spawn(squad, this.#game.tier() + 1, false);
+    const level = rivalLevel ?? this.#game.tier() + 3;
     const rivalTeam = this.spawn(rivalNames, level, true);
 
     this.player.set(playerTeam);
     this.rival.set(rivalTeam);
 
-    const battle = new BattleService();
+    const battle = new Battle();
     const res = battle.simulate(
       { name: 'You', fighters: playerTeam.map((f) => f.fighter) },
       { name: 'Rivals', fighters: rivalTeam.map((f) => f.fighter) },
@@ -98,16 +98,16 @@ export class MatchRunner {
     const res = this.result();
     if (!res || this.settled()) return;
     this.settled.set(true);
-    this.game.award(res.winner);
-    if (res.winner === 'player') this.game.promote();
+    this.#game.award(res.winner);
+    if (res.winner === 'player') this.#game.promote();
   }
 
   private spawn(names: string[], level: number, isRival: boolean): ArenaFighter[] {
     return names
       .map((name): ArenaFighter | null => {
-        const detail = this.poke.pokeByName(name);
+        const detail = this.#poke.pokeByName(name);
         if (!detail) return null;
-        const ownedLevel = isRival ? 0 : (this.game.own(name)?.level ?? 0);
+        const ownedLevel = isRival ? 0 : (this.#game.own(name)?.level ?? 0);
         return {
           name,
           detail,

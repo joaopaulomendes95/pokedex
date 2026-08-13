@@ -1,6 +1,7 @@
 import { ErrorHandler, Injectable, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorReportingService } from '../services/error-reporting/error-reporting.service';
+import { ErrorReportingService } from '../services/error-reporting/error-reporting';
 
 /**
  * App-wide error handler:
@@ -9,7 +10,8 @@ import { ErrorReportingService } from '../services/error-reporting/error-reporti
  */
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  private readonly errorReporting = inject(ErrorReportingService);
+  #errorReporting = inject(ErrorReportingService);
+  #document = inject(DOCUMENT);
 
   handleError(error: unknown): void {
     console.error(error);
@@ -20,6 +22,7 @@ export class GlobalErrorHandler implements ErrorHandler {
 
     const message = error instanceof Error ? error.message : String(error);
     const source = error instanceof Error ? (error.stack ?? '') : '';
-    this.errorReporting.reportError(message, source, window.location.href);
+    const url = this.#document.location?.href ?? '';
+    this.#errorReporting.reportError(message, source, url);
   }
 }

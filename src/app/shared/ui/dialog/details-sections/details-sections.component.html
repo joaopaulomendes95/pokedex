@@ -8,12 +8,12 @@
         <div class="header-actions">
           @for (action of section.sectionActions; track $index) {
             @if (!action.hidden) {
-              <a class="ghost-button" (click)="headerAction(action)" tabindex="1">
+              <button type="button" class="ghost-button" (click)="headerAction(action)">
                 {{ action.label }}
                 @if (action.icon) {
                   <i [class]="'fa-regular fa-' + action.icon"></i>
                 }
-              </a>
+              </button>
             }
           }
         </div>

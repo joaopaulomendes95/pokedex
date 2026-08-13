@@ -119,7 +119,7 @@ Comprehensive fixes for UX, UI, and gameplay issues identified in the Poké-Liga
 
 **Fix**:
 
-- Price formula: baseStatTotal *levelMultiplier* rarityFactor
+- Price formula: baseStatTotal _levelMultiplier_ rarityFactor
 - Disable "Use" button for energy drink when `energy >= 100`
 - Show "Max Energy" tooltip
 
@@ -235,7 +235,7 @@ as practice for the job project:
 
 - **Font Awesome** installed (`@fortawesome/fontawesome-free`) as the icon set (chips, KPIs,
   containers, headers all use `fa-solid`); build budgets bumped to fit.
-- **Dialogs**: `AppDialogService` (`open` / `openForm` / `showResult` / `openDetails`) + new
+- **Dialogs**: `AppDialogService` (`open` / `showResult` / `openDetails`) + new
   Confirmation / Form / Result dialogs and the slide-in **DetailDialog**
   (`DetailsBlockComponent` + `DetailsSectionsComponent` + `BlockDetailsDataPipe`). Models in
   `src/app/core/models/dialog.interface.ts`.

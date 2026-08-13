@@ -1,18 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { GameService, TIERS, SQUAD_MAX, ENERGY_MAX, CONSUMABLE_ENERGY } from '@poke/game.service';
+import { Game, TIERS, SQUAD_MAX, ENERGY_MAX, CONSUMABLE_ENERGY } from '@poke/game';
 import { xpForLevel } from '@poke/economy';
 
-describe('GameService', () => {
+describe('Game', () => {
   it('is created with the three starters', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     expect(['bulbasaur', 'charmander', 'squirtle'].every((n) => g.own(n))).toBe(true);
   });
 
   it('squad is capped at six', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     const names = Array.from({ length: SQUAD_MAX + 1 }, (_, i) => `p${i}`);
     g.setSquad(names);
     expect(g.squad().length).toBe(SQUAD_MAX);
@@ -22,7 +22,7 @@ describe('GameService', () => {
 
   it('toggleSquad removes when already fielded', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     g.setSquad(['bulbasaur', 'charmander']);
     g.toggleSquad('bulbasaur');
     expect(g.squad()).not.toContain('bulbasaur');
@@ -30,7 +30,7 @@ describe('GameService', () => {
 
   it('applies idle income every tick', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     const before = g.coins();
     g.tick();
     expect(g.coins()).toBeGreaterThan(before);
@@ -38,10 +38,9 @@ describe('GameService', () => {
 
   it('rewards a win with coins, xp and a win counter', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     g.setSquad(['charmander']);
     g.add('pikachu', 5);
-    g.squad.set(['charmander']);
     const coinsBefore = g.coins();
     const xpBefore = g.own('charmander')!.xp;
     g.award('player');
@@ -52,7 +51,7 @@ describe('GameService', () => {
 
   it('banks earned xp without auto-leveling until the player clicks', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     g.add('dratini', 1);
     const levelBefore = g.own('dratini')!.level;
     g.grantXp('dratini', 9999);
@@ -67,7 +66,7 @@ describe('GameService', () => {
 
   it('granting less than one level-up leaves no ready click', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     g.add('ditto', 2);
     const level = g.own('ditto')!.level;
     g.grantXp('ditto', 1);
@@ -77,7 +76,7 @@ describe('GameService', () => {
 
   it('passive XP applies to the whole collection each tick', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     const before = g.own('squirtle')!.xp;
     g.tick();
     expect(g.own('squirtle')!.xp).toBeGreaterThan(before);
@@ -85,9 +84,9 @@ describe('GameService', () => {
 
   it('promotes only after enough wins', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     const tier = g.tier();
-    for (let i = 0; i < TIERS[tier].winsToPromote; i++) g.wins.update((w) => w + 1);
+    for (let i = 0; i < TIERS[tier]!.winsToPromote; i++) g.award('player');
     expect(g.canPromote()).toBe(true);
     expect(g.promote()).toBe(true);
     expect(g.tier()).toBe(tier + 1);
@@ -95,14 +94,14 @@ describe('GameService', () => {
 
   it('starts with a few Pokéballs and no spare consumables', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     expect(g.itemCount('pokeball')).toBe(5);
     expect(g.itemCount('greatball')).toBe(0);
   });
 
   it('adds, stacks and consumes inventory items', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     g.addItem('potion', 2);
     g.addItem('potion', 1);
     expect(g.itemCount('potion')).toBe(3);
@@ -113,23 +112,23 @@ describe('GameService', () => {
 
   it('spendBestBall uses the best owned ball and empties the bag', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     expect(g.spendBestBall()).toBe(1); // plain Pokéball first seed
     g.addItem('greatball', 1);
     expect(g.spendBestBall()).toBe(1.5);
     expect(g.spendBestBall()).toBe(1); // ultra absent, falls back
     expect(g.itemCount('pokeball')).toBe(3);
-    g.inventory.set({});
+    expect(g.consumeItem('pokeball', 3)).toBe(true);
     expect(g.spendBestBall()).toBe(0);
   });
 
   it('useConsumable restores energy and consumes the item', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
-    g.energy.set(10);
+    const g = TestBed.inject(Game);
+    g.spendEnergy(90); // 100 -> 10
     g.addItem('potion', 1);
-    expect(g.useConsumable('potion')).toBe(CONSUMABLE_ENERGY['potion']);
-    expect(g.energy()).toBe(10 + CONSUMABLE_ENERGY['potion']);
+    expect(g.useConsumable('potion')).toBe(CONSUMABLE_ENERGY['potion']!);
+    expect(g.energy()).toBe(10 + CONSUMABLE_ENERGY['potion']!);
     expect(g.itemCount('potion')).toBe(0);
     expect(g.useConsumable('potion')).toBe(-1); // gone
     expect(g.energy()).toBeLessThanOrEqual(ENERGY_MAX);
@@ -138,18 +137,20 @@ describe('GameService', () => {
 
   it('energy regens every tick but never exceeds the cap', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
-    g.energy.set(3);
+    const g = TestBed.inject(Game);
+    g.spendEnergy(97); // 100 -> 3
     g.tick();
     expect(g.energy()).toBeGreaterThan(3);
-    g.energy.set(ENERGY_MAX);
+    g.addItem('revive', 1);
+    g.useConsumable('revive'); // back to full
+    expect(g.energy()).toBe(ENERGY_MAX);
     g.tick();
     expect(g.energy()).toBe(ENERGY_MAX);
   });
 
   it('income scales with the collection size', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     const base = g.incomePerSec();
     g.add('rattata', 1);
     g.add('pidgey', 1);
@@ -158,7 +159,7 @@ describe('GameService', () => {
 
   it('career stats track battles/wins/coins and level-ups', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     const before = g.stats();
     g.award('player');
     g.addLevel('bulbasaur', 2);
@@ -170,7 +171,7 @@ describe('GameService', () => {
 
   it('catch counter increments on noteCatch', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     const before = g.stats().catches;
     g.noteCatch();
     expect(g.stats().catches).toBe(before + 1);
@@ -178,10 +179,15 @@ describe('GameService', () => {
 
   it('prestige requires the top tier and banks a shard', () => {
     TestBed.configureTestingModule({});
-    const g = TestBed.inject(GameService);
+    const g = TestBed.inject(Game);
     expect(g.canPrestige()).toBe(false);
     expect(g.prestigeReset()).toBe(false);
-    g.tier.set(4);
+    // Advance to the top tier (Champion Cup) the honest way.
+    for (let t = g.tier(); t < 4; t++) {
+      for (let i = 0; i < TIERS[t]!.winsToPromote; i++) g.award('player');
+      g.promote();
+    }
+    expect(g.tier()).toBe(4);
     expect(g.canPrestige()).toBe(true);
     expect(g.prestigeReset()).toBe(true);
     expect(g.prestige()).toBe(1);

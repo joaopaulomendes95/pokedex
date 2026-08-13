@@ -55,7 +55,11 @@
                 color="accent"
                 (click)="use(item.id)"
                 [disabled]="game.itemCount(item.id) === 0 || isEnergyFull()"
-                [matTooltip]="isEnergyFull() ? 'Energy already full' : 'Restores ' + gainFor(item.id) + ' energy'"
+                [matTooltip]="
+                  isEnergyFull()
+                    ? 'Energy already full'
+                    : 'Restores ' + gainFor(item.id) + ' energy'
+                "
               >
                 <mat-icon>bolt</mat-icon>
                 Use

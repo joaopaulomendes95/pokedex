@@ -74,17 +74,9 @@
             <span class="color-label">{{ m.description }}</span>
           </div>
           <app-custom-chip
-            [color]="missions.claimed().has(m.id) ? 'desat' : missions.isDone(m) ? 'green' : 'main'"
-            [label]="
-              missions.claimed().has(m.id)
-                ? 'Claimed'
-                : missions.isDone(m)
-                  ? 'Ready!'
-                  : missions.progressOf(m) + ' / ' + m.goal
-            "
-            [faIcon]="
-              missions.claimed().has(m.id) ? 'check' : missions.isDone(m) ? 'bolt' : 'tasks'
-            "
+            [color]="chipFor(m).color"
+            [label]="chipFor(m).label"
+            [faIcon]="chipFor(m).faIcon"
           ></app-custom-chip>
         </div>
         <mat-progress-bar

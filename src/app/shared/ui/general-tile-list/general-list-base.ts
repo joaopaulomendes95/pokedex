@@ -9,6 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
 import { PageEvent } from '@angular/material/paginator';
@@ -24,7 +25,8 @@ interface AppliedFilters<T extends Record<string, unknown>> {
 export abstract class GeneralListBase<T extends Record<string, unknown>> {
   static readonly ALL_FILTER_VALUE = '';
 
-  private readonly destroyRef = inject(DestroyRef);
+  #destroyRef = inject(DestroyRef);
+  #document = inject(DOCUMENT);
 
   // Inputs
   dataProvider = input.required<T[]>();
@@ -56,12 +58,12 @@ export abstract class GeneralListBase<T extends Record<string, unknown>> {
 
   lastSyncedAt = signal<Date | null>(null);
 
-  private readonly refreshLabelTick = signal(0);
+  #refreshLabelTick = signal(0);
 
   lastSyncedMinutesAgo = computed<number | null>(() => {
     const syncedAt = this.lastSyncedAt();
     if (!syncedAt) return null;
-    this.refreshLabelTick();
+    this.#refreshLabelTick();
     return Math.max(0, Math.floor((Date.now() - syncedAt.getTime()) / 60_000));
   });
 
@@ -75,12 +77,12 @@ export abstract class GeneralListBase<T extends Record<string, unknown>> {
   currentPageIndex = signal<number>(0);
   currentPageSize = linkedSignal(() => this.initialPageSize());
 
-  private readonly hasActiveQuery = computed(
+  #hasActiveQuery = computed(
     () => this.selectedFilters().length > 0 || this.searchTerm().trim().length > 0,
   );
 
   paginatorLength = computed(() =>
-    this.hasActiveQuery()
+    this.#hasActiveQuery()
       ? this.filteredData().length
       : Math.max(this.totalCount(), this.filteredData().length),
   );
@@ -111,7 +113,7 @@ export abstract class GeneralListBase<T extends Record<string, unknown>> {
       const rowsNeeded = (this.currentPageIndex() + 1) * this.currentPageSize();
       const rowsLoaded = this.dataProvider().length;
       if (
-        !this.hasActiveQuery() &&
+        !this.#hasActiveQuery() &&
         !this.loadingMore() &&
         rowsNeeded > rowsLoaded &&
         this.totalCount() > rowsLoaded
@@ -136,7 +138,7 @@ export abstract class GeneralListBase<T extends Record<string, unknown>> {
       if (!intervalMs) return;
 
       const sub = interval(intervalMs)
-        .pipe(takeUntilDestroyed(this.destroyRef))
+        .pipe(takeUntilDestroyed(this.#destroyRef))
         .subscribe(() => this.refreshNow(true));
       onCleanup(() => sub.unsubscribe());
     });
@@ -145,8 +147,8 @@ export abstract class GeneralListBase<T extends Record<string, unknown>> {
       if (!this.onRefresh()) return;
       if (!this.lastSyncedAt()) return;
       const sub = interval(30_000)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe(() => this.refreshLabelTick.update((n) => n + 1));
+        .pipe(takeUntilDestroyed(this.#destroyRef))
+        .subscribe(() => this.#refreshLabelTick.update((n) => n + 1));
       onCleanup(() => sub.unsubscribe());
     });
 
@@ -154,13 +156,13 @@ export abstract class GeneralListBase<T extends Record<string, unknown>> {
       if (!this.onRefresh()) return;
       if (this.refreshIntervalMs() === 0) return;
       const handler = (): void => this.refreshNow(true);
-      document.addEventListener('visibilitychange', handler);
-      onCleanup(() => document.removeEventListener('visibilitychange', handler));
+      this.#document.addEventListener('visibilitychange', handler);
+      onCleanup(() => this.#document.removeEventListener('visibilitychange', handler));
     });
   }
 
   refreshNow(auto = false): void {
-    if (document.hidden) return;
+    if (this.#document.hidden) return;
     this.onRefresh()?.(auto);
   }
 

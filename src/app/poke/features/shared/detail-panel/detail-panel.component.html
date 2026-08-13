@@ -13,7 +13,7 @@
         }
       </div>
       <div class="stat-grid">
-        @if (ownedOwned(); as entry) {
+        @if (owned(); as entry) {
           @if (scaledStats(entry); as s) {
             <div>
               <span>HP</span><b>{{ s.hp }}</b>
@@ -57,7 +57,7 @@
       </div>
     </mat-card-content>
 
-    @if (ownedOwned(); as entry) {
+    @if (owned(); as entry) {
       <mat-card-actions class="train-actions">
         <div class="level-line">
           <span>Level {{ entry.level }}</span>

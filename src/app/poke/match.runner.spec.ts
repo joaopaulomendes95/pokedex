@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MatchRunner } from '@poke/match.runner';
-import { PokeDataService } from '@poke/poke-data.service';
-import { GameService } from '@poke/game.service';
+import { PokeData } from '@poke/poke-data';
+import { Game } from '@poke/game';
 import { PokeDetail } from '@poke/poke.model';
 
 function detail(name: string): PokeDetail {
@@ -17,23 +17,23 @@ function detail(name: string): PokeDetail {
   };
 }
 
-function stubPoke(names: string[]): PokeDataService {
+function stubPoke(names: string[]): PokeData {
   const cache = new Map(names.map((n) => [n, detail(n)]));
   return {
     pokeByName: (n: string) => cache.get(n) ?? null,
     spriteUrlOrEmpty: () => '',
     ensureInCache: async () => {},
-  } as unknown as PokeDataService;
+  } as unknown as PokeData;
 }
 
 function makeRunner(initialNames: string[]) {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
-    providers: [{ provide: PokeDataService, useValue: stubPoke([...initialNames, 'pikachu']) }],
+    providers: [{ provide: PokeData, useValue: stubPoke([...initialNames, 'pikachu']) }],
   });
-  const game = TestBed.inject(GameService);
-  game.collection.set(new Map(initialNames.map((n) => [n, { name: n, level: 1, xp: 0 }])));
-  game.squad.set(initialNames.slice(0, 6));
+  const game = TestBed.inject(Game);
+  for (const n of initialNames) game.add(n, 1);
+  game.setSquad(initialNames.slice(0, 6));
   const runner = TestBed.inject(MatchRunner);
   return { game, runner };
 }

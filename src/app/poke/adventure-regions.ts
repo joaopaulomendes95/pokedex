@@ -114,7 +114,8 @@ export function regionStatuses(visited: ReadonlySet<string>): RegionStatus[] {
   return KANTO_REGIONS.map((def, index) => {
     const visitedCount = def.areas.filter((l) => visited.has(l.url)).length;
     const cleared = visitedCount >= def.areas.length;
-    const unlocked = index === 0 || KANTO_REGIONS[index - 1].areas.every((l) => visited.has(l.url));
+    const unlocked =
+      index === 0 || KANTO_REGIONS[index - 1]!.areas.every((l) => visited.has(l.url));
     return { def, index, visitedCount, cleared, unlocked };
   });
 }

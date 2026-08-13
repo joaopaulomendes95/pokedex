@@ -16,8 +16,8 @@ export default defineConfig({
     },
     output: {
       mode: 'tags-split',
-      target: 'src/app/poke/poke-api',
-      schemas: 'src/app/poke/poke-api/model',
+      target: 'src/app/shared/openapi/poke-api',
+      schemas: 'src/app/shared/openapi/poke-api/model',
       client: 'angular',
       baseUrl: 'https://pokeapi.co',
       clean: true,

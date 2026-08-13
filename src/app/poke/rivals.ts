@@ -24,7 +24,10 @@ export function sampleRivalTeam(pool: string[], size: number): string[] {
   const names = [...new Set(pool)];
   for (let i = names.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [names[i], names[j]] = [names[j], names[i]];
+    // Both indices are always in range; swap without touching holes.
+    const tmp = names[i]!;
+    names[i] = names[j]!;
+    names[j] = tmp;
   }
   return names.slice(0, Math.max(1, size));
 }

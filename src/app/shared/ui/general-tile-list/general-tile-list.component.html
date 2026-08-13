@@ -7,12 +7,7 @@
       >
         <mat-label>Search</mat-label>
         <mat-icon matPrefix><i class="fa-solid fa-magnifying-glass"></i></mat-icon>
-        <input
-          matInput
-          type="text"
-          [value]="searchTerm()"
-          (input)="onSearch($any($event.currentTarget).value)"
-        />
+        <input matInput type="text" [value]="searchTerm()" (input)="onSearchInput($event)" />
       </mat-form-field>
     }
 
@@ -75,7 +70,7 @@
   </div>
 
   <div class="tile-grid" [style.grid-template-columns]="gridTemplateColumns()">
-    @for (row of pagedData(); track $index) {
+    @for (row of pagedData(); track rowTrack($index, row)) {
       <div
         class="tile-item"
         [class.highlighted]="rowHighlight()(row)"
@@ -85,9 +80,9 @@
         (keydown.enter)="onRowClick(row)"
         (keydown.space)="$event.preventDefault(); onRowClick(row)"
       >
-        @if (tile) {
+        @if (tile()) {
           <ng-container
-            *ngTemplateOutlet="tile; context: { $implicit: row, index: $index }"
+            *ngTemplateOutlet="tile(); context: { $implicit: row, index: $index }"
           ></ng-container>
         }
       </div>

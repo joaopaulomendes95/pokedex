@@ -15,12 +15,12 @@ npm test        # vitest under the hood (@angular/build:unit-test, jsdom), 38 te
 npx prettier --write .   # formatting (singleQuote, printWidth 100)
 ```
 
-No router — screens are tabs driven by `UiStateService` signals; the root
+No router — screens are tabs driven by `UiState` signals; the root
 component renders `<app-navbar>` + `<app-poke-hub>`.
 
 ## Gameplay
 
-- **Idle loop** — `GameService` ticks every real second: coins accrue
+- **Idle loop** — `Game` ticks every real second: coins accrue
   (`incomePerSec`, scaled by collection size + prestige shards), squad energy
   regenerates, and the whole collection banks passive XP.
 - **Squad** — field up to 6 creatures, drag to reorder, train (+1 level),
@@ -32,7 +32,7 @@ component renders `<app-navbar>` + `<app-poke-hub>`.
   catch chance by base exp).
 - **Arena** — instant quick fights (5 energy) + **tournaments/cups** with an
   entry fee and prize pool; win battles in a row to lift the cup (run state
-  survives tab switches via `CupRunService`). Auto-fight grinds while you
+  survives tab switches via `CupRuns`). Auto-fight grinds while you
   watch.
 - **Shop & Bag** — one modal (navbar `storefront` icon), slide-in from the
   right: buy items (prices scale by tier) and use consumables (restore squad
@@ -52,15 +52,14 @@ src/app/
 │   ├── config/       GAME_CONFIG injection token (energy, economy, roster)
 │   ├── handlers/     GlobalErrorHandler
 │   ├── models/       shared interfaces (dialogs, notifications, loader)
-│   └── services/     StorageService, NotificationService (CDK overlay toasts),
-│                     AppLoaderService, ErrorReportingService
+│   └── services/     BrowserStorage, Notifier (CDK overlay toasts),
+│                     AppLoader, ErrorReporting
 ├── layout/        # navbar + toast + pop-loader
 ├── poke/          # the game
 │   ├── features/     squad-builder, pokedex, adventure, arena, user, quests,
 │   │                 shared (detail-panel, shop-dialog, poke-details-content)
-│   ├── poke-api/     Orval-generated PokeAPI clients (tools/pokeapi.openapi.yml)
-│   └── *.service.ts  game.service (state machine), poke-data.service,
-│                     match.runner, battle.service, missions, auto-battle,
+│   └── *.ts          game (state machine), poke-data,
+│                     match.runner, battle, missions, auto-battle,
 │                     cup-run, theme, xp-display, ui-state
 └── shared/ui/     # reusable design system: basic-view,
                    # kpi-block, custom-chip, progress-gauge, container-mark,
@@ -79,12 +78,12 @@ Key patterns:
   signal** (`selected()`), cached by name so flipping the dex never re-fetches.
   `httpResource.text()` for raw string bodies; a request factory returning
   `undefined` keeps the resource Idle (the cache short-circuit).
-- **Pure battle sim** — `battle.service.simulate(player, rival, rng)` is
+- **Pure battle sim** — `battle.simulate(player, rival, rng)` is
   deterministic (rng injected); `MatchRunner` wraps it for the live arena with
   a one-shot `settled` guard (pays out once per match).
-- **Reactivity guarantee** — the 1s ticker also runs `detectChanges()` +
-  a paint nudge on `app-root`, so the screen updates every second regardless of
-  browser compositing quirks.
+- **Reactivity** — zoneless + signal-driven: the 1s ticker updates
+  `coins`/`energy`/`collection`/`stats` signals and any template reading them
+  re-renders automatically.
 - **Testing** — vitest with `describe/it/expect`; signal-driven tests call
   `fixture.detectChanges()` / `await fixture.whenStable()`. Spec pattern in
   `src/app/**/*.spec.ts`.
