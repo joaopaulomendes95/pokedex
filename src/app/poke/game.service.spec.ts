@@ -195,4 +195,39 @@ describe('Game', () => {
     expect(g.collection().size).toBeGreaterThan(0); // fresh starters
     expect(g.wins()).toBe(0);
   });
+
+  it('evolve swaps the species but keeps level, xp and the fielded slot', () => {
+    TestBed.configureTestingModule({});
+    const g = TestBed.inject(Game);
+    g.add('bulbasaur', 1);
+    g.addLevel('bulbasaur', 15);
+    g.grantXp('bulbasaur', 42);
+    g.setSquad(['bulbasaur']);
+
+    expect(g.evolve('bulbasaur', 'ivysaur')).toBe(true);
+    expect(g.own('bulbasaur')).toBeUndefined();
+    const evolved = g.own('ivysaur');
+    expect(evolved).toBeDefined();
+    expect(evolved!.level).toBe(16);
+    expect(evolved!.xp).toBe(42);
+    expect(g.squad()).toEqual(['ivysaur']);
+  });
+
+  it('evolve refuses unknown species', () => {
+    TestBed.configureTestingModule({});
+    const g = TestBed.inject(Game);
+    expect(g.evolve('missingno', 'mew')).toBe(false);
+  });
+
+  it('tracks shiny flag on caught pokémon', () => {
+    TestBed.configureTestingModule({});
+    const g = TestBed.inject(Game);
+    g.add('pikachu', 1, true);
+    g.add('eevee', 1, false);
+    expect(g.own('pikachu')?.shiny).toBe(true);
+    expect(g.own('eevee')?.shiny).toBe(false);
+    // Plain add keeps the old default.
+    g.add('meowth', 1);
+    expect(g.own('meowth')?.shiny).toBe(false);
+  });
 });

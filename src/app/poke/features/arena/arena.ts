@@ -1,8 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Game } from '@poke/game';
 import { MatchRunner } from '@poke/match.runner';
 import { PokeData } from '@poke/poke-data';
@@ -17,7 +18,8 @@ import {
 } from '@poke/tournament';
 import { poolAroundTier, sampleRivalTeam, RIVAL_POOLS } from '@poke/rivals';
 import { CupRuns } from '@poke/cup-run';
-import { AppDialog, BasicView } from '@shared/ui';
+import { AppDialog, BasicView, BattleLog } from '@shared/ui';
+import { ManualBattle } from '@poke/manual-battle';
 import type { ArenaFighter } from '@poke/match.runner';
 
 /** A fighter row enriched with every display value the template needs. */
@@ -40,7 +42,15 @@ function poolForCup(cup: Cup): string[] {
 
 @Component({
   selector: 'app-poke-arena',
-  imports: [MatButtonModule, MatCardModule, MatIconModule, MatProgressBarModule, BasicView],
+  imports: [
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatProgressBarModule,
+    MatTooltipModule,
+    BasicView,
+    BattleLog,
+  ],
   templateUrl: './arena.component.html',
   styleUrl: './arena.component.scss',
 })
@@ -50,6 +60,7 @@ export class Arena {
   readonly game = inject(Game);
   readonly data = inject(PokeData);
   readonly auto = inject(AutoBattle);
+  readonly manual = inject(ManualBattle);
   readonly cupRuns = inject(CupRuns);
   #notify = inject(Notify);
   #dialog = inject(AppDialog);
@@ -96,6 +107,7 @@ export class Arena {
   });
 
   /** Quick fight: a small rival team drawn from your tier's pool. */
+  /** Quick fight: a small rival team drawn from your tier's pool. */
   start() {
     if (!this.canQuick() || this.runner.busy()) return;
     if (!this.game.spendEnergy(QUICK_BATTLE_ENERGY)) {
@@ -106,6 +118,52 @@ export class Arena {
     const pool = [...new Set(poolAroundTier(tier))];
     const rival = sampleRivalTeam(pool, Math.min(3, pool.length));
     void this.runner.play(rival);
+  }
+
+  /** Start a manual turn-by-turn battle against a tier-scaled rival team. */
+  async startManual() {
+    if (this.manual.active() || this.runner.busy()) return;
+    if (!this.canBattle()) {
+      this.#notify.show('Field a squad on the Squad tab first.');
+      return;
+    }
+    if (!this.game.spendEnergy(QUICK_BATTLE_ENERGY)) {
+      this.#notify.show('Not enough squad energy — drink an Energy Drink or wait.');
+      return;
+    }
+    const squad = this.game.squad();
+    const tier = Math.min(Math.max(this.game.tier(), 0), 8);
+    const pool = [...new Set(poolAroundTier(tier))];
+    const rival = sampleRivalTeam(pool, Math.min(3, pool.length));
+    await this.data.ensureInCache([...squad, ...rival]);
+    await this.data.ensureMoves([...squad, ...rival]).catch(() => undefined);
+
+    const playerTeam = this.runner.spawn(squad, this.game.tier() + 1, false);
+    const rivalTeam = this.runner.spawn(rival, this.game.tier() + 3, true);
+    this.manual.start(
+      playerTeam.map((f) => f.fighter),
+      rivalTeam.map((f) => f.fighter),
+    );
+  }
+
+  /** HP percentage for a fighter's bar (manual battle). */
+  hpPct(f: { hp: number; maxHp: number }): number {
+    return Math.round((f.hp / Math.max(1, f.maxHp)) * 100);
+  }
+
+  constructor() {
+    // Pay out once when a manual battle ends.
+    effect(() => {
+      const winner = this.manual.winner();
+      if (!winner) return;
+      this.game.award(winner);
+      if (winner === 'player') {
+        for (const f of this.manual.player()) this.game.grantXp(f.name, 8 + this.game.tier() * 2);
+        this.#notify.show('Manual battle won — coins + XP banked!');
+      } else {
+        this.#notify.show('Manual battle lost — your squad needs more training.');
+      }
+    });
   }
 
   /** Enter a cup: pays the fee and begins the run. */

@@ -1,8 +1,8 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, effect, inject, input } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PokeData } from '@poke/poke-data';
 import { Game } from '@poke/game';
-import { type CustomChipColor, type DetailsSection } from '@shared/ui';
+import { type CustomChipColor, type DetailsBlockRow, type DetailsSection } from '@shared/ui';
 import { DetailsSections } from '@shared/ui/dialog/details-sections/details-sections';
 import { CustomChip } from '@shared/ui';
 import { xpForLevel } from '@poke/economy';
@@ -48,7 +48,7 @@ export class PokeDetailsContent {
   readonly sections = computed<DetailsSection[]>(() => {
     const d = this.detail();
     if (!d) return [];
-    return [
+    const sections: DetailsSection[] = [
       {
         name: 'Stats',
         rows: [
@@ -95,7 +95,86 @@ export class PokeDetailsContent {
         ],
       },
     ];
+
+    // Real abilities from the detail body (hidden ones tagged), with effect text.
+    if (d.abilities.length > 0) {
+      sections.push({
+        name: 'Abilities',
+        rows: [
+          {
+            cols: 1,
+            items: d.abilities.map((a) => ({
+              label: a.isHidden ? `${a.name} (hidden)` : a.name,
+              data: [this.poke.abilityEffect(a.name) ?? a.name],
+              faIcon: 'sparkles',
+            })),
+          },
+        ],
+      });
+    }
+
+    // Real dex entry from `/pokemon-species/:name` (warmed lazily).
+    const flavor = this.poke.speciesFlavor(this.data().name);
+    if (flavor) {
+      sections.push({
+        name: 'Pokédex entry',
+        style: 'filled',
+        rows: [{ cols: 1, items: [{ label: 'Entry', data: [flavor], faIcon: 'book-open' }] }],
+      });
+    }
+
+    // Real level-up moveset from the detail body.
+    if (d.moves.length > 0) {
+      const rows: DetailsBlockRow[] = [];
+      for (let i = 0; i < d.moves.length; i += 2) {
+        const pair = d.moves.slice(i, i + 2);
+        rows.push({
+          cols: 2,
+          items: pair.map((m) => ({
+            label: `Lv ${m.level}`,
+            data: [m.name],
+            faIcon: 'hand-fist',
+          })),
+        });
+      }
+      sections.push({ name: 'Moves', rows });
+    }
+
+    // Real evolution chain from `/evolution-chain/:id`.
+    const evo = this.poke.evolutionFor(this.data().name);
+    if (evo.length > 0) {
+      sections.push({
+        name: 'Evolution',
+        rows: [
+          {
+            cols: 2,
+            items: evo.map((step) => ({
+              label: step.species,
+              data: [`→ ${step.to}`],
+              suffix: `(${step.trigger})`,
+              faIcon: 'arrow-trend-up',
+            })),
+          },
+        ],
+      });
+    }
+
+    return sections;
   });
+
+  constructor() {
+    // Warm the dex entry + evolution chain so they appear as they land.
+    effect(() => {
+      const name = this.data().name;
+      if (!name) return;
+      void this.poke.ensureSpecies([name]).then(() => void this.poke.ensureChainFor([name]));
+    });
+    // Warm ability effect texts for the current pokémon.
+    effect(() => {
+      const names = this.detail()?.abilities.map((a) => a.name) ?? [];
+      if (names.length) void this.poke.ensureAbilities(names);
+    });
+  }
 
   catchRate(): number {
     const base = this.detail()?.baseExperience ?? 0;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Battle, buildFighter } from '@poke/battle';
-import { BattleTeam, Fighter } from '@poke/poke.model';
+import { BattleTeam, Fighter, FighterMove } from '@poke/poke.model';
 
 function fighter(
   name: string,
@@ -9,6 +9,7 @@ function fighter(
   defense: number,
   speed: number,
   types: string[],
+  moves: FighterMove[] = [],
 ): Fighter {
   return {
     name,
@@ -21,6 +22,7 @@ function fighter(
     spDef: defense,
     speed,
     types,
+    moves,
   };
 }
 
@@ -87,5 +89,60 @@ describe('Battle.simulate', () => {
     const normal = fighter('n', 100, 1, 1, 40, ['normal']);
     const res = service.simulate(team('a', [ghost]), team('b', [normal]), () => 0.5);
     expect(res.events.some((e) => e.text.includes('no effect'))).toBe(true);
+  });
+
+  it('narrates the real move name from the moveset', () => {
+    const a = fighter(
+      'attacker',
+      100,
+      20,
+      5,
+      90,
+      ['fire'],
+      [{ name: 'Ember', type: 'fire', category: 'physical', power: 40 }],
+    );
+    const b = fighter('defender', 100, 5, 5, 1, ['grass']);
+    const res = service.simulate(team('a', [a]), team('b', [b]), () => 0.5);
+    expect(res.events.some((e) => e.text.includes('Ember'))).toBe(true);
+  });
+
+  it('applies STAB — same-type moves hit harder', () => {
+    const a = fighter(
+      'attacker',
+      100,
+      20,
+      5,
+      90,
+      ['fire'],
+      [
+        { name: 'Ember', type: 'fire', category: 'physical', power: 40 },
+        { name: 'Scratch', type: 'normal', category: 'physical', power: 40 },
+      ],
+    );
+    const b = fighter('defender', 100, 5, 5, 1, ['grass']);
+    const res = service.simulate(team('a', [a]), team('b', [b]), () => 0.5);
+    // Ember (fire, STAB + super-effective) is picked over Scratch every time.
+    expect(res.events.some((e) => e.text.includes('Ember'))).toBe(true);
+    expect(res.events.some((e) => e.text.includes('Scratch'))).toBe(false);
+  });
+
+  it('prefers the super-effective move of the moveset', () => {
+    const a = fighter(
+      'attacker',
+      100,
+      20,
+      5,
+      90,
+      ['fire'],
+      [
+        { name: 'Ember', type: 'fire', category: 'physical', power: 40 },
+        { name: 'Scratch', type: 'normal', category: 'physical', power: 60 },
+      ],
+    );
+    const b = fighter('defender', 100, 5, 5, 1, ['grass']);
+    const res = service.simulate(team('a', [a]), team('b', [b]), () => 0.5);
+    // Ember (2x vs grass) out-scores Scratch (1x) despite lower power.
+    expect(res.events.filter((e) => e.text.includes('Ember')).length).toBeGreaterThan(0);
+    expect(res.events.filter((e) => e.text.includes('Scratch')).length).toBe(0);
   });
 });

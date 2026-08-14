@@ -1,9 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { PokeData } from '@poke/poke-data';
 import { Game } from '@poke/game';
 import { GenerationFilter } from '@poke/generation-filter';
@@ -15,6 +15,7 @@ import {
   AppDialog,
   BasicView,
   type ColumnDefinition,
+  CustomSpinner,
   type DialogAction,
   GeneralTileList,
 } from '@shared/ui';
@@ -35,10 +36,11 @@ interface DexRow extends Record<string, unknown> {
     MatButtonModule,
     MatFormFieldModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     MatSelectModule,
+    MatSlideToggleModule,
     GeneralTileList,
     BasicView,
+    CustomSpinner,
   ],
   templateUrl: './pokedex.component.html',
   styleUrl: './pokedex.component.scss',
@@ -51,6 +53,14 @@ export class Pokedex {
   #ui = inject(UiState);
   #dialog = inject(AppDialog);
 
+  /** Only show creatures the player owns. */
+  #_ownedOnly = signal(false);
+  readonly ownedOnly = this.#_ownedOnly.asReadonly();
+
+  setOwnedOnly(on: boolean) {
+    this.#_ownedOnly.set(on);
+  }
+
   /**
    * Rows fed to the shared tile list. When the search box has text we switch
    * from the current dex page to results across the WHOLE PokeAPI dex; otherwise
@@ -58,21 +68,24 @@ export class Pokedex {
    */
   readonly rows = computed<DexRow[]>(() => {
     const source = this.data.searchQuery().trim() ? this.data.searchResults() : this.data.dex();
-    return source.map((e) => {
-      const d = this.data.pokeByName(e.name);
-      const id = this.idFromUrl(e.url);
-      return {
-        name: e.name,
-        url: e.url,
-        id,
-        types: d?.types ?? [],
-        owned: !!this.game.own(e.name),
-        // CDN URL from the resolvable ID (works for search hits outside the cached dex page).
-        sprite: id
-          ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
-          : this.data.spriteUrlOrEmpty(e.name),
-      };
-    });
+    const onlyOwned = this.ownedOnly();
+    return source
+      .map((e) => {
+        const d = this.data.pokeByName(e.name);
+        const id = this.idFromUrl(e.url);
+        return {
+          name: e.name,
+          url: e.url,
+          id,
+          types: d?.types ?? [],
+          owned: !!this.game.own(e.name),
+          // CDN URL from the resolvable ID (works for search hits outside the cached dex page).
+          sprite: id
+            ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+            : this.data.spriteUrlOrEmpty(e.name),
+        };
+      })
+      .filter((row) => !onlyOwned || row.owned);
   });
 
   /** Stable @for identity for the tile list (rows are filtered/sorted). */

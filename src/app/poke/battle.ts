@@ -1,4 +1,4 @@
-import { BattleEvent, BattleResult, BattleTeam, Fighter } from '@poke/poke.model';
+import { BattleEvent, BattleResult, BattleTeam, Fighter, FighterMove } from '@poke/poke.model';
 import { typeMultiplier } from '@poke/type-chart';
 
 /** Scales raw base stats to a battle-ready fighter at `level`. */
@@ -15,6 +15,7 @@ export function buildFighter(
     speed: number;
   },
   level: number,
+  moves: FighterMove[] = [],
 ): Fighter {
   const scale = (v: number) => Math.max(1, Math.round(v * levelScale(level)));
   return {
@@ -22,6 +23,7 @@ export function buildFighter(
     spriteUrl,
     types,
     level,
+    moves,
     maxHp: scale(base.hp),
     hp: scale(base.hp),
     attack: scale(base.attack),
@@ -43,24 +45,93 @@ type Rng = () => number;
 type MoveCategory = 'physical' | 'special';
 
 interface Move {
+  name: string;
   category: MoveCategory;
   type: string;
   power: number;
 }
 
-/** Chooses the best move category (physical vs special) for an attacker vs defender. */
-function chooseMove(attacker: Fighter, defender: Fighter, rng: Rng): Move {
-  const physicalPower = attacker.attack / Math.max(1, defender.defense);
-  const specialPower = attacker.spAtk / Math.max(1, defender.spDef);
-  const useSpecial = specialPower > physicalPower;
-
+/** Generic fallback attack when a fighter has no real moves cached. */
+function fallbackMove(attacker: Fighter, rng: Rng): Move {
   const types = attacker.types.length ? attacker.types : ['normal'];
   const type = types[Math.floor(rng() * types.length)]!;
-
+  const useSpecial = attacker.spAtk > attacker.attack;
   return {
+    name: `${type} attack`,
     category: useSpecial ? 'special' : 'physical',
     type,
     power: useSpecial ? attacker.spAtk : attacker.attack,
+  };
+}
+
+/**
+ * Picks the best real move from the fighter's moveset: prefer the move that
+ * is super-effective against the defender (via the type chart), then the
+ * highest power, with a small random tiebreak. Falls back to a generic
+ * attack when no real moves are available.
+ */
+export function chooseMove(attacker: Fighter, defender: Fighter, rng: Rng): Move {
+  const moves = attacker.moves.length ? attacker.moves : [fallbackMove(attacker, rng)];
+  const defTypes = defender.types.length ? defender.types : ['normal'];
+  let best = moves[0]!;
+  let bestScore = -Infinity;
+  for (const m of moves) {
+    const mult = typeMultiplier(m.type, defTypes);
+    const score = mult * 1000 + m.power + rng() * 10;
+    if (score > bestScore) {
+      bestScore = score;
+      best = m;
+    }
+  }
+  return { name: best.name, category: best.category, type: best.type, power: best.power };
+}
+
+/** One attacker strikes the defender. Pure: neither fighter is mutated. */
+export interface ExchangeResult {
+  event: BattleEvent;
+  damage: number;
+  fainted: boolean;
+}
+
+export function resolveExchange(
+  attacker: Fighter,
+  defender: Fighter,
+  move: Move,
+  actor: Side,
+  rng: Rng,
+): ExchangeResult {
+  const defStat = move.category === 'physical' ? defender.defense : defender.spDef;
+  const defTypes = defender.types.length ? defender.types : ['normal'];
+  const mul = typeMultiplier(move.type, defTypes);
+  // STAB: same-type attack bonus — an attacker hitting with its own type
+  // deals 20% more damage (the classic Pokémon mechanic).
+  const stab = attacker.types.includes(move.type) ? 1.2 : 1;
+  const variance = 0.85 + rng() * 0.3;
+  const base = 10 * (move.power / Math.max(1, defStat)) * variance * mul * stab;
+  const damage = Math.max(1, Math.round(base));
+  const fainted = defender.hp - damage <= 0;
+
+  const effectiveness =
+    mul <= 0
+      ? 'no effect'
+      : mul >= 2
+        ? 'super effective!'
+        : mul <= 0.5
+          ? 'not very effective...'
+          : 'hit';
+
+  return {
+    event: {
+      text: `${attacker.name} used ${move.name} — ${effectiveness}`,
+      damage,
+      from: actor,
+      to: actor === 'player' ? 'rival' : 'player',
+      ko: fainted,
+      type: move.type,
+      effectiveness: mul,
+    },
+    damage,
+    fainted,
   };
 }
 
@@ -133,35 +204,10 @@ function exchange(
   rng: Rng,
 ): boolean {
   const move = chooseMove(attacker, defender, rng);
-  const defStat = move.category === 'physical' ? defender.defense : defender.spDef;
-  const defTypes = defender.types.length ? defender.types : ['normal'];
-  const mul = typeMultiplier(move.type, defTypes);
-  const variance = 0.85 + rng() * 0.3;
-  const base = 10 * (move.power / Math.max(1, defStat)) * variance * mul;
-  const damage = Math.max(1, Math.round(base));
-
-  defender.hp = Math.max(0, defender.hp - damage);
-
-  const effectiveness =
-    mul <= 0
-      ? 'no effect'
-      : mul >= 2
-        ? 'super effective!'
-        : mul <= 0.5
-          ? 'not very effective...'
-          : 'hit';
-  const categoryLabel = move.category === 'special' ? 'special' : 'physical';
-
-  events.push({
-    text: `${attacker.name} used a ${categoryLabel} ${move.type} move — ${effectiveness}`,
-    damage,
-    from: actor,
-    to: actor === 'player' ? 'rival' : 'player',
-    ko: defender.hp === 0,
-    type: move.type,
-    effectiveness: mul,
-  });
-  return defender.hp === 0;
+  const res = resolveExchange(attacker, defender, move, actor, rng);
+  defender.hp = Math.max(0, defender.hp - res.damage);
+  events.push(res.event);
+  return res.fainted;
 }
 
 function faintEvent(f: Fighter): BattleEvent {

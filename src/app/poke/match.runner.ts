@@ -74,6 +74,13 @@ export class MatchRunner {
 
     const squad = this.#game.squad();
     await this.#poke.ensureInCache([...squad, ...rivalNames]);
+    // Real move details drive the sim — resolve them (best-effort; the sim
+    // falls back to generic attacks when a move fetch fails).
+    try {
+      await this.#poke.ensureMoves([...squad, ...rivalNames]);
+    } catch {
+      /* move warmup is best-effort */
+    }
 
     const playerTeam = this.spawn(squad, this.#game.tier() + 1, false);
     const level = rivalLevel ?? this.#game.tier() + 3;
@@ -89,6 +96,12 @@ export class MatchRunner {
     );
     this.result.set(res);
     this.#_busy.set(false);
+    // Fighters earn a personal XP boost for showing up (on top of squad XP).
+    if (res.winner === 'player') {
+      for (const f of playerTeam) {
+        this.#game.grantXp(f.name, 8 + this.#game.tier() * 2);
+      }
+    }
     return res;
   }
 
@@ -104,7 +117,8 @@ export class MatchRunner {
     if (res.winner === 'player') this.#game.promote();
   }
 
-  private spawn(names: string[], level: number, isRival: boolean): ArenaFighter[] {
+  /** Build battle-ready teams for the given names (public for the manual mode). */
+  spawn(names: string[], level: number, isRival: boolean): ArenaFighter[] {
     return names
       .map((name): ArenaFighter | null => {
         const detail = this.#poke.pokeByName(name);
@@ -126,6 +140,7 @@ export class MatchRunner {
               speed: detail.stats.speed,
             },
             level + ownedLevel,
+            this.#poke.movesFor(name),
           ),
         };
       })

@@ -266,13 +266,31 @@ export class Game {
     return this.collection().get(name);
   }
 
-  add(name: string, level = 1) {
+  add(name: string, level = 1, shiny = false) {
     this.#_collection.update((map) => {
       const next = new Map(map);
-      next.set(name, { name, level, xp: 0 });
+      next.set(name, { name, level, xp: 0, shiny });
       return next;
     });
     this.persist();
+  }
+
+  /**
+   * Evolve an owned pokémon into `to`: the entry keeps its level, XP and
+   * fielded slot, only the species name changes.
+   */
+  evolve(from: string, to: string): boolean {
+    const owned = this.collection().get(from);
+    if (!owned) return false;
+    this.#_collection.update((map) => {
+      const next = new Map(map);
+      next.delete(from);
+      next.set(to, { ...owned, name: to });
+      return next;
+    });
+    this.#_squad.update((s) => s.map((n) => (n === from ? to : n)));
+    this.persist();
+    return true;
   }
 
   addLevel(name: string, levels = 1) {

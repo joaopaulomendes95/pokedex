@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -42,6 +42,19 @@ export class DetailPanel {
     const name = this.data.selected()?.name;
     return name ? (this.game.own(name) ?? null) : null;
   });
+
+  /** True until the artwork fails to load (falls back to the banner gradient). */
+  readonly artOk = signal(true);
+
+  constructor() {
+    effect(
+      () => {
+        this.data.selected()?.name;
+        this.artOk.set(true);
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   /** Banked level-ups waiting to be clicked. */
   readonly pending = computed<number>(() => {

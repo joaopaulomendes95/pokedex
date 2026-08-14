@@ -14,6 +14,8 @@ function detail(name: string): PokeDetail {
     spriteUrl: '',
     artworkUrl: '',
     baseExperience: 64,
+    moves: [],
+    abilities: [],
   };
 }
 
@@ -23,6 +25,8 @@ function stubPoke(names: string[]): PokeData {
     pokeByName: (n: string) => cache.get(n) ?? null,
     spriteUrlOrEmpty: () => '',
     ensureInCache: async () => {},
+    ensureMoves: async () => {},
+    movesFor: () => [],
   } as unknown as PokeData;
 }
 

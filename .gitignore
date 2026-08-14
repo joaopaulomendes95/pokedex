@@ -52,3 +52,6 @@ src/app/shared/openapi
 
 # opencode session plans
 .opencode/
+
+# ai stuff
+.ralph/

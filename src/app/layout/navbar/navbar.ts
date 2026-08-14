@@ -4,7 +4,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
+import { BrowserStorage } from '@core/services/storage';
 import { ShopDialog } from '@poke/features/shared/shop-dialog/shop-dialog';
+
+/** localStorage key for the navbar expanded/collapsed preference. */
+const NAVBAR_KEY = 'poke-navbar-expanded';
+
 import {
   UiState,
   TAB_SQUAD,
@@ -35,11 +40,19 @@ export class Navbar {
   public readonly game = inject(Game);
   #theme = inject(Theme);
   #dialog = inject(MatDialog);
+  #storage = inject(BrowserStorage);
 
-  readonly expanded = signal(false);
+  /** Navbar starts expanded; the toggle collapses it to hover-expand mode. */
+  readonly expanded = signal(this.#storage.get(NAVBAR_KEY) !== 'collapsed');
   readonly hovered = signal(false);
 
   readonly isOpen = computed(() => this.expanded() || this.hovered());
+
+  /** Collapse/expand; preference persists across sessions. */
+  toggle() {
+    this.expanded.update((v) => !v);
+    this.#storage.set(NAVBAR_KEY, this.expanded() ? 'expanded' : 'collapsed');
+  }
 
   readonly navItems: NavItem[] = [
     { id: TAB_SQUAD, label: 'Squad', icon: 'groups' },
@@ -68,10 +81,6 @@ export class Navbar {
 
   onMouseLeave() {
     this.hovered.set(false);
-  }
-
-  toggle() {
-    this.expanded.update((v) => !v);
   }
 
   toggleTheme() {

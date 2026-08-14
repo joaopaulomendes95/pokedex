@@ -2,7 +2,6 @@ import { Component, computed, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { CommonModule } from '@angular/common';
-import { GenerationFilter } from '@poke/generation-filter';
 import { PokeData } from '@poke/poke-data';
 import { Game } from '@poke/game';
 import {
@@ -49,7 +48,6 @@ export class PokeHub {
 
   readonly data = inject(PokeData);
   readonly game = inject(Game);
-  readonly genFilter = inject(GenerationFilter);
 
   /** Named tab indexes for the template's @switch. */
   readonly tabs = {

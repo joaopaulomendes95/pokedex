@@ -11,6 +11,11 @@
       </button>
     }
 
+    <p class="dnd-hint">
+      Drag collection cards into the squad bar to field them — drop on a specific slot to replace or
+      reorder it.
+    </p>
+
     <div
       class="fielded"
       cdkDropList
@@ -73,9 +78,10 @@
           (cdkDropListDropped)="onDrop($event)"
           [cdkDropListConnectedTo]="['squad-drop']"
         >
-          @for (row of team(); track row.owned.name) {
+          @for (row of team(); track row.owned.name; let i = $index) {
             <mat-card
-              class="card"
+              class="card anim-fade-in-up"
+              [style.--i]="i % 12"
               [class.fielded]="row.isFielded"
               [class.selected]="data.selected()?.name === row.owned.name"
               cdkDrag
@@ -92,6 +98,9 @@
               } @else {
                 <div class="sprite-placeholder"></div>
               }
+              @if (row.owned.shiny) {
+                <span class="shiny-badge" title="Shiny">✨</span>
+              }
               <mat-card-content>
                 <p class="name">{{ row.owned.name }}</p>
                 <p class="meta">Lv {{ row.owned.level }}</p>
@@ -105,6 +114,17 @@
                 <div class="xp-text">{{ row.xpLabel }}</div>
                 @if (row.pending > 0) {
                   <p class="pending">Ready: Level up!</p>
+                }
+                @if (row.evolvesTo; as to) {
+                  <button
+                    mat-flat-button
+                    color="accent"
+                    class="evolve-btn"
+                    (click)="evolve(row.owned.name); $event.stopPropagation()"
+                  >
+                    <mat-icon>auto_awesome</mat-icon>
+                    Evolve → {{ to }}
+                  </button>
                 }
                 @if (row.scaledStats; as s) {
                   <p class="stats-mini">

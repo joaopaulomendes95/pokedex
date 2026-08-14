@@ -964,3 +964,201 @@
   pointer-events: auto;
   z-index: 1100;
 }
+
+// ---- Motion utilities (design-system entrance + hover language) -------
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim-fade-in-up {
+  animation: fade-in-up 0.35s ease both;
+  // Set --i (e.g. `[style.--i]="$index"`) to stagger a grid of items.
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+.hover-lift {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+// Respect OS-level reduced-motion: kill the new entrances/hovers.
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-in-up,
+  .hover-lift,
+  .anim-catch-pop,
+  .anim-vs-pulse {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@keyframes region-art-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes catch-pop {
+  0% {
+    transform: scale(0.2) rotate(-20deg);
+  }
+  60% {
+    transform: scale(1.4) rotate(8deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+// ---- Arena manual-battle panel (kept global to stay under the component
+// SCSS budget; class names are unique to the arena panel) -----------------
+.manual-panel {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.02);
+
+  .manual-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    .manual-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+  }
+
+  .manual-stage {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    .vs {
+      font-weight: 800;
+      opacity: 0.5;
+      font-size: 1.2rem;
+    }
+
+    .manual-fighter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      img {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+      }
+      .mf-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        .mf-name {
+          font-weight: 700;
+          font-size: 0.8rem;
+          text-transform: capitalize;
+          small {
+            opacity: 0.6;
+            font-weight: 500;
+          }
+        }
+        .hp-bar {
+          height: 8px;
+          border-radius: 999px;
+          background: var(--color-desat-90);
+          overflow: hidden;
+          .hp-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: var(--color-green);
+            transition: width 0.3s ease;
+            &.rival {
+              background: var(--color-red);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .manual-moves {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 6px;
+    margin-bottom: 10px;
+    .move-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+      padding: 6px 8px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      background: var(--mat-sys-surface);
+      cursor: pointer;
+      transition:
+        transform 0.12s ease,
+        border-color 0.12s ease;
+      &:hover {
+        transform: translateY(-1px);
+        border-color: var(--color-main-50);
+      }
+      .move-name {
+        font-weight: 700;
+        font-size: 0.72rem;
+        text-transform: capitalize;
+      }
+      .move-meta {
+        font-size: 0.6rem;
+        opacity: 0.6;
+        text-transform: capitalize;
+      }
+    }
+  }
+
+  .manual-winner {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+    &.win {
+      background: #e8f5e9;
+      color: var(--color-green);
+      border: 1px solid var(--color-green-60);
+    }
+    &.loss {
+      background: #fdeaea;
+      color: var(--color-red);
+      border: 1px solid var(--color-red-60);
+    }
+  }
+
+  .hint {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin: 6px 0;
+  }
+}

@@ -2,10 +2,16 @@
   <mat-spinner diameter="28"></mat-spinner>
 } @else if (data.detail(); as d) {
   <mat-card class="detail">
-    <img mat-card-image [src]="d.artworkUrl" alt="" />
+    <div class="art-banner">
+      <span class="id-tag">#{{ d.id }}</span>
+      <img [src]="d.artworkUrl" alt="" (error)="artOk.set(false)" />
+      @if (owned()?.shiny) {
+        <span class="shiny-badge" title="Shiny">✨</span>
+      }
+    </div>
     <mat-card-content>
       <h3>
-        {{ d.name }} <span class="id">#{{ d.id }}</span>
+        {{ d.name }}
       </h3>
       <div class="types">
         @for (t of d.types; track t) {

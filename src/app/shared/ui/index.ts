@@ -1,3 +1,5 @@
+export { CustomSpinner } from '@shared/ui/custom-spinner/custom-spinner';
+export { BattleLog, type BattleLogRow } from '@shared/ui/battle-log/battle-log';
 export { CustomChip, type CustomChipColor } from '@shared/ui/custom-chip/custom-chip';
 export {
   KpiBlock,

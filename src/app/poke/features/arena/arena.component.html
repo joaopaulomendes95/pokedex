@@ -78,21 +78,7 @@
                 </p>
               }
             </div>
-            <div class="battle-log">
-              @for (ev of res.events; track $index) {
-                <div
-                  class="log-entry"
-                  [class.ko]="ev.ko"
-                  [class.player]="ev.from === 'player'"
-                  [class.rival]="ev.from === 'rival'"
-                >
-                  <span class="log-text">{{ ev.text }}</span>
-                  @if (ev.damage > 0) {
-                    <span class="damage">{{ ev.damage }}</span>
-                  }
-                </div>
-              }
-            </div>
+            <app-battle-log [events]="res.events" />
           } @else {
             <div class="result-empty">Pick a fight to see the result here.</div>
           }
@@ -124,6 +110,15 @@
               <mat-icon>fitness_center</mat-icon>
               Fight ({{ quickCost }}⚡)
             </button>
+            <button
+              mat-stroked-button
+              (click)="startManual()"
+              [disabled]="!canBattle() || manual.active() || runner.busy()"
+              [matTooltip]="'Play turn-by-turn: pick a move each round'"
+            >
+              <mat-icon>sports_martial_arts</mat-icon>
+              Manual battle
+            </button>
           } @else {
             <button mat-raised-button color="primary" (click)="runner.collect()">
               <mat-icon>savings</mat-icon>
@@ -135,6 +130,74 @@
             </button>
           }
         </div>
+
+        @if (manual.active()) {
+          <div class="manual-panel">
+            <div class="manual-head">
+              <span class="manual-title">Manual battle — round {{ manual.round() }}</span>
+              <button mat-stroked-button (click)="manual.quit()">Flee</button>
+            </div>
+
+            @if (manual.winner(); as w) {
+              <div class="manual-winner" [class.win]="w === 'player'" [class.loss]="w === 'rival'">
+                {{
+                  w === 'player'
+                    ? '🏆 You won the manual battle!'
+                    : 'Your squad lost… train harder!'
+                }}
+              </div>
+            } @else {
+              <div class="manual-stage">
+                <div class="manual-side">
+                  @if (manual.playerFighter(); as pf) {
+                    <div class="manual-fighter">
+                      <img [src]="data.spriteUrlOrEmpty(pf.name)" alt="" />
+                      <div class="mf-info">
+                        <span class="mf-name"
+                          >{{ pf.name }} <small>Lv {{ pf.level }}</small></span
+                        >
+                        <div class="hp-bar">
+                          <div class="hp-fill" [style.width.%]="hpPct(pf)"></div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <span class="vs">VS</span>
+                <div class="manual-side">
+                  @if (manual.rivalFighter(); as rf) {
+                    <div class="manual-fighter">
+                      <img [src]="data.spriteUrlOrEmpty(rf.name)" alt="" />
+                      <div class="mf-info">
+                        <span class="mf-name"
+                          >{{ rf.name }} <small>Lv {{ rf.level }}</small></span
+                        >
+                        <div class="hp-bar">
+                          <div class="hp-fill rival" [style.width.%]="hpPct(rf)"></div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              @if (manual.canAct()) {
+                <div class="manual-moves">
+                  @for (move of manual.playerFighter()?.moves ?? []; track move.name) {
+                    <button class="move-btn" (click)="manual.playRound(move)">
+                      <span class="move-name">{{ move.name }}</span>
+                      <span class="move-meta">{{ move.type }} · {{ move.category }}</span>
+                    </button>
+                  }
+                </div>
+              } @else {
+                <p class="hint">The battle is settled — fight another round or flee.</p>
+              }
+
+              <app-battle-log [events]="manual.log()" />
+            }
+          </div>
+        }
       </mat-card-content>
     </mat-card>
 

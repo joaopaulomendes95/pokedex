@@ -1,19 +1,20 @@
 import { computed, effect, inject, linkedSignal, signal, Service } from '@angular/core';
-import { LocationArea, PokeDetail, PokeId, PokeLocation } from '@poke/poke.model';
+import { LocationArea, PokeDetail, PokeId, PokeLocation, FighterMove } from '@poke/poke.model';
 import { GenerationFilter } from '@poke/generation-filter';
 import { maxIdForGen } from '@poke/generation';
 import type { PokemonListParams } from '@shared/openapi/poke-api/model/pokemonListParams';
 import {
   pokemonListResource,
   pokemonRetrieveResource,
+  pokemonSpeciesRetrieveResource,
+  abilityRetrieveResource,
 } from '@shared/openapi/poke-api/pokemon/pokemon.service';
+import { moveRetrieveResource } from '@shared/openapi/poke-api/moves/moves.service';
+import { evolutionChainRetrieveResource } from '@shared/openapi/poke-api/evolution/evolution.service';
 import { locationAreaRetrieveResource } from '@shared/openapi/poke-api/location/location.service';
 
 /** Default dex page size. */
 const DEFAULT_DEX_PAGE_SIZE = 30;
-
-// PokeAPI base — no key, CORS-open, used over HTTPS.
-const BASE_URL = 'https://pokeapi.co/api/v2';
 
 /**
  * Player-facing data service, powered by the Orval-generated PokeAPI client.
@@ -106,6 +107,56 @@ export class PokeData {
   /** name → real location-areas where the species was seen while exploring. */
   #discoveredHabitats = new Map<string, PokeLocation[]>();
 
+  /** The move currently being fetched by the derived move resource. */
+  #_moveName = signal('');
+
+  #moveResource = moveRetrieveResource(this.#_moveName, {
+    request: (request) =>
+      this.shouldFetchMove() ? request : (undefined as unknown as typeof request),
+  });
+
+  /** name → real move (type/category/power) from `/move/:name`. */
+  #moveCache = new Map<string, FighterMove>();
+
+  /** The species currently being fetched for its dex entry. */
+  #_speciesName = signal('');
+
+  #speciesResource = pokemonSpeciesRetrieveResource(this.#_speciesName, {
+    request: (request) =>
+      this.shouldFetchSpecies() ? request : (undefined as unknown as typeof request),
+  });
+
+  /** name → English Pokédex entry (flavor text) from `/pokemon-species/:name`. */
+  #speciesCache = new Map<string, string>();
+
+  /** The ability currently being fetched for its effect text. */
+  #_abilityName = signal('');
+
+  #abilityResource = abilityRetrieveResource(this.#_abilityName, {
+    request: (request) =>
+      this.#_abilityName() ? request : (undefined as unknown as typeof request),
+  });
+
+  /** ability name → English short effect text from `/ability/:name`. */
+  #abilityCache = new Map<string, string>();
+
+  /** species name → evolution-chain URL (harvested from the species body). */
+  #chainUrlByName = new Map<string, string>();
+
+  /** The chain currently being fetched. */
+  #_chainUrl = signal('');
+
+  #chainResource = evolutionChainRetrieveResource(this.#_chainUrl, {
+    request: (request) =>
+      this.shouldFetchChain() ? request : (undefined as unknown as typeof request),
+  });
+
+  /** chain URL → flattened evolution steps (dedupe for the request gate). */
+  #chainByUrl = new Map<string, EvoStep[]>();
+
+  /** species name → flattened evolution steps from `/evolution-chain/:id`. */
+  #chainCache = new Map<string, EvoStep[]>();
+
   /** The dex page the game reads from (current page only, filtered by generation). */
   readonly dex = computed<PokeId[]>(() => {
     const maxId = maxIdForGen(this.#genFilter.maxGen());
@@ -183,6 +234,22 @@ export class PokeData {
       this.exploring() ? resource : (undefined as unknown as typeof resource),
   });
 
+  /** The location-area currently being fetched for the wild-zone pool. */
+  #_poolAreaUrl = signal('');
+
+  #poolAreaId = computed(() => {
+    const m = this.#_poolAreaUrl().match(/(\d+)\/?$/);
+    return m ? Number(m[1]) : 0;
+  });
+
+  #poolResource = locationAreaRetrieveResource(this.#poolAreaId, {
+    request: (request) =>
+      this.#_poolAreaUrl() ? request : (undefined as unknown as typeof request),
+  });
+
+  /** url → parsed location-area (all fetched areas, explore + pool). */
+  #areaDataCache = new Map<string, LocationArea>();
+
   readonly exploringArea = computed(() => this.exploring());
 
   /** Encounters in the current area, filtered by generation. */
@@ -251,6 +318,47 @@ export class PokeData {
         this.#nameToId.set(d.name, d.id);
       }
     });
+    // Harvest every fetched move into memory (guarded against stale values).
+    effect(() => {
+      const raw = this.#moveResource.value();
+      const name = this.#_moveName();
+      if (raw && name && name === this.#_moveName()) {
+        this.#moveCache.set(name, parseMove(raw, name));
+      }
+    });
+    // Harvest every fetched species entry (guarded against stale values).
+    effect(() => {
+      const raw = this.#speciesResource.value();
+      const name = this.#_speciesName();
+      if (raw && name && name === this.#_speciesName()) {
+        const flavor = parseFlavor(raw);
+        if (flavor) this.#speciesCache.set(name, flavor);
+        const chainUrl = parseChainUrl(raw);
+        if (chainUrl) this.#chainUrlByName.set(name, chainUrl);
+      }
+    });
+    // Harvest every fetched ability (guarded against stale values).
+    effect(() => {
+      const raw = this.#abilityResource.value();
+      const name = this.#_abilityName();
+      if (raw && name && name === this.#_abilityName()) {
+        const effect = parseAbilityEffect(raw);
+        if (effect) this.#abilityCache.set(name, effect);
+      }
+    });
+    // Harvest every fetched evolution chain into memory.
+    effect(() => {
+      const raw = this.#chainResource.value();
+      const url = this.#_chainUrl();
+      if (raw && url && url === this.#_chainUrl()) {
+        const steps = parseChain(raw);
+        this.#chainByUrl.set(url, steps);
+        // Map the flattened steps back to every species mentioned in the chain.
+        for (const species of speciesInChain(raw)) {
+          this.#chainCache.set(species, steps);
+        }
+      }
+    });
     // Also harvest name→id from area encounters when explored, and remember
     // which real location-areas each species was encountered in.
     effect(() => {
@@ -270,6 +378,14 @@ export class PokeData {
         }
       }
     });
+    // Harvest every zone-pool area fetch into the shared area cache.
+    effect(() => {
+      const raw = this.#poolResource.value();
+      const url = this.#_poolAreaUrl();
+      if (raw && url && url === this.#_poolAreaUrl()) {
+        this.#areaDataCache.set(url, parseArea(raw));
+      }
+    });
   }
   select(entry: PokeId) {
     this.#_selected.set(entry);
@@ -285,9 +401,62 @@ export class PokeData {
     this.#_selected.set(this.selected()?.name === name ? this.selected()! : { name, url: '' });
   }
 
+  /**
+   * Fetches a zone's areas and returns a shuffled, deduped wild pool of
+   * species (era-capped). Details are warmed so sprites + fights are instant.
+   */
+  async zonePool(areaUrls: string[], genCap: number, poolSize = 8): Promise<PokeId[]> {
+    for (const url of areaUrls) {
+      if (this.#areaDataCache.has(url)) continue;
+      this.#_poolAreaUrl.set(url);
+      await waitFor(() => this.#areaDataCache.has(url), 5000);
+    }
+    const areas = areaUrls
+      .map((url) => this.#areaDataCache.get(url))
+      .filter((a): a is LocationArea => Boolean(a));
+    const pool = buildZonePool(areas, genCap).slice(0, poolSize);
+    void this.ensureInCache(pool.map((p) => p.name)).catch(() => undefined);
+    return pool;
+  }
+
   /** Reads a cached detail (no request if it hasn't been fetched yet). */
   pokeByName(name: string): PokeDetail | null {
     return this.#detailCache.get(name) ?? null;
+  }
+
+  /** Reads a cached real move (no request if it hasn't been fetched yet). */
+  moveByName(name: string): FighterMove | null {
+    return this.#moveCache.get(name) ?? null;
+  }
+
+  /**
+   * The battle moveset for a pokémon: resolves its cached detail's real
+   * moves against the move cache. Empty until both are warmed.
+   */
+  movesFor(name: string): FighterMove[] {
+    const detail = this.#detailCache.get(name);
+    if (!detail) return [];
+    const out: FighterMove[] = [];
+    for (const m of detail.moves) {
+      const move = this.#moveCache.get(m.name);
+      if (move) out.push(move);
+    }
+    return out;
+  }
+
+  /** The English Pokédex entry for a species (cached, no request if absent). */
+  speciesFlavor(name: string): string | null {
+    return this.#speciesCache.get(name) ?? null;
+  }
+
+  /** English short effect text for an ability (cached, no request if absent). */
+  abilityEffect(name: string): string | null {
+    return this.#abilityCache.get(name) ?? null;
+  }
+
+  /** Flattened evolution steps for a species (cached, empty until warmed). */
+  evolutionFor(name: string): EvoStep[] {
+    return this.#chainCache.get(name) ?? [];
   }
 
   /** Real location-areas (with URLs) where the player has seen this species. */
@@ -320,6 +489,15 @@ export class PokeData {
     return this.spriteUrl(name);
   }
 
+  /** Shiny sprite for a name (works once the dex ID is known). */
+  shinySpriteUrl(name: string): string {
+    const id = this.#nameToId.get(name) ?? this.#detailCache.get(name)?.id ?? 0;
+    if (id) {
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png`;
+    }
+    return this.spriteUrlOrEmpty(name);
+  }
+
   retryDex() {
     this.#dexResource.reload();
   }
@@ -346,10 +524,77 @@ export class PokeData {
     }
   }
 
+  /**
+   * Guarantees the real move details for every move in the given pokémon's
+   * movesets are cached (details must already be in memory — call
+   * `ensureInCache` first).
+   */
+  async ensureMoves(pokeNames: string[], timeoutMs = 5000): Promise<void> {
+    for (const pokeName of pokeNames) {
+      const detail = this.#detailCache.get(pokeName);
+      if (!detail) continue;
+      for (const m of detail.moves) {
+        if (this.#moveCache.has(m.name)) continue;
+        this.#_moveName.set(m.name);
+        await waitFor(() => this.#moveCache.has(m.name), timeoutMs);
+      }
+    }
+  }
+
+  /** Guarantees the dex entry for a list of species names is cached. */
+  async ensureSpecies(pokeNames: string[], timeoutMs = 5000): Promise<void> {
+    for (const name of pokeNames) {
+      if (this.#speciesCache.has(name)) continue;
+      this.#_speciesName.set(name);
+      await waitFor(() => this.#speciesCache.has(name), timeoutMs);
+    }
+  }
+
+  /** Guarantees the effect text for a list of ability names is cached. */
+  async ensureAbilities(abilityNames: string[], timeoutMs = 5000): Promise<void> {
+    for (const name of abilityNames) {
+      if (this.#abilityCache.has(name)) continue;
+      this.#_abilityName.set(name);
+      await waitFor(() => this.#abilityCache.has(name), timeoutMs);
+    }
+  }
+
+  /**
+   * Guarantees the evolution chain for each species is flattened into cache
+   * (species bodies must already be fetched — call `ensureSpecies` first).
+   */
+  async ensureChainFor(pokeNames: string[], timeoutMs = 5000): Promise<void> {
+    for (const name of pokeNames) {
+      if (this.#chainCache.has(name)) continue;
+      const url = this.#chainUrlByName.get(name);
+      if (!url) continue;
+      this.#_chainUrl.set(url);
+      await waitFor(() => this.#chainByUrl.has(url), timeoutMs);
+    }
+  }
+
   /** Cannot fetch when nothing is selected or the entry is already cached. */
   private shouldFetchDetail(): boolean {
     const sel = this.selected();
     return Boolean(sel && !this.#detailCache.has(sel.name));
+  }
+
+  /** Cannot fetch when no move is requested or it is already cached. */
+  private shouldFetchMove(): boolean {
+    const name = this.#_moveName();
+    return Boolean(name && !this.#moveCache.has(name));
+  }
+
+  /** Cannot fetch when no species is requested or its dex entry is cached. */
+  private shouldFetchSpecies(): boolean {
+    const name = this.#_speciesName();
+    return Boolean(name && !this.#speciesCache.has(name));
+  }
+
+  /** Cannot fetch when no chain is requested or it is already flattened. */
+  private shouldFetchChain(): boolean {
+    const url = this.#_chainUrl();
+    return Boolean(url && !this.#chainByUrl.has(url));
   }
 }
 
@@ -387,7 +632,27 @@ interface RawDetail {
   stats?: RawStatSlot[];
   sprites?: RawSprites;
   base_experience?: number;
+  moves?: RawMoveSlot[];
+  abilities?: RawAbilitySlot[];
 }
+
+interface RawAbilitySlot {
+  ability?: { name?: string } | null;
+  is_hidden?: boolean;
+}
+
+interface RawMoveSlot {
+  move?: { name?: string } | null;
+  version_group_details?: RawMoveVersionDetail[];
+}
+
+interface RawMoveVersionDetail {
+  level_learned_at?: number;
+  move_learn_method?: { name?: string } | null;
+}
+
+/** Max real moves kept per pokémon (drives the battle sim + moves section). */
+const MOVESET_CAP = 8;
 interface RawEncounter {
   pokemon?: { name?: string; url?: string };
 }
@@ -414,12 +679,186 @@ export function parseDetail(raw: unknown): PokeDetail {
     spriteUrl: r.sprites?.front_default ?? '',
     artworkUrl: r.sprites?.other?.['official-artwork']?.front_default ?? '',
     baseExperience: r.base_experience ?? 0,
+    moves: moveset(r),
+    abilities: (r.abilities ?? [])
+      .map((a) => ({ name: a.ability?.name ?? '', isHidden: a.is_hidden === true }))
+      .filter((a) => a.name.length > 0),
   };
+}
+
+/**
+ * Real level-up moveset from the raw `/pokemon/:name` body: newest version
+ * group only, level-up learn method, sorted by level, capped at MOVESET_CAP.
+ */
+export function moveset(raw: unknown): { name: string; level: number }[] {
+  const r = raw as RawDetail;
+  const out: { name: string; level: number }[] = [];
+  for (const slot of r.moves ?? []) {
+    const name = slot.move?.name ?? '';
+    if (!name) continue;
+    // The API lists version groups oldest → newest; the last one is current.
+    const newest = slot.version_group_details?.at(-1);
+    if (!newest || (newest.move_learn_method?.name ?? '') !== 'level-up') continue;
+    const level = newest.level_learned_at ?? 0;
+    if (level <= 0) continue;
+    out.push({ name, level });
+  }
+  out.sort((a, b) => a.level - b.level);
+  return out.slice(0, MOVESET_CAP);
 }
 
 function stat(raw: RawDetail, name: string): number {
   const hit = (raw.stats ?? []).find((s) => s.stat?.name === name);
   return hit?.base_stat ?? 0;
+}
+
+interface RawMove {
+  name?: string;
+  power?: number | null;
+  damage_class?: { name?: string } | null;
+  type?: { name?: string } | null;
+}
+
+/**
+ * Exported for unit tests — maps a raw `/move/:name` body to our FighterMove.
+ * Status moves get a token power so they stay usable but never dominate.
+ */
+export function parseMove(raw: unknown, fallbackName: string): FighterMove {
+  const r = raw as RawMove;
+  const category = r.damage_class?.name ?? 'physical';
+  return {
+    name: r.name ?? fallbackName,
+    type: r.type?.name ?? 'normal',
+    category: category === 'special' ? 'special' : 'physical',
+    power: Math.max(1, r.power ?? 25),
+  };
+}
+
+interface RawAbilityEffect {
+  effect_entries?: {
+    effect?: string;
+    short_effect?: string;
+    language?: { name?: string } | null;
+  }[];
+}
+
+/**
+ * Exported for unit tests — English short effect text from a raw
+ * `/ability/:name` body (falls back to the full effect, then null).
+ */
+export function parseAbilityEffect(raw: unknown): string | null {
+  const r = raw as RawAbilityEffect;
+  const entry = (r.effect_entries ?? []).find((e) => e.language?.name === 'en');
+  const text = entry?.short_effect || entry?.effect;
+  if (!text) return null;
+  return text
+    .replace(/\$effect_chance/g, 'chance')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+interface RawFlavorEntry {
+  flavor_text?: string;
+  language?: { name?: string } | null;
+}
+
+interface RawSpecies {
+  flavor_text_entries?: RawFlavorEntry[];
+}
+
+/**
+ * Exported for unit tests — picks the English Pokédex entry from a raw
+ * `/pokemon-species/:name` body (first EN entry; form-feed/newline cleaned).
+ */
+/**
+ * Exported for unit tests — picks the English Pokédex entry from a raw
+ * `/pokemon-species/:name` body (first EN entry; form-feed/newline cleaned).
+ */
+export function parseFlavor(raw: unknown): string | null {
+  const r = raw as RawSpecies;
+  const entry = (r.flavor_text_entries ?? []).find((e) => e.language?.name === 'en');
+  const text = entry?.flavor_text;
+  if (!text) return null;
+  return text
+    .replace(/[\f\n\r]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** One step of an evolution chain, human-readable. */
+export interface EvoStep {
+  /** The species that evolves. */
+  species: string;
+  /** The species it evolves into. */
+  to: string;
+  /** How: "level 16", "trade", "item: fire-stone", … */
+  trigger: string;
+}
+
+interface RawChainLink {
+  species?: { name?: string } | null;
+  evolution_details?: RawEvoDetail[];
+  evolves_to?: RawChainLink[];
+}
+
+interface RawEvoDetail {
+  min_level?: number | null;
+  trigger?: { name?: string } | null;
+  item?: { name?: string } | null;
+}
+
+interface RawChain {
+  chain?: RawChainLink;
+}
+
+/** Exported for unit tests — the species body's evolution-chain URL. */
+export function parseChainUrl(raw: unknown): string | null {
+  const r = raw as RawSpecies & { evolution_chain?: { url?: string } | null };
+  return r.evolution_chain?.url ?? null;
+}
+
+/** Human trigger label for one evolution detail. */
+function triggerLabel(detail: RawEvoDetail | undefined): string {
+  if (!detail) return 'evolution';
+  if (detail.min_level) return `level ${detail.min_level}`;
+  if (detail.item?.name) return `item: ${detail.item.name}`;
+  return detail.trigger?.name ?? 'evolution';
+}
+
+/**
+ * Exported for unit tests — flattens a raw `/evolution-chain/:id` body into
+ * one human-readable step per species → evolution edge.
+ */
+export function parseChain(raw: unknown): EvoStep[] {
+  const root = (raw as RawChain).chain;
+  const out: EvoStep[] = [];
+  const walk = (link: RawChainLink | undefined) => {
+    if (!link?.species?.name) return;
+    for (const next of link.evolves_to ?? []) {
+      const toName = next.species?.name;
+      if (!toName) continue;
+      out.push({
+        species: link.species!.name!,
+        to: toName,
+        trigger: triggerLabel(next.evolution_details?.[0]),
+      });
+      walk(next);
+    }
+  };
+  walk(root);
+  return out;
+}
+
+/** Exported for unit tests — every species name mentioned in a chain body. */
+export function speciesInChain(raw: unknown): string[] {
+  const names: string[] = [];
+  const walk = (link: RawChainLink | undefined) => {
+    if (!link?.species?.name) return;
+    names.push(link.species.name);
+    for (const next of link.evolves_to ?? []) walk(next);
+  };
+  walk((raw as RawChain).chain);
+  return names;
 }
 
 /** Exported for unit tests — maps a raw `/location-area` body to our type. */
@@ -431,4 +870,29 @@ export function parseArea(raw: unknown): LocationArea {
       pokemon: { name: enc.pokemon?.name ?? '', url: enc.pokemon?.url ?? '' },
     })),
   };
+}
+
+/**
+ * Exported for unit tests — builds a wild-zone pool from area encounter lists:
+ * dedupes by species, drops species beyond the era cap, shuffles.
+ */
+export function buildZonePool(areas: LocationArea[], genCap: number): PokeId[] {
+  const maxId = maxIdForGen(genCap);
+  const seen = new Set<string>();
+  const pool: PokeId[] = [];
+  for (const area of areas) {
+    for (const enc of area.pokemon_encounters) {
+      const name = enc.pokemon.name;
+      const id = Number(enc.pokemon.url.match(/\/(\d+)\/?$/)?.[1] ?? '0');
+      if (!name || seen.has(name) || id <= 0 || id > maxId) continue;
+      seen.add(name);
+      pool.push({ name, url: enc.pokemon.url });
+    }
+  }
+  // Fisher–Yates shuffle (not cryptographically relevant here).
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j]!, pool[i]!];
+  }
+  return pool;
 }

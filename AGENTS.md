@@ -43,8 +43,9 @@ component (`app.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
   `services/error-reporting/error-reporting.ts`, `models/*`.
 - **UI building blocks in `shared/ui/`**: `basic-view`,
   `kpi-block`, `custom-chip`, `progress-gauge`, `container-mark`,
-  `object-container`, `general-tile-list` (+ `GeneralListBase` engine), and
-  the dialog system (`AppDialog`, `ConfirmationDialog`,
+  `object-container`, `general-tile-list` (+ `GeneralListBase` engine),
+  `custom-spinner` (the bouncer loader), `battle-log` (battle narration
+  timeline), and the dialog system (`AppDialog`, `ConfirmationDialog`,
   `ResultDialog`, `DetailsDialog`,
   `DetailsSections`). Re-exported through `shared/ui/index.ts`.
 - **Layout** in `layout/`: `navbar` (hover-expand, theme + Shop buttons,
@@ -71,9 +72,23 @@ component (`app.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
   `selected` signal, cached by name), `spriteUrlOrEmpty(name)` (cached detail
   sprite, falling back to the dex-derived CDN URL), plus **dex pagination**:
   `dexPage()` signal with `nextDexPage()`, `prevDexPage()`, `dexTotal()`,
-  `dexMaxPage()`, `hasPrevPage()`, `hasNextPage()`. The live app needs the
-  network at runtime; there is **no local snapshot**. Clients are
-  Orval-generated from `tools/pokeapi.openapi.yml` into `shared/openapi/poke-api/`.
+  `dexMaxPage()`, `hasPrevPage()`, `hasNextPage()`. Three more generated
+  resources feed the game: `moveByName()`/`ensureMoves()` (real moves from
+  `/move/:name`, driving the battle sim), `speciesFlavor()`/`ensureSpecies()`
+  (English dex entry from `/pokemon-species/:name`) and
+  `evolutionFor()`/`ensureChainFor()` (flattened `/evolution-chain/:id`). All
+  fetches go through the Orval-generated `*Resource` functions (no hand-rolled
+  URLs); the live app needs the network at runtime; there is **no local
+  snapshot**. Clients are Orval-generated from `tools/pokeapi.openapi.yml`
+  into `shared/openapi/poke-api/`.
+
+- `poke/adventure-regions.ts` — the adventure **world map**: 13 curated
+  regions (all with real, verified `location-area` IDs) grouped into **5
+  macro-zones** (`WORLD_ZONES`: Kanto · Johto&Hoenn · Sinnoh&Unova ·
+  Kalos&Alola · Galar). Adventure flow is fight-to-catch: pick a zone →
+  "Go catch some" fetches a shuffled wild pool (`PokeData.zonePool`),
+  pick one and FIGHT it (Battle sim, 1v1 vs your strongest owned) — winning
+  gives a chance to throw a ball (catch + 1/64 shiny roll).
 
 - `poke/game.ts` is the state machine: `coins`, `collection`
   (name → `OwnedPoke`), `squad` (max 6), `wins`, `tier`. `tick()` (1s
@@ -82,8 +97,12 @@ component (`app.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
   energy. `award(winner)` pays coins + XP to the squad; `promote()` moves the
   ladder. **No auto-level**: XP banks up and a pokémon stays ready
   (`pendingLevels(name)`) until the player clicks `applyLevelUps(name)` (free,
-  click-to-level). Paid +1 levels go through `spend` + `addLevel`. Persisted
-  via `BrowserStorage` to `poke-league-save` with offline coins+XP on restore.
+  click-to-level). Paid +1 levels go through `spend` + `addLevel`. **Evolve**:
+  `evolve(from, to)` swaps the species while keeping level/XP and the fielded
+  slot (readiness comes from the evolution-chain cache). `add(name, level,
+shiny)` — catches roll a 1/64 shiny variant (`OwnedPoke.shiny`, ✨ badge +
+  shiny sprite). Persisted via `BrowserStorage` to `poke-league-save` with
+  offline coins+XP on restore.
 
   **Idle mechanics**: `incomePerSec` scales with collection size;
   `stats()` signal tracks career counters (`battles`, `wins`, `catches`,
@@ -106,12 +125,28 @@ component (`app.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
 - `poke/auto-battle.ts` — idle loop running quick fights every ~4s.
   `toggle()` starts/stops; inject into Arena for the UI button.
 
+- `poke/manual-battle.ts` — **player-controlled turn-by-turn battles** (the
+  "real Pokémon game" mode): each round the player picks one of their
+  pokémon's real moves, both sides strike by speed initiative, hp is applied
+  immutably. Reuses `resolveExchange` (the same pure damage formula + type
+  chart as the sim) and `chooseMove` for the rival AI. Arena pays out once
+  when a manual battle ends, plus a per-fighter XP boost.
+
 - `poke/battle.ts` — `simulate(player, rival, rng)` is a **pure**
-  turn-based sim (rng injected → deterministic, fully unit-tested). Type
-  multipliers live in `poke/type-chart.ts`. `MatchRunner`
+  turn-based sim (rng injected → deterministic, fully unit-tested). Fighters
+  carry a real moveset (`Fighter.moves`, from PokeAPI `/move/:name`);
+  `chooseMove` picks the best move vs the defender via the type chart;
+  `resolveExchange(attacker, defender, move, actor, rng)` is the shared pure
+  single-strike used by both the sim and manual battles. Type multipliers
+  live in `poke/type-chart.ts`. `MatchRunner`
   (`poke/match.runner.ts`) wraps it for the live arena: INSTANT result, a
   `summary()` (damage/knockouts/fainted per side) and a **one-shot `settled`
   guard** — `collect()` pays out at most once per match (no coin farming).
+  Winning fighters earn a personal XP boost on top of the squad award.
+
+- `poke/tournament.ts` — cups are **tier-gated** (`minTier`): Rookie →
+  Silver → Pro → Grand → Champion, with escalating rivals/prizes; at tier 4+
+  `generateInfiniteCups(tier)` produces an ever-harder Elite Series.
 
 - **Shop & Bag** (`poke/features/shared/shop-dialog/`): the single
   buy+use-items modal, opened from the navbar `storefront` button

@@ -4,6 +4,12 @@ export interface PokeId {
   url: string;
 }
 
+/** A real ability a species can have (from the detail body — no extra request). */
+export interface PokeAbility {
+  name: string;
+  isHidden: boolean;
+}
+
 /** Full detail from PokeAPI `/pokemon/:name` (what we render in the dex). */
 export interface PokeDetail {
   id: number;
@@ -14,6 +20,10 @@ export interface PokeDetail {
   artworkUrl: string;
   /** base experience from the API — drives catch difficulty. */
   baseExperience: number;
+  /** Real level-up moveset: name + level learned (newest version group, capped). */
+  moves: { name: string; level: number }[];
+  /** Real abilities, hidden flag included. */
+  abilities: PokeAbility[];
 }
 
 export interface PokeStats {
@@ -44,6 +54,16 @@ export interface OwnedPoke {
   name: string;
   level: number;
   xp: number;
+  /** Shiny variant (caught with a low roll — renders the shiny sprite). */
+  shiny?: boolean;
+}
+
+/** A real move a fighter can use in battle (from PokeAPI `/move/:name`). */
+export interface FighterMove {
+  name: string;
+  type: string;
+  category: 'physical' | 'special';
+  power: number;
 }
 
 /** A battle-ready fighter with scaled stats. */
@@ -58,6 +78,8 @@ export interface Fighter {
   spDef: number;
   speed: number;
   types: string[];
+  /** Real moves known by this fighter (drives the battle sim). */
+  moves: FighterMove[];
   /** Display level (used to show "Lv N" in the arena). Optional: sim ignores it. */
   level?: number;
 }

@@ -15,6 +15,8 @@ export interface Cup {
   prizePerBattle: number;
   /** Bonus for winning the whole cup. */
   finalPrize: number;
+  /** Lowest ladder tier that can enter this cup. */
+  minTier: number;
   /** Series number for infinite cups (0 = base cups). */
   series?: number;
 }
@@ -25,7 +27,7 @@ export const CUP_BATTLE_ENERGY = 15;
 /** Squad energy drained per quick-fight battle. */
 export const QUICK_BATTLE_ENERGY = 10;
 
-/** Base cups available from the start. */
+/** Base cups, unlocked as the ladder tier rises. */
 export const BASE_CUPS: Cup[] = [
   {
     id: 'rookie',
@@ -38,6 +40,20 @@ export const BASE_CUPS: Cup[] = [
     rivalTeamSize: 2,
     prizePerBattle: 15,
     finalPrize: 90,
+    minTier: 0,
+  },
+  {
+    id: 'silver',
+    name: 'Silver Cup',
+    tagline: 'Steady hands and a levelled roster.',
+    icon: 'workspace_premium',
+    entryFee: 100,
+    battles: 4,
+    rivalLevel: 6,
+    rivalTeamSize: 3,
+    prizePerBattle: 35,
+    finalPrize: 170,
+    minTier: 1,
   },
   {
     id: 'pro',
@@ -46,10 +62,24 @@ export const BASE_CUPS: Cup[] = [
     icon: 'emoji_events',
     entryFee: 180,
     battles: 4,
-    rivalLevel: 8,
+    rivalLevel: 9,
     rivalTeamSize: 3,
     prizePerBattle: 55,
     finalPrize: 260,
+    minTier: 2,
+  },
+  {
+    id: 'grand',
+    name: 'Grand Cup',
+    tagline: 'Near the top of the ladder — no room for mistakes.',
+    icon: 'shield',
+    entryFee: 300,
+    battles: 5,
+    rivalLevel: 11,
+    rivalTeamSize: 4,
+    prizePerBattle: 95,
+    finalPrize: 480,
+    minTier: 3,
   },
   {
     id: 'champion',
@@ -58,10 +88,11 @@ export const BASE_CUPS: Cup[] = [
     icon: 'military_tech',
     entryFee: 420,
     battles: 5,
-    rivalLevel: 13,
+    rivalLevel: 14,
     rivalTeamSize: 3,
     prizePerBattle: 140,
     finalPrize: 760,
+    minTier: 4,
   },
 ];
 
@@ -87,6 +118,7 @@ export function generateInfiniteCups(tier: number): Cup[] {
       rivalTeamSize: 3,
       prizePerBattle: Math.round(basePrizePerBattle * difficultyMultiplier),
       finalPrize: Math.round(baseFinalPrize * difficultyMultiplier),
+      minTier: 4,
       series,
     });
   }
@@ -96,7 +128,7 @@ export function generateInfiniteCups(tier: number): Cup[] {
 /** Get all available cups for a given tier. */
 export function getCupsForTier(tier: number): Cup[] {
   if (tier < 4) {
-    return BASE_CUPS;
+    return BASE_CUPS.filter((c) => c.minTier <= tier);
   }
   return generateInfiniteCups(tier);
 }

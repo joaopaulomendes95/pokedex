@@ -1,12 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CustomSpinner } from '@shared/ui';
 import { LoaderData } from '@core/models/loader.interface';
 
 @Component({
   selector: 'app-pop-loader',
-  imports: [MatProgressSpinnerModule, MatProgressBarModule],
+  imports: [CustomSpinner, MatProgressBarModule],
   templateUrl: './pop-loader.component.html',
   styleUrl: './pop-loader.component.scss',
 })

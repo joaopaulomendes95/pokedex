@@ -4,13 +4,17 @@
     headline="Search every creature, see where they live, and jump straight there to catch them."
     faIcon="dragon"
   >
-    <div class="gen-picker">
-      <span class="gen-label">Gen</span>
-      <span class="gen-value">{{ genFilter.maxGen() }}</span>
+    <div class="dex-toolbar">
+      <mat-slide-toggle [checked]="ownedOnly()" (change)="setOwnedOnly($event.checked)">
+        Owned only
+      </mat-slide-toggle>
+      <span class="dex-hint"
+        >Sort & type-filter via the list toolbar below · click a card to inspect</span
+      >
     </div>
 
     @if (data.dexLoading()) {
-      <mat-spinner diameter="32"></mat-spinner>
+      <app-custom-spinner />
     } @else if (data.dexError()) {
       <p class="error">
         Couldn't load the dex. <button mat-stroked-button (click)="data.retryDex()">Retry</button>
@@ -22,16 +26,21 @@
         [initialPageSize]="30"
         [pageSizeOptions]="[10, 30]"
         [showSearchInput]="true"
+        [showPagination]="false"
         [trackBy]="rowTrackKey"
         (searchChanged)="data.setSearchQuery($event)"
         (rowClick)="openDetail($event)"
-        [tileMinWidth]="180"
+        [tileMinWidth]="170"
       >
         @if (data.searchLoading()) {
           <p class="error">Searching the whole Pokédex…</p>
         }
-        <ng-template #tile let-row>
-          <div class="dex-tile" [class.owned]="row.owned">
+        <ng-template #tile let-row let-index="index">
+          <div
+            class="dex-tile anim-fade-in-up"
+            [style.--i]="(index ?? 0) % 20"
+            [class.owned]="row.owned"
+          >
             <img [src]="row.sprite" alt="" />
             <div class="dex-tile-name">{{ row.name }}</div>
             <div class="dex-tile-id">#{{ row.id }}</div>

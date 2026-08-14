@@ -41,6 +41,8 @@ export abstract class GeneralListBase<T extends Record<string, unknown>> {
 
   pageSizeOptions = input<number[]>([5, 10, 25, 100]);
   initialPageSize = input<number>(10);
+  /** Host-managed paging (e.g. the dex custom pager) hides the internal one. */
+  showPagination = input<boolean>(true);
 
   totalCount = input<number>(0);
   loadingMore = input<boolean>(false);

@@ -33,6 +33,8 @@ interface TeamRow {
   xpPct: number;
   xpLabel: string;
   scaledStats: ScaledStats | null;
+  /** Species this pokémon can evolve into right now (null = not ready). */
+  evolvesTo: string | null;
 }
 
 /** One of the six fixed squad slots (null = empty, drop here). */
@@ -77,18 +79,43 @@ export class SquadBuilder {
       const xpPct = Math.floor(this.game.xpPercent(owned.name));
       const xpNeed = Math.floor(this.game.xpNeedForLevel(owned.name));
       const xpCurrent = Math.floor(this.game.xpCurrent(owned.name));
+      const evolution = this.evolutionStep(owned.name, owned.level);
       out.push({
         owned,
         isFielded: this.game.squad().includes(owned.name),
-        sprite: this.data.spriteUrlOrEmpty(owned.name),
+        sprite: owned.shiny
+          ? this.data.shinySpriteUrl(owned.name)
+          : this.data.spriteUrlOrEmpty(owned.name),
         pending: this.game.pendingLevels(owned.name),
         xpPct,
         xpLabel: this.xpDisplay.mode() === 'pct' ? `${xpPct}%` : `${xpCurrent} / ${xpNeed} XP`,
         scaledStats: this.scaledStats(owned),
+        evolvesTo: evolution,
       });
     }
     return out;
   });
+
+  /** The first evolution step ready at (or below) the given level, if any. */
+  private evolutionStep(name: string, level: number): string | null {
+    const steps = this.data.evolutionFor(name);
+    const step = steps.find((s) => {
+      const m = s.trigger.match(/^level (\d+)$/);
+      return m ? level >= Number(m[1]) : false;
+    });
+    return step?.to ?? null;
+  }
+
+  /** Evolve an owned pokémon into its ready stage. */
+  evolve(name: string) {
+    const owned = this.game.own(name);
+    if (!owned) return;
+    const to = this.evolutionStep(name, owned.level);
+    if (!to) return;
+    if (this.game.evolve(name, to)) {
+      this.#notify.show(`🎉 ${name} evolved into ${to}!`);
+    }
+  }
 
   /** Fixed 6-slot squad bar (null when a slot is empty). */
   readonly slotEntries = computed<(SquadSlot | null)[]>(() =>
@@ -157,19 +184,37 @@ export class SquadBuilder {
     if (count) this.#notify.show(`${count} Pokémon levelled up!`);
   }
 
-  /** Handle drag-drop between squad slots and collection. */
+  /** Handle drag-drop between squad slots and collection (slot-aware). */
   onDrop(event: CdkDragDrop<string[]>) {
-    if (event.previousContainer === event.container) return;
-
     const name = event.item.data;
     if (event.container.id === 'squad-drop') {
-      // Dropping into squad: only if squad has space
-      if (this.game.squad().length >= SQUAD_MAX) return;
-      this.game.setSquad([...this.game.squad(), name]);
-    } else {
-      // Dropping back to collection: remove from squad
+      if (event.previousContainer.id === 'squad-drop') {
+        // Reorder within the squad bar.
+        this.reorderSquad(event.previousIndex, event.currentIndex);
+        return;
+      }
+      // From collection: insert at the target slot (replace when full).
+      const squad = this.game.squad();
+      const next = [...squad];
+      if (next.length >= SQUAD_MAX) {
+        next[event.currentIndex] = name;
+      } else {
+        next.splice(Math.min(event.currentIndex, next.length), 0, name);
+      }
+      this.game.setSquad(next);
+    } else if (event.previousContainer.id === 'squad-drop') {
+      // Dropping back to collection: remove from squad.
       this.game.setSquad(this.game.squad().filter((n) => n !== name));
     }
+  }
+
+  /** Move a squad member from one slot index to another. */
+  private reorderSquad(from: number, to: number) {
+    const squad = [...this.game.squad()];
+    const [moved] = squad.splice(from, 1);
+    if (moved === undefined) return;
+    squad.splice(Math.min(to, squad.length), 0, moved);
+    this.game.setSquad(squad);
   }
 
   /** Handle double-click on collection card. */
@@ -211,7 +256,11 @@ export class SquadBuilder {
     // Pre-fetch details for all owned pokemon so sprites always work.
     effect(() => {
       const names = this.team().map((t) => t.owned.name);
-      if (names.length) this.data.ensureInCache(names);
+      if (names.length) {
+        this.data.ensureInCache(names);
+        // Evolution readiness needs the species + chain warmed.
+        void this.data.ensureSpecies(names).then(() => void this.data.ensureChainFor(names));
+      }
     });
   }
 }

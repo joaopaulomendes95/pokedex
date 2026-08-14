@@ -94,7 +94,7 @@
     }
   </div>
 
-  @if (filteredData().length > initialPageSize()) {
+  @if (showPagination() && filteredData().length > initialPageSize()) {
     <mat-paginator
       [length]="filteredData().length"
       [pageSize]="initialPageSize()"

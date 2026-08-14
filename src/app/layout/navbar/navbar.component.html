@@ -14,6 +14,20 @@
       <div class="brand-text nav-text">Poké-Liga</div>
     </div>
 
+    <button
+      class="nav-item collapse-toggle"
+      (click)="toggle()"
+      [matTooltip]="expanded() ? 'Collapse navbar' : 'Expand navbar'"
+      [matTooltipPosition]="'right'"
+      [matTooltipDisabled]="isOpen()"
+      aria-label="Toggle navbar"
+    >
+      <span class="nav-item-icon">
+        <mat-icon>{{ expanded() ? 'chevron_left' : 'chevron_right' }}</mat-icon>
+      </span>
+      <span class="nav-text">{{ expanded() ? 'Collapse' : 'Expand' }}</span>
+    </button>
+
     <div class="nav-links">
       @for (item of navItems; track item.id) {
         <button
