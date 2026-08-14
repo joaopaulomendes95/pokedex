@@ -67,13 +67,14 @@
       </span>
       <span class="nav-text">{{ themeMode() === 'dark' ? 'Light' : 'Dark' }}</span>
     </button>
+    @let income = game.incomePerSec().toFixed(1);
     <div class="coins-display" [matTooltip]="'Coins: ' + (game.coins() | number)">
       <mat-icon>monetization_on</mat-icon>
       <span class="coins-value nav-text">{{ game.coins() | number }}</span>
     </div>
-    <div class="income-display" [matTooltip]="'Income: ' + game.incomePerSec().toFixed(1) + '¢/s'">
+    <div class="income-display" [matTooltip]="'Income: ' + income + '¢/s'">
       <mat-icon>hourglass_bottom</mat-icon>
-      <span class="income-value nav-text">{{ game.incomePerSec().toFixed(1) }}</span>
+      <span class="income-value nav-text">{{ income }}</span>
     </div>
   </div>
 </nav>

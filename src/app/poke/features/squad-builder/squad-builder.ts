@@ -3,7 +3,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { CdkDragDrop, DragDropModule, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { A11yModule } from '@angular/cdk/a11y';
 import { PokeData } from '@poke/poke-data';
 import { Game, SQUAD_MAX } from '@poke/game';
 import { OwnedPoke } from '@poke/poke.model';
@@ -13,6 +14,41 @@ import { Notify } from '@poke/notify';
 import { DetailPanel } from '@poke/features/shared/detail-panel/detail-panel';
 import { BasicView } from '@shared/ui';
 
+/** Level-scaled stat block for an owned pokémon. */
+interface ScaledStats {
+  hp: number;
+  attack: number;
+  defense: number;
+  spAtk: number;
+  spDef: number;
+  speed: number;
+}
+
+/** A collection card row enriched with every value the template needs. */
+interface TeamRow {
+  owned: OwnedPoke;
+  isFielded: boolean;
+  sprite: string;
+  pending: number;
+  xpPct: number;
+  xpLabel: string;
+  scaledStats: ScaledStats | null;
+}
+
+/** One of the six fixed squad slots (null = empty, drop here). */
+interface SquadSlot {
+  name: string;
+  sprite: string;
+  pending: number;
+}
+
+/** A swap-modal target row. */
+interface SwapTarget {
+  name: string;
+  sprite: string;
+  pending: number;
+}
+
 @Component({
   selector: 'app-poke-squad',
   imports: [
@@ -21,6 +57,7 @@ import { BasicView } from '@shared/ui';
     MatIconModule,
     MatProgressSpinnerModule,
     DragDropModule,
+    A11yModule,
     DetailPanel,
     BasicView,
   ],
@@ -29,46 +66,54 @@ import { BasicView } from '@shared/ui';
 })
 export class SquadBuilder {
   readonly xpDisplay = inject(XpDisplay);
-  team = computed(() => {
-    const out: { owned: OwnedPoke; isFielded: boolean }[] = [];
+  readonly data = inject(PokeData);
+  readonly game = inject(Game);
+  #notify = inject(Notify);
+
+  /** Collection cards enriched with every display value the template needs. */
+  readonly team = computed<TeamRow[]>(() => {
+    const out: TeamRow[] = [];
     for (const owned of this.game.roster()) {
-      out.push({ owned, isFielded: this.game.squad().includes(owned.name) });
+      const xpPct = Math.floor(this.game.xpPercent(owned.name));
+      const xpNeed = Math.floor(this.game.xpNeedForLevel(owned.name));
+      const xpCurrent = Math.floor(this.game.xpCurrent(owned.name));
+      out.push({
+        owned,
+        isFielded: this.game.squad().includes(owned.name),
+        sprite: this.data.spriteUrlOrEmpty(owned.name),
+        pending: this.game.pendingLevels(owned.name),
+        xpPct,
+        xpLabel: this.xpDisplay.mode() === 'pct' ? `${xpPct}%` : `${xpCurrent} / ${xpNeed} XP`,
+        scaledStats: this.scaledStats(owned),
+      });
     }
     return out;
   });
 
-  sprite(name: string) {
-    return this.data.spriteUrlOrEmpty(name);
-  }
+  /** Fixed 6-slot squad bar (null when a slot is empty). */
+  readonly slotEntries = computed<(SquadSlot | null)[]>(() =>
+    Array.from({ length: SQUAD_MAX }, (_, i) => {
+      const name = this.game.squad()[i];
+      if (!name) return null;
+      return {
+        name,
+        sprite: this.data.spriteUrlOrEmpty(name),
+        pending: this.game.pendingLevels(name),
+      };
+    }),
+  );
 
-  /** 0..100 progress bar fill for a collection card. */
-  xpPct(owned: OwnedPoke): number {
-    return Math.floor(this.game.xpPercent(owned.name));
-  }
-
-  /** XP needed for next level (integer). */
-  xpNeed(owned: OwnedPoke): number {
-    return Math.floor(this.game.xpNeedForLevel(owned.name));
-  }
-
-  /** Current XP (integer). */
-  xpCurrent(owned: OwnedPoke): number {
-    return Math.floor(this.game.xpCurrent(owned.name));
-  }
-
-  /** XP readout honoring the global flat/% toggle. */
-  xpLabel(owned: OwnedPoke): string {
-    if (this.xpDisplay.mode() === 'pct') return `${this.xpPct(owned)}%`;
-    return `${this.xpCurrent(owned)} / ${this.xpNeed(owned)} XP`;
-  }
-
-  /** Number of ready level-ups banked (waits for a click). */
-  pending(name: string): number {
-    return this.game.pendingLevels(name);
-  }
+  /** Swap-modal targets = current squad, enriched for the template. */
+  readonly swapTargets = computed<SwapTarget[]>(() =>
+    this.game.squad().map((name) => ({
+      name,
+      sprite: this.data.spriteUrlOrEmpty(name),
+      pending: this.game.pendingLevels(name),
+    })),
+  );
 
   /** Total pending level-ups across all owned Pokémon. */
-  totalPending = computed(() => {
+  readonly totalPending = computed(() => {
     let total = 0;
     for (const owned of this.game.roster()) {
       total += this.game.pendingLevels(owned.name);
@@ -77,10 +122,31 @@ export class SquadBuilder {
   });
 
   /** Whether any Pokémon has pending level-ups. */
-  hasAnyPending = computed(() => this.totalPending() > 0);
+  readonly hasAnyPending = computed(() => this.totalPending() > 0);
+
+  /** Collection names only (for drag data) - independent of fielded state. */
+  readonly collectionNames = computed(() => this.game.roster().map((r) => r.name));
+
+  /** Swap modal state. */
+  readonly swapModal = signal<{ incoming: string } | null>(null);
+
+  /** Level-scaled stats for an owned pokémon (null until its detail is cached). */
+  private scaledStats(owned: OwnedPoke): ScaledStats | null {
+    const base = this.data.pokeByName(owned.name);
+    if (!base) return null;
+    const k = levelScale(owned.level);
+    return {
+      hp: Math.max(1, Math.round(base.stats.hp * k)),
+      attack: Math.max(1, Math.round(base.stats.attack * k)),
+      defense: Math.max(1, Math.round(base.stats.defense * k)),
+      spAtk: Math.max(1, Math.round(base.stats.spAtk * k)),
+      spDef: Math.max(1, Math.round(base.stats.spDef * k)),
+      speed: Math.max(1, Math.round(base.stats.speed * k)),
+    };
+  }
 
   /** Inspect a collection card in the side panel. */
-  inspect(name: string, event?: MouseEvent) {
+  inspect(name: string, event?: Event) {
     if (event && (event.target as HTMLElement).closest('button')) return;
     this.data.selectByName(name);
   }
@@ -90,9 +156,6 @@ export class SquadBuilder {
     const count = this.game.applyAllLevelUps();
     if (count) this.#notify.show(`${count} Pokémon levelled up!`);
   }
-
-  /** Slot indices the arena squad can hold (6, per SQUAD_MAX). */
-  slots = Array.from({ length: SQUAD_MAX }, (_, i) => i);
 
   /** Handle drag-drop between squad slots and collection. */
   onDrop(event: CdkDragDrop<string[]>) {
@@ -108,12 +171,6 @@ export class SquadBuilder {
       this.game.setSquad(this.game.squad().filter((n) => n !== name));
     }
   }
-
-  /** Collection names only (for drag data) - independent of fielded state. */
-  collectionNames = computed(() => this.game.roster().map((r) => r.name));
-
-  /** Swap modal state. */
-  swapModal = signal<{ incoming: string } | null>(null);
 
   /** Handle double-click on collection card. */
   onCollectionDblClick(name: string) {
@@ -140,25 +197,6 @@ export class SquadBuilder {
   cancelSwap() {
     this.swapModal.set(null);
   }
-
-  /** Stats escalados para o level actual do owned. */
-  scaledStats(owned: OwnedPoke) {
-    const base = this.data.pokeByName(owned.name);
-    if (!base) return null;
-    const k = levelScale(owned.level);
-    return {
-      hp: Math.max(1, Math.round(base.stats.hp * k)),
-      attack: Math.max(1, Math.round(base.stats.attack * k)),
-      defense: Math.max(1, Math.round(base.stats.defense * k)),
-      spAtk: Math.max(1, Math.round(base.stats.spAtk * k)),
-      spDef: Math.max(1, Math.round(base.stats.spDef * k)),
-      speed: Math.max(1, Math.round(base.stats.speed * k)),
-    };
-  }
-
-  readonly data = inject(PokeData);
-  readonly game = inject(Game);
-  #notify = inject(Notify);
 
   constructor() {
     // Bring the side panel up on the first-owned monster once the roster lands.

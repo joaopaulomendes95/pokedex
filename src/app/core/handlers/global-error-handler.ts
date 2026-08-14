@@ -1,4 +1,4 @@
-import { ErrorHandler, Injectable, inject } from '@angular/core';
+import { ErrorHandler, Service, inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorReportingService } from '../services/error-reporting/error-reporting';
@@ -8,7 +8,7 @@ import { ErrorReportingService } from '../services/error-reporting/error-reporti
  * logs every uncaught error and forwards a sanitized report to the reporting
  * sink. HttpErrorResponse is skipped — those are handled at the HTTP layer.
  */
-@Injectable()
+@Service()
 export class GlobalErrorHandler implements ErrorHandler {
   #errorReporting = inject(ErrorReportingService);
   #document = inject(DOCUMENT);

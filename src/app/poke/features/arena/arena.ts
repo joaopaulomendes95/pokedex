@@ -18,6 +18,15 @@ import {
 import { poolAroundTier, sampleRivalTeam, RIVAL_POOLS } from '@poke/rivals';
 import { CupRuns } from '@poke/cup-run';
 import { AppDialog, BasicView } from '@shared/ui';
+import type { ArenaFighter } from '@poke/match.runner';
+
+/** A fighter row enriched with every display value the template needs. */
+interface FighterView {
+  name: string;
+  level: number;
+  sprite: string;
+  hpPct: number;
+}
 
 function poolForCup(cup: Cup): string[] {
   const flat: string[] = [];
@@ -36,6 +45,15 @@ function poolForCup(cup: Cup): string[] {
   styleUrl: './arena.component.scss',
 })
 export class Arena {
+  // Injected dependencies
+  readonly runner = inject(MatchRunner);
+  readonly game = inject(Game);
+  readonly data = inject(PokeData);
+  readonly auto = inject(AutoBattle);
+  readonly cupRuns = inject(CupRuns);
+  #notify = inject(Notify);
+  #dialog = inject(AppDialog);
+
   canBattle = computed(() => this.game.squad().length > 0);
   /** Quick fight unlocked: squad ready and energy to spare. */
   canQuick = computed(() => this.canBattle() && this.game.energy() >= QUICK_BATTLE_ENERGY);
@@ -52,6 +70,14 @@ export class Arena {
   readonly quickCost = QUICK_BATTLE_ENERGY;
   readonly cupCost = CUP_BATTLE_ENERGY;
 
+  /** Player/rival fighters enriched for the template (sprite + hp%). */
+  readonly playerView = computed<FighterView[]>(() => this.toFighterViews(this.runner.player()));
+  readonly rivalView = computed<FighterView[]>(() => this.toFighterViews(this.runner.rival()));
+
+  /** Cup progress track dots (0..battles-1). */
+  readonly cupTrackDots = computed<number[]>(() =>
+    Array.from({ length: this.cupRun()?.cup.battles ?? 0 }, (_, i) => i),
+  );
   /** Prize shown on the collect button for a finished quick fight. */
   resultCoins = computed(() =>
     this.runner.result()?.winner === 'player' ? 10 + this.game.tier() * 2 : 2,
@@ -68,14 +94,6 @@ export class Arena {
     if (!run) return 0;
     return Math.round((run.wins.length / run.cup.battles) * 100);
   });
-
-  readonly runner = inject(MatchRunner);
-  readonly game = inject(Game);
-  readonly data = inject(PokeData);
-  readonly auto = inject(AutoBattle);
-  #notify = inject(Notify);
-  #dialog = inject(AppDialog);
-  readonly cupRuns = inject(CupRuns);
 
   /** Quick fight: a small rival team drawn from your tier's pool. */
   start() {
@@ -173,12 +191,12 @@ export class Arena {
   }
 
   /** HP percentage for a fighter's bar. */
-  hpPct(f: { hp: number; maxHp: number }): number {
-    return Math.round((f.hp / Math.max(1, f.maxHp)) * 100);
-  }
-
-  /** Battle slot indices 0..battles-1 for a cup's progress track. */
-  cupTrack(battles: number): number[] {
-    return Array.from({ length: battles }, (_, i) => i);
+  private toFighterViews(fighters: ArenaFighter[]): FighterView[] {
+    return fighters.map((f) => ({
+      name: f.name,
+      level: f.fighter.level ?? 1,
+      sprite: this.data.spriteUrlOrEmpty(f.name),
+      hpPct: Math.round((f.fighter.hp / Math.max(1, f.fighter.maxHp)) * 100),
+    }));
   }
 }

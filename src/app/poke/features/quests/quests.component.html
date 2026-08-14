@@ -8,10 +8,10 @@
   </div>
 
   <div class="kpis">
-    <app-kpi-block [metricData]="incomeMetric()"></app-kpi-block>
-    <app-kpi-block [metricData]="prestigeMetric()"></app-kpi-block>
-    <app-kpi-block [metricData]="rosterMetric()"></app-kpi-block>
-    <app-kpi-block [metricData]="missionsMetric()"></app-kpi-block>
+    <app-kpi-block [metricData]="incomeMetric()" />
+    <app-kpi-block [metricData]="prestigeMetric()" />
+    <app-kpi-block [metricData]="rosterMetric()" />
+    <app-kpi-block [metricData]="missionsMetric()" />
   </div>
 
   <mat-card class="prestige-card">
@@ -27,11 +27,11 @@
         </div>
         <div class="prestige-info">
           <h2 class="text-topic-title">Shards: {{ game.prestige() }}</h2>
+          @let gain = game.prestigeGain();
           <p class="hint">
             Each shard permanently boosts idle income by +25% and passive XP by +1/sec. Reach the
             Champion Cup tier to reset your run and bank
-            <strong>{{ game.prestigeGain() }}</strong> more
-            {{ game.prestigeGain() === 1 ? 'shard' : 'shards' }}.
+            <strong>{{ gain }}</strong> more {{ gain === 1 ? 'shard' : 'shards' }}.
           </p>
           <div class="actions">
             <button

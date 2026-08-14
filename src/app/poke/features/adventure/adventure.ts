@@ -17,6 +17,11 @@ import { BasicView } from '@shared/ui';
   styleUrl: './adventure.component.scss',
 })
 export class Adventure {
+  // Injected dependencies
+  readonly data = inject(PokeData);
+  readonly game = inject(Game);
+  #notify = inject(Notify);
+
   /** Wild pokémon currently selected for catch attempt. */
   selectedWild = signal<{ name: string; baseExperience: number; sprite: string } | null>(null);
 
@@ -25,10 +30,6 @@ export class Adventure {
 
   /** Which region of the unlock chain is open on the map. */
   regionIndex = signal(0);
-
-  readonly data = inject(PokeData);
-  readonly game = inject(Game);
-  #notify = inject(Notify);
 
   regStatuses = computed(() => regionStatuses(new Set(this.game.visited())));
 
@@ -40,8 +41,25 @@ export class Adventure {
     return statuses.find((s) => s.unlocked) ?? statuses[0]!;
   });
 
-  /** Encounters in currently explored area (filtered by generation). */
-  encounters = computed(() => this.data.areaEncounters());
+  /** Encounters in currently explored area (filtered by generation), with sprites. */
+  encounters = computed(() =>
+    this.data.areaEncounters().map((enc) => ({
+      ...enc,
+      sprite: this.data.spriteUrlOrEmpty(enc.pokemon.name),
+    })),
+  );
+
+  /** Areas of the current region, enriched with image + visited state. */
+  areas = computed(() =>
+    this.current().def.areas.map((loc) => ({
+      ...loc,
+      image: this.locationImage(loc),
+      visited: this.game.visited().includes(loc.url),
+    })),
+  );
+
+  /** Artwork for the current region card. */
+  currentArt = computed(() => this.regionArt(this.current().index));
 
   /** Whether we're currently exploring an area. */
   isExploring = computed(() => this.data.exploringArea() !== null);
@@ -96,10 +114,6 @@ export class Adventure {
     }
     this.regionIndex.set(index);
     return null;
-  }
-
-  isVisited(loc: PokeLocation): boolean {
-    return this.game.visited().includes(loc.url);
   }
 
   /** Explore a location area (marks it visited for the region unlock). */

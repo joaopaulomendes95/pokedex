@@ -14,9 +14,10 @@ export const TAB_QUESTS = 5;
  */
 @Service()
 export class UiState {
-  readonly tab = signal(TAB_SQUAD);
+  #_tab = signal(TAB_SQUAD);
+  readonly tab = this.#_tab.asReadonly();
 
   goToTab(index: number) {
-    this.tab.set(index);
+    this.#_tab.set(index);
   }
 }

@@ -22,15 +22,15 @@
         <div class="stage">
           <div class="side player">
             <span class="side-label">You</span>
-            @for (f of runner.player(); track f.name; let i = $index) {
+            @for (f of playerView(); track f.name) {
               <div class="fighter">
-                <img [src]="data.spriteUrlOrEmpty(f.name)" alt="" />
+                <img [src]="f.sprite" alt="" />
                 <div class="fighter-info">
                   <span class="f-name">{{ f.name }}</span>
-                  <span class="f-level">Lv {{ f.fighter.level ?? 1 }}</span>
+                  <span class="f-level">Lv {{ f.level }}</span>
                 </div>
                 <div class="hp-bar">
-                  <div class="hp-fill" [style.width.%]="hpPct(f.fighter)"></div>
+                  <div class="hp-fill" [style.width.%]="f.hpPct"></div>
                 </div>
               </div>
             } @empty {
@@ -43,15 +43,15 @@
 
           <div class="side rival">
             <span class="side-label">Rival</span>
-            @for (f of runner.rival(); track f.name; let i = $index) {
+            @for (f of rivalView(); track f.name) {
               <div class="fighter">
-                <img [src]="data.spriteUrlOrEmpty(f.name)" alt="" />
+                <img [src]="f.sprite" alt="" />
                 <div class="fighter-info">
                   <span class="f-name">{{ f.name }}</span>
-                  <span class="f-level">Lv {{ f.fighter.level ?? 1 }}</span>
+                  <span class="f-level">Lv {{ f.level }}</span>
                 </div>
                 <div class="hp-bar">
-                  <div class="hp-fill rival" [style.width.%]="hpPct(f.fighter)"></div>
+                  <div class="hp-fill rival" [style.width.%]="f.hpPct"></div>
                 </div>
               </div>
             } @empty {
@@ -173,7 +173,7 @@
             </div>
 
             <div class="cup-track">
-              @for (b of cupTrack(run.cup.battles); track b) {
+              @for (b of cupTrackDots(); track b) {
                 <span
                   class="track-dot"
                   [class.win]="run.wins[b] === true"
@@ -189,11 +189,11 @@
                 <span class="label">Your rivals this round:</span>
                 @if (runner.rival(); as rivals) {
                   <div class="mini-team">
-                    @for (f of rivals; track f.name) {
+                    @for (f of rivalView(); track f.name) {
                       <div class="mini-fighter">
-                        <img [src]="data.spriteUrlOrEmpty(f.name)" alt="" />
+                        <img [src]="f.sprite" alt="" />
                         <span>{{ f.name }}</span>
-                        <span class="lv">Lv {{ f.fighter.level ?? 1 }}</span>
+                        <span class="lv">Lv {{ f.level }}</span>
                       </div>
                     }
                   </div>

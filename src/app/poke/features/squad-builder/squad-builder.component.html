@@ -19,24 +19,28 @@
       (cdkDropListDropped)="onDrop($event)"
       [cdkDropListConnectedTo]="['collection-drop']"
     >
-      @for (slot of slots; track slot) {
+      @for (slot of slotEntries(); track $index) {
         <div class="slot">
-          @if (game.squad()[slot]; as name) {
+          @if (slot; as s) {
             <div
               class="slot-ava"
               cdkDrag
-              [cdkDragData]="name"
-              (click)="inspect(name)"
-              (dblclick)="onSquadDblClick(name)"
+              [cdkDragData]="s.name"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="'Inspect ' + s.name"
+              (click)="inspect(s.name)"
+              (dblclick)="onSquadDblClick(s.name)"
+              (keydown.enter)="inspect(s.name)"
             >
-              @if (sprite(name)) {
-                <img [src]="sprite(name)" alt="" />
+              @if (s.sprite) {
+                <img [src]="s.sprite" alt="" />
               } @else {
                 <div class="sprite-placeholder"></div>
               }
-              <span class="slot-name">{{ name }}</span>
-              @if (pending(name) > 0) {
-                <span class="ready-chip">+{{ pending(name) }}</span>
+              <span class="slot-name">{{ s.name }}</span>
+              @if (s.pending > 0) {
+                <span class="ready-chip">+{{ s.pending }}</span>
               }
             </div>
           } @else {
@@ -55,6 +59,7 @@
             type="button"
             (click)="xpDisplay.toggle()"
             title="Toggle XP display"
+            aria-label="Toggle XP display"
           >
             <mat-icon>percent</mat-icon>
           </button>
@@ -75,11 +80,15 @@
               [class.selected]="data.selected()?.name === row.owned.name"
               cdkDrag
               [cdkDragData]="row.owned.name"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="'Inspect ' + row.owned.name"
               (click)="inspect(row.owned.name, $event)"
               (dblclick)="onCollectionDblClick(row.owned.name)"
+              (keydown.enter)="inspect(row.owned.name, $event)"
             >
-              @if (sprite(row.owned.name)) {
-                <img mat-card-image [src]="sprite(row.owned.name)" alt="" />
+              @if (row.sprite) {
+                <img mat-card-image [src]="row.sprite" alt="" />
               } @else {
                 <div class="sprite-placeholder"></div>
               }
@@ -89,15 +98,15 @@
                 <div class="xp-bar">
                   <div
                     class="xp-fill"
-                    [class.ready]="pending(row.owned.name) > 0"
-                    [style.width.%]="xpPct(row.owned)"
+                    [class.ready]="row.pending > 0"
+                    [style.width.%]="row.xpPct"
                   ></div>
                 </div>
-                <div class="xp-text">{{ xpLabel(row.owned) }}</div>
-                @if (pending(row.owned.name) > 0) {
+                <div class="xp-text">{{ row.xpLabel }}</div>
+                @if (row.pending > 0) {
                   <p class="pending">Ready: Level up!</p>
                 }
-                @if (scaledStats(row.owned); as s) {
+                @if (row.scaledStats; as s) {
                   <p class="stats-mini">
                     <span>HP {{ s.hp }}</span>
                     <span>ATK {{ s.attack }}</span>
@@ -135,22 +144,30 @@
   </app-basic-view>
 
   @if (swapModal(); as modal) {
-    <div class="swap-modal-overlay" (click)="cancelSwap()">
-      <div class="swap-modal" (click)="$event.stopPropagation()">
-        <h3>
+    <div class="swap-modal-overlay" (click)="cancelSwap()" (keydown.escape)="cancelSwap()">
+      <div
+        class="swap-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="swap-modal-title"
+        (click)="$event.stopPropagation()"
+        cdkTrapFocus
+        cdkTrapFocusAutoCapture
+      >
+        <h3 id="swap-modal-title">
           Squad full — swap <b>{{ modal.incoming }}</b> with?
         </h3>
         <div class="swap-targets">
-          @for (name of game.squad(); track name) {
-            <button class="swap-target" (click)="confirmSwap(name)">
-              @if (sprite(name)) {
-                <img [src]="sprite(name)" alt="" />
+          @for (t of swapTargets(); track t.name) {
+            <button class="swap-target" (click)="confirmSwap(t.name)">
+              @if (t.sprite) {
+                <img [src]="t.sprite" alt="" />
               } @else {
                 <div class="sprite-placeholder"></div>
               }
-              <span>{{ name }}</span>
-              @if (pending(name) > 0) {
-                <span class="ready-chip">+{{ pending(name) }}</span>
+              <span>{{ t.name }}</span>
+              @if (t.pending > 0) {
+                <span class="ready-chip">+{{ t.pending }}</span>
               }
             </button>
           }

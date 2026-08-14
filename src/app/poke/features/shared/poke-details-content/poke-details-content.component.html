@@ -16,11 +16,11 @@
       <section class="dn-training">
         <h4>Training</h4>
         <div class="dn-xp">
-          <div class="dn-xp-bar" [style.width.%]="xpPct(p.level, p.xp)"></div>
+          <div class="dn-xp-bar" [style.width.%]="xpPct()"></div>
         </div>
         <div class="dn-xp-label">
-          Lv. {{ p.level }} · {{ p.xp }} / {{ xpNeed(p.level) }} XP
-          <span class="dn-xp-pct">({{ xpPct(p.level, p.xp) }}%)</span>
+          Lv. {{ p.level }} · {{ p.xp }} / {{ xpNeed() }} XP
+          <span class="dn-xp-pct">({{ xpPct() }}%)</span>
         </div>
       </section>
     }

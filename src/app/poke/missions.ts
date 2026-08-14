@@ -118,7 +118,8 @@ export class Missions {
   #_claimed = signal<Set<string>>(new Set());
 
   /** Current mission tier (increments when all missions in current tier are claimed). */
-  readonly missionTier = signal(0);
+  #_missionTier = signal(0);
+  readonly missionTier = this.#_missionTier.asReadonly();
 
   /** All missions for the current tier (generated dynamically). */
   readonly missions = computed<Mission[]>(() => {
@@ -136,7 +137,6 @@ export class Missions {
   readonly totalMissionsAllTiers = computed(() => {
     return BASE_MISSIONS.length * (this.missionTier() + 1);
   });
-
   /** Completed missions in current tier. */
   readonly completedInTier = computed(() => {
     return this.missions().filter((m) => this.isDone(m)).length;
@@ -182,7 +182,7 @@ export class Missions {
     this.persist();
     // Check if tier is complete
     if (this.tierComplete()) {
-      this.missionTier.update((t) => t + 1);
+      this.#_missionTier.update((t) => t + 1);
     }
     return true;
   }
@@ -202,7 +202,7 @@ export class Missions {
       const data = JSON.parse(raw);
       if (data.claimed) {
         this.#_claimed.set(new Set(data.claimed));
-        this.missionTier.set(data.tier ?? 0);
+        this.#_missionTier.set(data.tier ?? 0);
       } else {
         // Old format
         this.#_claimed.set(new Set(data as string[]));
@@ -218,7 +218,7 @@ export class Missions {
         MISSION_KEY,
         JSON.stringify({
           claimed: [...this.#_claimed()],
-          tier: this.missionTier(),
+          tier: this.#_missionTier(),
         }),
       );
     } catch {

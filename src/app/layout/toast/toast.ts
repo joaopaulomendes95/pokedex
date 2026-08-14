@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, afterNextRender, signal, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Notification } from '@core/models/notification.interface';
 
@@ -8,7 +8,7 @@ import { Notification } from '@core/models/notification.interface';
   templateUrl: './toast.component.html',
   styleUrl: './toast.component.scss',
 })
-export class Toast implements AfterViewInit {
+export class Toast {
   #dismissFn?: () => void;
   #exitResolve?: () => void;
 
@@ -16,8 +16,11 @@ export class Toast implements AfterViewInit {
   readonly isExiting = signal(false);
   readonly toastEl = viewChild.required<ElementRef<HTMLElement>>('toastEl');
 
-  ngAfterViewInit(): void {
-    this.toastEl().nativeElement.focus({ preventScroll: true });
+  constructor() {
+    // Move focus to the toast once it has rendered (screen-reader announcement).
+    afterNextRender(() => {
+      this.toastEl().nativeElement.focus({ preventScroll: true });
+    });
   }
 
   registerDismiss(fn: () => void): void {

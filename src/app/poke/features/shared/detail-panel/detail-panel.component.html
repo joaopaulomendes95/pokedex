@@ -14,7 +14,7 @@
       </div>
       <div class="stat-grid">
         @if (owned(); as entry) {
-          @if (scaledStats(entry); as s) {
+          @if (scaledStats(); as s) {
             <div>
               <span>HP</span><b>{{ s.hp }}</b>
             </div>
@@ -62,26 +62,27 @@
         <div class="level-line">
           <span>Level {{ entry.level }}</span>
           <div class="xp-bar">
-            <div class="xp-fill" [class.ready]="ready()" [style.width.%]="progress(entry)"></div>
+            <div class="xp-fill" [class.ready]="ready()" [style.width.%]="progress()"></div>
           </div>
           <div class="xp-text-row">
-            <span class="xp-text">{{ xpLabel(entry) }}</span>
+            <span class="xp-text">{{ xpLabel() }}</span>
             <button
               mat-icon-button
               type="button"
               class="xp-toggle"
               (click)="xpDisplay.toggle()"
               title="Toggle XP display"
+              aria-label="Toggle XP display"
             >
               <mat-icon>percent</mat-icon>
             </button>
           </div>
         </div>
 
-        @if (pending(entry) > 0) {
+        @if (pending() > 0) {
           <button mat-flat-button color="accent" class="level-up" (click)="bank()">
             <mat-icon>arrow_upward</mat-icon>
-            Level Up ({{ pending(entry) }} ready)
+            Level Up ({{ pending() }} ready)
           </button>
         }
 
@@ -89,10 +90,10 @@
           mat-flat-button
           color="primary"
           (click)="train()"
-          [disabled]="game.canAfford(trainCost(entry.level)) === false"
+          [disabled]="game.canAfford(trainCost()) === false"
         >
           <mat-icon>fitness_center</mat-icon>
-          Train +1 Lv · {{ trainCost(entry.level) | number }}¢
+          Train +1 Lv · {{ trainCost() | number }}¢
         </button>
       </mat-card-actions>
     } @else {

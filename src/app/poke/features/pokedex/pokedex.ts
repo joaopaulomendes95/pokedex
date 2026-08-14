@@ -26,6 +26,7 @@ interface DexRow extends Record<string, unknown> {
   id: number;
   types: string[];
   owned: boolean;
+  sprite: string;
 }
 
 @Component({
@@ -43,6 +44,7 @@ interface DexRow extends Record<string, unknown> {
   styleUrl: './pokedex.component.scss',
 })
 export class Pokedex {
+  // Injected dependencies
   readonly data = inject(PokeData);
   readonly game = inject(Game);
   readonly genFilter = inject(GenerationFilter);
@@ -58,23 +60,20 @@ export class Pokedex {
     const source = this.data.searchQuery().trim() ? this.data.searchResults() : this.data.dex();
     return source.map((e) => {
       const d = this.data.pokeByName(e.name);
+      const id = this.idFromUrl(e.url);
       return {
         name: e.name,
         url: e.url,
-        id: this.idFromUrl(e.url),
+        id,
         types: d?.types ?? [],
         owned: !!this.game.own(e.name),
+        // CDN URL from the resolvable ID (works for search hits outside the cached dex page).
+        sprite: id
+          ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+          : this.data.spriteUrlOrEmpty(e.name),
       };
     });
   });
-
-  /** Sprite for a tile — CDN URL from the resolvable ID (works for search hits outside the cached dex page). */
-  spriteFor(row: DexRow): string {
-    if (row.id) {
-      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${row.id}.png`;
-    }
-    return this.data.spriteUrlOrEmpty(row.name);
-  }
 
   /** Stable @for identity for the tile list (rows are filtered/sorted). */
   readonly rowTrackKey = (row: DexRow) => row.name;

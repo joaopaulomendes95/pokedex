@@ -31,6 +31,7 @@
           class="toolbar-sort-dir"
           (click)="toggleSortDirection()"
           title="Toggle sort direction"
+          aria-label="Toggle sort direction"
         >
           <i
             class="fa-solid"
@@ -82,8 +83,9 @@
       >
         @if (tile()) {
           <ng-container
-            *ngTemplateOutlet="tile(); context: { $implicit: row, index: $index }"
-          ></ng-container>
+            [ngTemplateOutlet]="tile()"
+            [ngTemplateOutletContext]="{ $implicit: row, index: $index }"
+          />
         }
       </div>
     }

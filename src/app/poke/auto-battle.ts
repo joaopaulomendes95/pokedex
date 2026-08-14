@@ -15,9 +15,11 @@ const AUTO_INTERVAL_MS = 4000;
  */
 @Service()
 export class AutoBattle {
-  readonly autoPlaying = signal(false);
+  #_autoPlaying = signal(false);
   /** How many auto-fights have resolved so far (activity pulse for the UI). */
-  readonly fightCount = signal(0);
+  #_fightCount = signal(0);
+  readonly autoPlaying = this.#_autoPlaying.asReadonly();
+  readonly fightCount = this.#_fightCount.asReadonly();
 
   /** Whether an auto-fight can start right now (squad + energy). */
   canAutoFight = computed(
@@ -46,12 +48,12 @@ export class AutoBattle {
       this.#notify.show('Field a squad on the Squad tab first.');
       return;
     }
-    this.autoPlaying.set(true);
+    this.#_autoPlaying.set(true);
     this.#notify.show('Auto-battle on — battles run while you watch.');
   }
 
   stop() {
-    this.autoPlaying.set(false);
+    this.#_autoPlaying.set(false);
     this.#notify.show('Auto-battle off.');
   }
 
@@ -78,6 +80,6 @@ export class AutoBattle {
     const rival = sampleRivalTeam(pool, Math.min(3, pool.length));
     await this.#runner.play(rival, this.#game.tier() + 1);
     this.#runner.collect();
-    this.fightCount.update((n) => n + 1);
+    this.#_fightCount.update((n) => n + 1);
   }
 }

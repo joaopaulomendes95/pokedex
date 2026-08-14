@@ -33,27 +33,17 @@ export class PokeDetailsContent {
 
   readonly owned = computed(() => this.game.own(this.data().name) ?? null);
 
-  xpNeed(level: number): number {
-    return xpForLevel(level);
-  }
+  /** XP needed for the owned pokémon's next level. */
+  readonly xpNeed = computed(() => {
+    const o = this.owned();
+    return o ? xpForLevel(o.level) : 0;
+  });
 
-  xpInt(xp: number): number {
-    return Math.floor(xp);
-  }
-
-  xpPct(level: number, xp: number): number {
-    return Math.min(100, Math.floor((xp / xpForLevel(level)) * 100));
-  }
-
-  catchRate(): number {
-    const base = this.detail()?.baseExperience ?? 0;
-    return Math.round((40 / (base || 1)) * 100);
-  }
-
-  /** Chip colour for a Pokémon type (exposed for the template). */
-  typeColor(t: string): CustomChipColor {
-    return typeColor(t);
-  }
+  /** XP bar fill % for the owned pokémon (0..100). */
+  readonly xpPct = computed(() => {
+    const o = this.owned();
+    return o ? Math.min(100, Math.floor((o.xp / xpForLevel(o.level)) * 100)) : 0;
+  });
 
   readonly sections = computed<DetailsSection[]>(() => {
     const d = this.detail();
@@ -106,4 +96,14 @@ export class PokeDetailsContent {
       },
     ];
   });
+
+  catchRate(): number {
+    const base = this.detail()?.baseExperience ?? 0;
+    return Math.round((40 / (base || 1)) * 100);
+  }
+
+  /** Chip colour for a Pokémon type (exposed for the template). */
+  typeColor(t: string): CustomChipColor {
+    return typeColor(t);
+  }
 }

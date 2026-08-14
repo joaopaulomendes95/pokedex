@@ -44,13 +44,16 @@ export class ShopDialog {
   /** Total stocked items in the bag (not spent ones). */
   ownedCount = computed(() => Object.values(this.game.inventory()).reduce((sum, n) => sum + n, 0));
 
-  /** Effective price: consumables scale with tier. */
-  getPrice(item: ShopItem): number {
-    if (CONSUMABLE_ENERGY[item.id] !== undefined) {
-      return Math.round(item.price * (1 + this.game.tier() * 0.25));
+  /** Effective price per item id: consumables scale with tier. */
+  prices = computed<Record<string, number>>(() => {
+    const mult = 1 + this.game.tier() * 0.25;
+    const out: Record<string, number> = {};
+    for (const item of SHOP_ITEMS) {
+      out[item.id] =
+        CONSUMABLE_ENERGY[item.id] !== undefined ? Math.round(item.price * mult) : item.price;
     }
-    return item.price;
-  }
+    return out;
+  });
 
   isConsumable(id: string): boolean {
     return CONSUMABLE_ENERGY[id] !== undefined;
@@ -61,7 +64,8 @@ export class ShopDialog {
   }
 
   buy(item: ShopItem) {
-    const price = this.getPrice(item);
+    const price = this.prices()[item.id];
+    if (price === undefined) return;
     if (!this.game.spend(price)) {
       this.#notify.show(`Not enough coins for the ${item.name}.`);
       return;

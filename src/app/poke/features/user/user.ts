@@ -42,9 +42,8 @@ export class User {
     this.newGen.set(this.genFilter.maxGen());
   }
 
-  lastSaved(): string {
-    return new Date(this.game.lastSaved()).toLocaleTimeString();
-  }
+  /** Human-readable time of the last save. */
+  readonly lastSaved = computed(() => new Date(this.game.lastSaved()).toLocaleTimeString());
 
   /** Restart the run: full reset back to the starters + 5 Pokéballs. */
   doReset() {

@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { CommonModule } from '@angular/common';
@@ -37,7 +37,7 @@ import { Quests } from '@poke/features/quests/quests';
   templateUrl: './poke-hub.component.html',
   styleUrl: './poke-hub.component.scss',
 })
-export class PokeHub implements OnInit {
+export class PokeHub {
   #ui = inject(UiState);
   readonly tab = this.#ui.tab;
 
@@ -62,7 +62,7 @@ export class PokeHub implements OnInit {
   };
 
   /** Warm the first dex entries so the very first battle can start instantly. */
-  ngOnInit() {
+  constructor() {
     void this.data.warmup();
   }
 }

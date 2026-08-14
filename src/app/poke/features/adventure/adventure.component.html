@@ -31,7 +31,7 @@
 
         <div class="region-card">
           <div class="region-art">
-            <img [src]="regionArt(current().index)" alt="" />
+            <img [src]="currentArt()" alt="" />
             <div class="region-tint"></div>
             <div class="region-title">
               <h2>{{ current().def.name }}</h2>
@@ -80,12 +80,12 @@
         </div>
 
         <div class="area-grid">
-          @for (loc of current().def.areas; track loc.url) {
-            <button class="area-card" [class.visited]="isVisited(loc)" (click)="explore(loc)">
-              <img [src]="locationImage(loc)" alt="" />
+          @for (loc of areas(); track loc.url) {
+            <button class="area-card" [class.visited]="loc.visited" (click)="explore(loc)">
+              <img [src]="loc.image" alt="" />
               <div class="area-overlay">
                 <span class="area-name">{{ loc.name }}</span>
-                @if (isVisited(loc)) {
+                @if (loc.visited) {
                   <mat-icon class="checked">check_circle</mat-icon>
                 } @else {
                   <mat-icon>explore</mat-icon>
@@ -120,7 +120,7 @@
                 [class.selected]="selectedWild()?.name === enc.pokemon.name"
                 (click)="selectWild(enc)"
               >
-                <img [src]="data.spriteUrlOrEmpty(enc.pokemon.name)" alt="" />
+                <img [src]="enc.sprite" alt="" />
                 <span class="enc-name">{{ enc.pokemon.name }}</span>
               </button>
             } @empty {
@@ -133,6 +133,7 @@
 
     <!-- Catch Panel (when a wild Pokémon is selected) -->
     @if (selectedWild(); as wild) {
+      @let ball = bestBall();
       <div class="catch-panel">
         <div class="wild-preview">
           <img [src]="wild.sprite" alt="" />
@@ -141,8 +142,8 @@
             <div class="catch-stats">
               <span class="stat"><mat-icon>casino</mat-icon> {{ catchPct() }}% catch rate</span>
               <span class="stat"
-                ><mat-icon>sports_handball</mat-icon> {{ bestBall()?.name ?? 'None' }}
-                {{ bestBall() ? ' (×' + bestBall()?.mult + ')' : '' }}
+                ><mat-icon>sports_handball</mat-icon> {{ ball?.name ?? 'None' }}
+                {{ ball ? ' (×' + ball?.mult + ')' : '' }}
               </span>
             </div>
           </div>
@@ -160,13 +161,13 @@
           color="primary"
           class="throw-ball-btn"
           (click)="throwBall()"
-          [disabled]="!bestBall()"
+          [disabled]="!ball"
         >
           <mat-icon>sports_handball</mat-icon>
-          Throw {{ bestBall()?.name ?? 'Pokéball' }}
+          Throw {{ ball?.name ?? 'Pokéball' }}
         </button>
 
-        @if (!bestBall()) {
+        @if (!ball) {
           <p class="hint">No Pokéballs! Buy some in the Market.</p>
         }
       </div>

@@ -6,15 +6,25 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DecimalPipe } from '@angular/common';
 import { PokeData } from '@poke/poke-data';
 import { Game } from '@poke/game';
+import { XpDisplay } from '@poke/xp-display';
+import { OwnedPoke } from '@poke/poke.model';
 import { xpForLevel, trainCost as trainCostFn } from '@poke/economy';
 import { levelScale } from '@poke/battle';
-import { OwnedPoke } from '@poke/poke.model';
-import { XpDisplay } from '@poke/xp-display';
+
+/** Level-scaled stat block for an owned pokémon. */
+interface ScaledStats {
+  hp: number;
+  attack: number;
+  defense: number;
+  spAtk: number;
+  spDef: number;
+  speed: number;
+}
 
 /**
  * Shared "Poké-Card" detail panel: artwork, types, stat grid and the buy /
- * train / banked level-up actions. Used by the Market (purchase lane) and the
- * Squad (collection inspector) so both screens show the same stats + training.
+ * train / banked level-up actions. Used by the Pokédex and the Squad
+ * inspector so both screens show the same stats + training.
  */
 @Component({
   selector: 'app-poke-detail-panel',
@@ -27,38 +37,43 @@ export class DetailPanel {
   readonly game = inject(Game);
   readonly xpDisplay = inject(XpDisplay);
 
-  xpNeed = (level: number) => xpForLevel(level);
-  xpInt = (xp: number) => Math.floor(xp);
-  trainCost = (level: number) => trainCostFn(level);
-
-  /** XP readout honoring the global flat/% toggle. */
-  xpLabel(entry: OwnedPoke): string {
-    if (this.xpDisplay.mode() === 'pct') return `${this.progress(entry)}%`;
-    return `${this.xpInt(entry.xp)}/${this.xpNeed(entry.level)} XP`;
-  }
-
   /** The owned pokémon behind the selected dex card, if any. */
   readonly owned = computed<OwnedPoke | null>(() => {
     const name = this.data.selected()?.name;
     return name ? (this.game.own(name) ?? null) : null;
   });
 
-  /** XP bar fill % for an owned pokémon (0..100). */
-  progress(owned: OwnedPoke): number {
-    const need = xpForLevel(owned.level);
-    return Math.min(100, Math.floor((owned.xp / need) * 100));
-  }
-
   /** Banked level-ups waiting to be clicked. */
-  pending(owned: OwnedPoke): number {
-    return this.game.pendingLevels(owned.name);
-  }
+  readonly pending = computed<number>(() => {
+    const o = this.owned();
+    return o ? this.game.pendingLevels(o.name) : 0;
+  });
 
-  /** Stats escalados para o level actual do owned. */
-  scaledStats(owned: OwnedPoke) {
+  /** Whether the current pokémon has at least one banked level-up. */
+  readonly ready = computed(() => this.pending() > 0);
+
+  /** XP bar fill % for an owned pokémon (0..100). */
+  readonly progress = computed(() => {
+    const o = this.owned();
+    if (!o) return 0;
+    const need = xpForLevel(o.level);
+    return Math.min(100, Math.floor((o.xp / need) * 100));
+  });
+
+  /** XP readout honoring the global flat/% toggle. */
+  readonly xpLabel = computed(() => {
+    const o = this.owned();
+    if (!o) return '';
+    if (this.xpDisplay.mode() === 'pct') return `${this.progress()}%`;
+    return `${Math.floor(o.xp)}/${xpForLevel(o.level)} XP`;
+  });
+
+  /** Stats scaled to the owned pokémon's level (null until detail is cached). */
+  readonly scaledStats = computed<ScaledStats | null>(() => {
+    const o = this.owned();
     const base = this.data.detail();
-    if (!base) return null;
-    const k = levelScale(owned.level);
+    if (!o || !base) return null;
+    const k = levelScale(o.level);
     return {
       hp: Math.max(1, Math.round(base.stats.hp * k)),
       attack: Math.max(1, Math.round(base.stats.attack * k)),
@@ -67,18 +82,16 @@ export class DetailPanel {
       spDef: Math.max(1, Math.round(base.stats.spDef * k)),
       speed: Math.max(1, Math.round(base.stats.speed * k)),
     };
-  }
+  });
 
-  /** Whether the current pokémon has at least one banked level-up. */
-  ready() {
+  /** Cost of a paid training level-up for the current pokémon. */
+  readonly trainCost = computed(() => {
     const o = this.owned();
-    return o ? this.pending(o) > 0 : false;
-  }
+    return o ? trainCostFn(o.level) : 0;
+  });
 
   /** Price to purchase a brand-new level-1 monster (raw stat totals). */
-  price(): number {
-    return this.rawTotal() ?? 300;
-  }
+  readonly price = computed(() => this.rawTotal() ?? 300);
 
   private rawTotal(): number | null {
     const d = this.data.pokeByName(this.data.selected()?.name ?? '') ?? this.data.detail();
@@ -103,7 +116,7 @@ export class DetailPanel {
   train() {
     const o = this.owned();
     if (!o) return;
-    if (this.game.spend(this.trainCost(o.level))) this.game.addLevel(o.name, 1);
+    if (this.game.spend(this.trainCost())) this.game.addLevel(o.name, 1);
   }
 
   /** Consumes every banked level-up (free, banked by battles/idle). */

@@ -32,7 +32,7 @@
         }
         <ng-template #tile let-row>
           <div class="dex-tile" [class.owned]="row.owned">
-            <img [src]="spriteFor(row)" alt="" />
+            <img [src]="row.sprite" alt="" />
             <div class="dex-tile-name">{{ row.name }}</div>
             <div class="dex-tile-id">#{{ row.id }}</div>
             <div class="dex-tile-types">

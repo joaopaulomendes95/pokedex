@@ -34,8 +34,10 @@ export class MatchRunner {
   rival = signal<ArenaFighter[]>([]);
   result = signal<BattleResult | null>(null);
   /** True once the spoils of the current match have been collected. */
-  settled = signal(false);
-  busy = signal(false);
+  #_settled = signal(false);
+  #_busy = signal(false);
+  readonly settled = this.#_settled.asReadonly();
+  readonly busy = this.#_busy.asReadonly();
 
   summary = computed<MatchSummary | null>(() => {
     const res = this.result();
@@ -66,9 +68,9 @@ export class MatchRunner {
    *  Returns the result immediately (the `result()` signal still updates for
    *  the template). */
   async play(rivalNames: string[], rivalLevel?: number): Promise<BattleResult> {
-    this.busy.set(true);
+    this.#_busy.set(true);
     this.result.set(null);
-    this.settled.set(false);
+    this.#_settled.set(false);
 
     const squad = this.#game.squad();
     await this.#poke.ensureInCache([...squad, ...rivalNames]);
@@ -86,7 +88,7 @@ export class MatchRunner {
       { name: 'Rivals', fighters: rivalTeam.map((f) => f.fighter) },
     );
     this.result.set(res);
-    this.busy.set(false);
+    this.#_busy.set(false);
     return res;
   }
 
@@ -97,7 +99,7 @@ export class MatchRunner {
   collect() {
     const res = this.result();
     if (!res || this.settled()) return;
-    this.settled.set(true);
+    this.#_settled.set(true);
     this.#game.award(res.winner);
     if (res.winner === 'player') this.#game.promote();
   }

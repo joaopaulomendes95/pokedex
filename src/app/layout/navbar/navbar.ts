@@ -51,6 +51,12 @@ export class Navbar {
   ];
 
   readonly currentTab = this.#ui.tab;
+  readonly themeMode = this.#theme.mode;
+
+  /** Total owned items (bag badge). */
+  readonly totalItems = computed(() =>
+    Object.values(this.game.inventory()).reduce((sum, n) => sum + n, 0),
+  );
 
   goToTab(index: number) {
     this.#ui.goToTab(index);
@@ -67,13 +73,6 @@ export class Navbar {
   toggle() {
     this.expanded.update((v) => !v);
   }
-
-  readonly themeMode = this.#theme.mode;
-
-  /** Total owned items (bag badge). */
-  readonly totalItems = computed(() =>
-    Object.values(this.game.inventory()).reduce((sum, n) => sum + n, 0),
-  );
 
   toggleTheme() {
     this.#theme.toggle();
