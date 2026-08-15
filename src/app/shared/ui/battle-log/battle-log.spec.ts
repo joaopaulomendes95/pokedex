@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { BattleLog } from '@shared/ui/battle-log/battle-log';
-import { BattleEvent } from '@poke/poke.model';
+import { BattleEvent } from '@shared/models/battle-event';
 
 describe('BattleLog', () => {
   let fixture: ComponentFixture<BattleLog>;

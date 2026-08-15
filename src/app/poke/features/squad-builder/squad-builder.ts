@@ -243,6 +243,11 @@ export class SquadBuilder {
     this.swapModal.set(null);
   }
 
+  /** Close the swap modal only when the overlay itself (not a bubbled child click) is hit. */
+  onOverlayClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) this.cancelSwap();
+  }
+
   constructor() {
     // Bring the side panel up on the first-owned monster once the roster lands.
     effect(

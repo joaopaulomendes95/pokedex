@@ -8,7 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(180deg, var(--color-container) 0%, transparent 100%);
+  background: linear-gradient(180deg, var(--app-color-container) 0%, transparent 100%);
   border-radius: var(--radius-m);
   padding: 0.5rem;
 
@@ -36,31 +36,31 @@
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--color-head-text);
+    color: var(--app-color-head-text);
   }
 }
 
 .dn-xp {
   height: 0.6rem;
   border-radius: 999px;
-  background: var(--color-container-primary);
+  background: var(--app-color-container-primary);
   overflow: hidden;
 }
 
 .dn-xp-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-orange-60), var(--color-main));
+  background: linear-gradient(90deg, var(--app-color-orange-60), var(--app-color-main));
   border-radius: inherit;
   transition: width 0.3s ease;
 }
 
 .dn-xp-label {
   font-size: 0.85rem;
-  color: var(--color-text);
+  color: var(--app-color-text);
 }
 
 .dn-xp-pct {
-  color: var(--color-desat-70);
+  color: var(--app-color-desat-70);
 }
 
 .dn-loading {

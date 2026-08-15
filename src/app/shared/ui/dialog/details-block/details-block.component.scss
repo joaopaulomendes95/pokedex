@@ -50,19 +50,19 @@
     }
 
     &.primary::before {
-      background-color: var(--color-main-50);
+      background-color: var(--app-color-main-50);
     }
 
     &.success::before {
-      background-color: var(--color-green);
+      background-color: var(--app-color-green);
     }
 
     &.delete::before {
-      background-color: var(--color-red);
+      background-color: var(--app-color-red);
     }
 
     &.warn::before {
-      background-color: var(--color-orange);
+      background-color: var(--app-color-orange);
     }
   }
 }

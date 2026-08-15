@@ -38,7 +38,7 @@
           [matTooltip]="item.label"
           [matTooltipPosition]="'right'"
           [matTooltipDisabled]="isOpen()"
-          aria-label="{{ item.label }}"
+          [attr.aria-label]="item.label"
         >
           <span class="nav-item-icon">
             <mat-icon>{{ item.icon }}</mat-icon>

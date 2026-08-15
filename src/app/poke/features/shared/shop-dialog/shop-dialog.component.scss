@@ -53,13 +53,13 @@
     white-space: nowrap;
 
     &.coins {
-      background: var(--color-yellow-a);
-      color: var(--color-yellow);
+      background: var(--app-color-yellow-a);
+      color: var(--app-color-yellow);
     }
 
     &.bag {
-      background: var(--color-main-a);
-      color: var(--color-main-50);
+      background: var(--app-color-main-a);
+      color: var(--app-color-main-50);
     }
 
     mat-icon {
@@ -106,8 +106,8 @@
   gap: 0.75rem;
   padding: 0.75rem;
   border-radius: 12px;
-  background: var(--color-container);
-  border: 1px solid var(--color-desat-80);
+  background: var(--app-color-container);
+  border: 1px solid var(--app-color-desat-80);
   min-width: 0;
 
   .item-icon {
@@ -117,8 +117,8 @@
     display: grid;
     place-items: center;
     border-radius: 10px;
-    background: var(--color-main-a);
-    color: var(--color-main-50);
+    background: var(--app-color-main-a);
+    color: var(--app-color-main-50);
 
     mat-icon {
       font-size: 1.4rem;

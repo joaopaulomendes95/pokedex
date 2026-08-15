@@ -1,5 +1,6 @@
 import { computed, signal, Service } from '@angular/core';
-import { BattleEvent, Fighter, FighterMove } from '@poke/poke.model';
+import { Fighter, FighterMove } from '@poke/poke.model';
+import { BattleEvent } from '@shared/models/battle-event';
 import { chooseMove, resolveExchange } from '@poke/battle';
 
 /**

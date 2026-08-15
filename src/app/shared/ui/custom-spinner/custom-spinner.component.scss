@@ -1,18 +1,18 @@
 :host {
-  transform: scale(var(--CUSTOM-SPINNER-SCALE, 1));
+  transform: scale(var(--custom-spinner-scale, 1));
   display: block;
 }
 
 @keyframes bouncer-bounce {
   20% {
-    left: calc(100% - var(--CUSTOM-SPINNER-BALL-SIZE, 16px));
+    left: calc(100% - var(--custom-spinner-ball-size, 16px));
     width: 0px;
     height: 0px;
   }
   60% {
     left: 0%;
     width: 66.666%;
-    height: var(--CUSTOM-SPINNER-BALL-SIZE, 16px);
+    height: var(--custom-spinner-ball-size, 16px);
   }
   100% {
     left: 0%;
@@ -23,22 +23,22 @@
 
 @keyframes bouncer-color-swap {
   0% {
-    background-color: var(--color-main-40);
+    background-color: var(--app-color-main-40);
   }
   33% {
-    background-color: var(--color-main-40);
+    background-color: var(--app-color-main-40);
   }
   33.333% {
-    background-color: var(--color-main-60);
+    background-color: var(--app-color-main-60);
   }
   66% {
-    background-color: var(--color-main-60);
+    background-color: var(--app-color-main-60);
   }
   66.667% {
-    background-color: var(--color-main-50);
+    background-color: var(--app-color-main-50);
   }
   100% {
-    background-color: var(--color-main-50);
+    background-color: var(--app-color-main-50);
   }
 }
 
@@ -50,7 +50,7 @@
     transform: rotate(0deg) scale(1);
   }
   20% {
-    transform: rotate(60deg) scale(var(--CUSTOM-SPINNER-SHRINK-SCALE, 0.6));
+    transform: rotate(60deg) scale(var(--custom-spinner-shrink-scale, 0.6));
   }
   33.333% {
     transform: rotate(120deg) scale(1);
@@ -59,7 +59,7 @@
     transform: rotate(120deg) scale(1);
   }
   53.333% {
-    transform: rotate(180deg) scale(var(--CUSTOM-SPINNER-SHRINK-SCALE, 0.6));
+    transform: rotate(180deg) scale(var(--custom-spinner-shrink-scale, 0.6));
   }
   66.667% {
     transform: rotate(240deg) scale(1);
@@ -68,7 +68,7 @@
     transform: rotate(240deg) scale(1);
   }
   86.667% {
-    transform: rotate(300deg) scale(var(--CUSTOM-SPINNER-SHRINK-SCALE, 0.6));
+    transform: rotate(300deg) scale(var(--custom-spinner-shrink-scale, 0.6));
   }
   100% {
     transform: rotate(360deg) scale(1);
@@ -76,15 +76,15 @@
 }
 
 .custom-spinner-wrapper {
-  width: var(--CUSTOM-SPINNER-RADIUS, 110px);
-  height: var(--CUSTOM-SPINNER-RADIUS, 110px);
+  width: var(--custom-spinner-radius, 110px);
+  height: var(--custom-spinner-radius, 110px);
   border-radius: 50%;
-  animation: bouncer-rotate var(--CUSTOM-SPINNER-ANIMATION-DURATION, 5000ms) ease infinite;
+  animation: bouncer-rotate var(--custom-spinner-animation-duration, 5000ms) ease infinite;
   position: relative;
 
   .bouncer-wrapper {
     width: inherit;
-    height: var(--CUSTOM-SPINNER-BALL-SIZE, 20px);
+    height: var(--custom-spinner-ball-size, 20px);
     position: absolute;
 
     &.bouncer-wrapper-1 {
@@ -93,11 +93,11 @@
       transform: translate(-50%, -50%) rotate(120deg);
 
       .bouncer {
-        background-color: var(--color-main-40);
+        background-color: var(--app-color-main-40);
         animation:
-          bouncer-bounce calc(var(--CUSTOM-SPINNER-ANIMATION-DURATION, 5000ms) / 3) ease infinite,
-          bouncer-color-swap var(--CUSTOM-SPINNER-ANIMATION-DURATION, 5000ms)
-            calc((var(--CUSTOM-SPINNER-ANIMATION-DURATION, 5000ms) / 3) * 2) ease infinite;
+          bouncer-bounce calc(var(--custom-spinner-animation-duration, 5000ms) / 3) ease infinite,
+          bouncer-color-swap var(--custom-spinner-animation-duration, 5000ms)
+            calc((var(--custom-spinner-animation-duration, 5000ms) / 3) * 2) ease infinite;
       }
     }
 
@@ -107,11 +107,11 @@
       transform: translate(-50%, -50%) rotate(240deg);
 
       .bouncer {
-        background-color: var(--color-main-50);
+        background-color: var(--app-color-main-50);
         animation:
-          bouncer-bounce calc(var(--CUSTOM-SPINNER-ANIMATION-DURATION, 5000ms) / 3) ease infinite,
-          bouncer-color-swap var(--CUSTOM-SPINNER-ANIMATION-DURATION, 5000ms)
-            calc(var(--CUSTOM-SPINNER-ANIMATION-DURATION, 5000ms) / 3) ease infinite;
+          bouncer-bounce calc(var(--custom-spinner-animation-duration, 5000ms) / 3) ease infinite,
+          bouncer-color-swap var(--custom-spinner-animation-duration, 5000ms)
+            calc(var(--custom-spinner-animation-duration, 5000ms) / 3) ease infinite;
       }
     }
 
@@ -121,10 +121,10 @@
       transform: translate(-50%, -50%) rotate(360deg);
 
       .bouncer {
-        background-color: var(--color-main-60);
+        background-color: var(--app-color-main-60);
         animation:
-          bouncer-bounce calc(var(--CUSTOM-SPINNER-ANIMATION-DURATION, 5000ms) / 3) ease infinite,
-          bouncer-color-swap var(--CUSTOM-SPINNER-ANIMATION-DURATION, 5000ms) ease infinite;
+          bouncer-bounce calc(var(--custom-spinner-animation-duration, 5000ms) / 3) ease infinite,
+          bouncer-color-swap var(--custom-spinner-animation-duration, 5000ms) ease infinite;
       }
     }
 

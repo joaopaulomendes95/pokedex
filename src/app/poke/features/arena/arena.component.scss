@@ -17,10 +17,10 @@
           opacity: 0.7;
         }
         &.player .side-label {
-          color: var(--color-green);
+          color: var(--app-color-green);
         }
         &.rival .side-label {
-          color: var(--color-red);
+          color: var(--app-color-red);
           text-align: right;
         }
         .fighter {
@@ -58,11 +58,11 @@
             overflow: hidden;
             .hp-fill {
               height: 100%;
-              background: var(--color-green);
+              background: var(--app-color-green);
               border-radius: 999px;
               transition: width 0.3s ease;
               &.rival {
-                background: var(--color-red);
+                background: var(--app-color-red);
               }
             }
           }
@@ -116,10 +116,10 @@
         font-size: 1.2rem;
       }
       &.win .outcome {
-        color: var(--color-green);
+        color: var(--app-color-green);
       }
       &.loss .outcome {
-        color: var(--color-red);
+        color: var(--app-color-red);
       }
       .breakdown {
         margin: 4px 0 0;
@@ -141,10 +141,10 @@
         padding: 2px 6px;
         border-left: 3px solid transparent;
         &.player {
-          border-left-color: var(--color-green);
+          border-left-color: var(--app-color-green);
         }
         &.rival {
-          border-left-color: var(--color-red);
+          border-left-color: var(--app-color-red);
         }
         &.ko {
           background: rgba(255, 0, 0, 0.07);
@@ -155,7 +155,7 @@
         }
         .damage {
           font-weight: 700;
-          color: var(--color-red);
+          color: var(--app-color-red);
         }
       }
     }
@@ -187,18 +187,18 @@
       opacity: 0.6;
       &.win {
         background: #e8f5e9;
-        color: var(--color-green);
+        color: var(--app-color-green);
         opacity: 1;
       }
       &.loss {
         background: #fdeaea;
-        color: var(--color-red);
+        color: var(--app-color-red);
         opacity: 1;
       }
       &.current {
-        outline: 2px solid var(--color-orange);
+        outline: 2px solid var(--app-color-orange);
         background: #fff3e0;
-        color: var(--color-orange);
+        color: var(--app-color-orange);
         opacity: 1;
       }
     }
@@ -248,7 +248,7 @@
       font-size: 2.2rem;
       width: 2.2rem;
       height: 2.2rem;
-      color: var(--color-orange);
+      color: var(--app-color-orange);
       margin-right: 12px;
     }
     .cup-meta {

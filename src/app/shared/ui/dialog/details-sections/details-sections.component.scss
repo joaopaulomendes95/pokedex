@@ -24,7 +24,7 @@
   }
 
   .details-block {
-    border: 1px solid var(--color-desat-90);
+    border: 1px solid var(--app-color-desat-90);
     border-radius: 0.5rem;
 
     .row {
@@ -32,7 +32,7 @@
       gap: 0px;
 
       &:not(:last-child) {
-        border-bottom: 1px solid var(--color-desat-90);
+        border-bottom: 1px solid var(--app-color-desat-90);
       }
     }
 
@@ -45,14 +45,14 @@
       flex-direction: column;
 
       &:not(:last-child) {
-        border-right: 1px solid var(--color-desat-90);
+        border-right: 1px solid var(--app-color-desat-90);
       }
 
       .block-label {
         font: var(--mat-sys-label-medium);
         line-height: 1.2;
         font-weight: 600;
-        color: var(--color-desat-60);
+        color: var(--app-color-desat-60);
 
         &.spaced {
           margin-bottom: 0.25rem;
@@ -63,11 +63,11 @@
         font: var(--mat-sys-title-medium);
         line-height: 1.2;
         font-weight: 600;
-        color: var(--color-desat-20);
+        color: var(--app-color-desat-20);
       }
 
       .fa-icon-prefix {
-        color: var(--color-main-50);
+        color: var(--app-color-main-50);
         margin-right: 0.25rem;
       }
 

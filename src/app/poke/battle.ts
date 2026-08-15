@@ -1,5 +1,6 @@
-import { BattleEvent, BattleResult, BattleTeam, Fighter, FighterMove } from '@poke/poke.model';
+import { BattleResult, BattleTeam, Fighter, FighterMove } from '@poke/poke.model';
 import { typeMultiplier } from '@poke/type-chart';
+import { BattleEvent } from '@shared/models/battle-event';
 
 /** Scales raw base stats to a battle-ready fighter at `level`. */
 export function buildFighter(

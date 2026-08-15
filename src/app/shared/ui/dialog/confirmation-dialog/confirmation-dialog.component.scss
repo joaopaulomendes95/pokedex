@@ -14,10 +14,10 @@
   p {
     padding: 0px;
     margin: 0px;
-    height: fit-content !important;
+    height: fit-content;
     font: var(--mat-sys-title-large);
     font-weight: 500;
-    color: var(--color-main-20);
+    color: var(--app-color-main-20);
   }
 }
 
@@ -31,17 +31,17 @@
   place-items: center;
 
   font-size: 2rem;
-  color: var(--color-main-60);
-  background-color: var(--color-main-90);
+  color: var(--app-color-main-60);
+  background-color: var(--app-color-main-90);
 
   &.warn {
-    color: var(--color-orange-60);
-    background-color: var(--color-orange-90);
+    color: var(--app-color-orange-60);
+    background-color: var(--app-color-orange-90);
   }
   &.danger,
   &.delete {
-    color: var(--color-red-60);
-    background-color: var(--color-red-90);
+    color: var(--app-color-red-60);
+    background-color: var(--app-color-red-90);
   }
 }
 
@@ -50,10 +50,10 @@
   font: var(--mat-sys-title-medium);
 
   p {
-    color: var(--color-desat-50);
+    color: var(--app-color-desat-50);
 
     &.warning {
-      color: var(--color-red);
+      color: var(--app-color-red);
     }
   }
 }

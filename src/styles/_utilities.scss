@@ -2,7 +2,7 @@
 
 // ---- Global reusable surfaces / helpers (mirrors the work repo's design system) ----
 .flat-container {
-  border: 1px solid var(--color-desat-80);
+  border: 1px solid var(--app-color-desat-80);
   border-radius: 1rem;
   background: var(--mat-sys-surface);
   overflow: hidden;
@@ -11,7 +11,7 @@
 .full-container {
   border-radius: 1rem;
   background: var(--mat-sys-surface);
-  box-shadow: var(--all-around-shadow);
+  box-shadow: var(--app-all-around-shadow);
   overflow: hidden;
 }
 
@@ -21,26 +21,26 @@
   align-items: center;
 
   &.gap-inner-spacing {
-    gap: var(--inner-spacing);
+    gap: var(--app-inner-spacing);
   }
 }
 
 .cols-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--inner-spacing);
+  gap: var(--app-inner-spacing);
 }
 
 .cols-3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--inner-spacing);
+  gap: var(--app-inner-spacing);
 }
 
 .cols-4 {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--inner-spacing);
+  gap: var(--app-inner-spacing);
 }
 
 .text-header {
@@ -54,31 +54,31 @@
 }
 
 .color-main {
-  color: var(--color-main-50);
+  color: var(--app-color-main-50);
 }
 
 .color-green {
-  color: var(--color-green);
+  color: var(--app-color-green);
 }
 
 .color-red {
-  color: var(--color-red);
+  color: var(--app-color-red);
 }
 
 .color-orange {
-  color: var(--color-orange);
+  color: var(--app-color-orange);
 }
 
 .color-yellow {
-  color: var(--color-yellow);
+  color: var(--app-color-yellow);
 }
 
 .color-purple {
-  color: var(--color-purple);
+  color: var(--app-color-purple);
 }
 
 .color-label {
-  color: var(--color-desat-50);
+  color: var(--app-color-desat-50);
 }
 
 .chip {
@@ -93,23 +93,23 @@
 }
 
 .chip-green {
-  color: var(--color-green);
-  background: var(--color-green-90);
+  color: var(--app-color-green);
+  background: var(--app-color-green-90);
 }
 
 .chip-red {
-  color: var(--color-red);
-  background: var(--color-red-90);
+  color: var(--app-color-red);
+  background: var(--app-color-red-90);
 }
 
 .chip-purple {
-  color: var(--color-purple);
-  background: var(--color-purple-a);
+  color: var(--app-color-purple);
+  background: var(--app-color-purple-a);
 }
 
 .chip-main {
-  color: var(--color-main-10);
-  background: var(--color-main-90);
+  color: var(--app-color-main-10);
+  background: var(--app-color-main-90);
 }
 
 // ---- Reusable page/layout helpers (shared by components) ----
@@ -146,7 +146,7 @@
 }
 
 .error {
-  color: var(--color-red);
+  color: var(--app-color-red);
   text-align: center;
   padding: 16px;
 }
@@ -245,19 +245,19 @@
     transform 0.1s;
 
   &.visited {
-    border-color: var(--color-green-60);
-    box-shadow: inset 0 0 0 2px var(--color-green-a);
+    border-color: var(--app-color-green-60);
+    box-shadow: inset 0 0 0 2px var(--app-color-green-a);
   }
 
   &:hover:not(.selected) {
-    border-color: var(--color-green);
-    box-shadow: 0 4px 16px var(--color-green-a);
+    border-color: var(--app-color-green);
+    box-shadow: 0 4px 16px var(--app-color-green-a);
     transform: translateY(-4px);
   }
 
   &.selected {
-    border-color: var(--color-green);
-    box-shadow: 0 0 0 2px var(--color-green-a);
+    border-color: var(--app-color-green);
+    box-shadow: 0 0 0 2px var(--app-color-green-a);
   }
 }
 
@@ -341,14 +341,14 @@
 
   .xp-fill {
     height: 100%;
-    background: var(--color-green);
+    background: var(--app-color-green);
     border-radius: 999px;
     transition: width 0.3s ease;
 
     &.ready {
       position: relative;
       overflow: hidden;
-      background: var(--color-orange);
+      background: var(--app-color-orange);
 
       &::after {
         content: '';
@@ -412,11 +412,11 @@
 
     .hp-fill {
       height: 100%;
-      background: var(--color-green);
+      background: var(--app-color-green);
       border-radius: 999px;
 
       &.rival {
-        background: var(--color-red);
+        background: var(--app-color-red);
       }
     }
   }
@@ -446,11 +446,11 @@
     border-left: 3px solid transparent;
 
     &.player {
-      border-left-color: var(--color-green);
+      border-left-color: var(--app-color-green);
     }
 
     &.rival {
-      border-left-color: var(--color-red);
+      border-left-color: var(--app-color-red);
     }
 
     &.ko {
@@ -464,7 +464,7 @@
 
     .damage {
       font-weight: 700;
-      color: var(--color-red);
+      color: var(--app-color-red);
     }
   }
 }
@@ -480,7 +480,7 @@
     font-size: 2.2rem;
     width: 2.2rem;
     height: 2.2rem;
-    color: var(--color-orange);
+    color: var(--app-color-orange);
     margin-right: 12px;
   }
 
@@ -523,20 +523,20 @@
 
     &.win {
       background: #e8f5e9;
-      color: var(--color-green);
+      color: var(--app-color-green);
       opacity: 1;
     }
 
     &.loss {
       background: #fdeaea;
-      color: var(--color-red);
+      color: var(--app-color-red);
       opacity: 1;
     }
 
     &.current {
-      outline: 2px solid var(--color-orange);
+      outline: 2px solid var(--app-color-orange);
       background: #fff3e0;
-      color: var(--color-orange);
+      color: var(--app-color-orange);
       opacity: 1;
     }
   }
@@ -586,46 +586,46 @@
 
 // colors
 .color-main {
-  color: var(--color-main-50);
+  color: var(--app-color-main-50);
 }
 
 .color-main-light {
-  color: var(--color-main-70);
+  color: var(--app-color-main-70);
 }
 
 .color-label,
 .color-desat {
-  color: var(--color-desat-50);
+  color: var(--app-color-desat-50);
 }
 
 .color-error,
 .color-red {
-  color: var(--color-red);
+  color: var(--app-color-red);
 }
 
 .color-warning,
 .color-yellow {
-  color: var(--color-yellow);
+  color: var(--app-color-yellow);
 }
 
 .color-danger,
 .color-orange {
-  color: var(--color-orange);
+  color: var(--app-color-orange);
 }
 
 .color-success,
 .color-green {
-  color: var(--color-green);
+  color: var(--app-color-green);
 }
 
 .color-purple {
-  color: var(--color-purple);
+  color: var(--app-color-purple);
 }
 
 // transparent button on text
 .link-bt {
   cursor: pointer;
-  color: var(--color-main-50);
+  color: var(--app-color-main-50);
   font-weight: 600;
 }
 
@@ -636,7 +636,7 @@
   font-size: 0.8em;
   font-weight: 600;
   overflow: visible;
-  color: var(--color-main-50);
+  color: var(--app-color-main-50);
   cursor: pointer;
   background: transparent;
   border: 0;
@@ -667,7 +667,7 @@
   align-items: center;
 
   &.gap-inner-spacing {
-    gap: var(--inner-spacing, 4px);
+    gap: var(--app-inner-spacing, 4px);
   }
 
   & > * {
@@ -676,7 +676,7 @@
 }
 
 .text-header {
-  margin: calc(1.5rem + var(--inner-spacing, 4px)) 2rem 1.5rem;
+  margin: calc(1.5rem + var(--app-inner-spacing, 4px)) 2rem 1.5rem;
   font: var(--mat-sys-headline-medium);
 }
 
@@ -685,15 +685,15 @@
   font: var(--mat-sys-title-medium);
   font-weight: 600;
 
-  color: var(--color-main-50);
+  color: var(--app-color-main-50);
 }
 
 .favButton {
-  color: var(--color-desat-50);
+  color: var(--app-color-desat-50);
   opacity: 0.6;
 
   &:hover {
-    background-color: var(--color-desat-a);
+    background-color: var(--app-color-desat-a);
   }
 }
 
@@ -735,7 +735,7 @@
   flex: 1 1 0%;
   display: flex;
   flex-direction: column;
-  gap: var(--inner-spacing, 4px);
+  gap: var(--app-inner-spacing, 4px);
   box-sizing: border-box;
   overflow-y: auto;
   padding-bottom: 1rem;
@@ -751,7 +751,7 @@
   flex: 0 0 fit-content;
   display: flex;
   flex-direction: column;
-  gap: var(--inner-spacing, 4px);
+  gap: var(--app-inner-spacing, 4px);
   overflow: hidden;
 }
 
@@ -760,7 +760,7 @@
   box-sizing: border-box;
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr);
-  gap: var(--inner-spacing, 4px);
+  gap: var(--app-inner-spacing, 4px);
 }
 
 .grid-37 {
@@ -768,7 +768,7 @@
   box-sizing: border-box;
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
-  gap: var(--inner-spacing, 4px);
+  gap: var(--app-inner-spacing, 4px);
 }
 
 .container-header {
@@ -795,8 +795,8 @@
     place-items: center;
 
     font-size: 1.5rem;
-    color: var(--color-main-60);
-    background-color: var(--color-main-90);
+    color: var(--app-color-main-60);
+    background-color: var(--app-color-main-90);
   }
 
   .head-info {
@@ -813,14 +813,14 @@
 
   .head-desc {
     font: var(--mat-sys-body-medium);
-    color: var(--color-desat-50);
+    color: var(--app-color-desat-50);
     line-height: 1.2;
     font-weight: 600;
   }
 }
 
 .flat-container {
-  border: 1px solid var(--color-desat-80);
+  border: 1px solid var(--app-color-desat-80);
   border-radius: 1rem;
   background-color: var(--mat-sys-surface);
   overflow: hidden;
@@ -894,27 +894,27 @@
 }
 
 .chip-main {
-  background-color: var(--color-main-a);
+  background-color: var(--app-color-main-a);
 }
 
 .chip-red {
-  background-color: var(--color-red-a);
+  background-color: var(--app-color-red-a);
 }
 
 .chip-yellow {
-  background-color: var(--color-yellow-a);
+  background-color: var(--app-color-yellow-a);
 }
 
 .chip-orange {
-  background-color: var(--color-orange-a);
+  background-color: var(--app-color-orange-a);
 }
 
 .chip-green {
-  background-color: var(--color-green-a);
+  background-color: var(--app-color-green-a);
 }
 
 .chip-purple {
-  background-color: var(--color-purple-a);
+  background-color: var(--app-color-purple-a);
 }
 
 .chip-set {
@@ -923,7 +923,7 @@
 }
 
 .isFavorite {
-  color: var(--color-orange);
+  color: var(--app-color-orange);
   opacity: 1;
 }
 
@@ -1086,15 +1086,15 @@
         .hp-bar {
           height: 8px;
           border-radius: 999px;
-          background: var(--color-desat-90);
+          background: var(--app-color-desat-90);
           overflow: hidden;
           .hp-fill {
             height: 100%;
             border-radius: 999px;
-            background: var(--color-green);
+            background: var(--app-color-green);
             transition: width 0.3s ease;
             &.rival {
-              background: var(--color-red);
+              background: var(--app-color-red);
             }
           }
         }
@@ -1122,7 +1122,7 @@
         border-color 0.12s ease;
       &:hover {
         transform: translateY(-1px);
-        border-color: var(--color-main-50);
+        border-color: var(--app-color-main-50);
       }
       .move-name {
         font-weight: 700;
@@ -1146,13 +1146,13 @@
     text-align: center;
     &.win {
       background: #e8f5e9;
-      color: var(--color-green);
-      border: 1px solid var(--color-green-60);
+      color: var(--app-color-green);
+      border: 1px solid var(--app-color-green-60);
     }
     &.loss {
       background: #fdeaea;
-      color: var(--color-red);
-      border: 1px solid var(--color-red-60);
+      color: var(--app-color-red);
+      border: 1px solid var(--app-color-red-60);
     }
   }
 

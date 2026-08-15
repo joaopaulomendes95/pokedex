@@ -24,8 +24,8 @@ function stubPoke(names: string[]): PokeData {
   return {
     pokeByName: (n: string) => cache.get(n) ?? null,
     spriteUrlOrEmpty: () => '',
-    ensureInCache: async () => {},
-    ensureMoves: async () => {},
+    ensureInCache: async () => undefined,
+    ensureMoves: async () => undefined,
     movesFor: () => [],
   } as unknown as PokeData;
 }

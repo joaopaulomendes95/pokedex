@@ -21,10 +21,10 @@
     animation-delay: calc(var(--i, 0) * 40ms);
 
     &.player {
-      border-left-color: var(--color-green);
+      border-left-color: var(--app-color-green);
     }
     &.rival {
-      border-left-color: var(--color-red);
+      border-left-color: var(--app-color-red);
     }
     &.ko {
       background: rgba(255, 0, 0, 0.07);
@@ -34,7 +34,7 @@
       display: inline-flex;
       align-items: center;
       flex-shrink: 0;
-      color: var(--color-desat-50);
+      color: var(--app-color-desat-50);
 
       mat-icon {
         width: 14px;
@@ -44,7 +44,7 @@
       }
 
       &.ko {
-        color: var(--color-red);
+        color: var(--app-color-red);
       }
     }
 
@@ -55,7 +55,7 @@
 
     .damage {
       font-weight: 700;
-      color: var(--color-red);
+      color: var(--app-color-red);
     }
   }
 

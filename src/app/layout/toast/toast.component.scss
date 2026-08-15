@@ -8,7 +8,7 @@
   width: 100%;
   max-width: 22rem;
   padding: 1rem;
-  background: var(--mat-sys-surface-container-high, var(--color-desat-97));
+  background: var(--mat-sys-surface-container-high, var(--app-color-desat-97));
   color: var(--mat-sys-on-surface);
   border-radius: var(--mat-sys-corner-medium, 0.75rem);
   box-shadow: var(--mat-sys-level3, 0 4px 12px rgba(0, 0, 0, 0.2));
@@ -67,8 +67,8 @@
     color: var(--mat-sys-outline);
     cursor: pointer;
     transition:
-      background-color var(--default-transition),
-      color var(--default-transition);
+      background-color var(--app-default-transition),
+      color var(--app-default-transition);
 
     mat-icon {
       font-size: 1.1rem;
@@ -77,7 +77,7 @@
     }
 
     &:hover {
-      background-color: var(--color-desat-a);
+      background-color: var(--app-color-desat-a);
       color: var(--mat-sys-on-surface);
     }
 

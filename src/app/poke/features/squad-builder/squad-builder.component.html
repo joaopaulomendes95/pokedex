@@ -164,13 +164,17 @@
   </app-basic-view>
 
   @if (swapModal(); as modal) {
-    <div class="swap-modal-overlay" (click)="cancelSwap()" (keydown.escape)="cancelSwap()">
+    <div
+      class="swap-modal-overlay"
+      tabindex="-1"
+      (click)="onOverlayClick($event)"
+      (keydown.escape)="cancelSwap()"
+    >
       <div
         class="swap-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="swap-modal-title"
-        (click)="$event.stopPropagation()"
         cdkTrapFocus
         cdkTrapFocusAutoCapture
       >

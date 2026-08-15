@@ -27,52 +27,52 @@ button {
 
   @include mat.button-overrides(
     (
-      tonal-label-text-color: var(--color-main-50),
-      tonal-disabled-container-color: var(--color-desat-90),
-      tonal-disabled-label-text-color: var(--color-desat-70),
+      tonal-label-text-color: var(--app-color-main-50),
+      tonal-disabled-container-color: var(--app-color-desat-90),
+      tonal-disabled-label-text-color: var(--app-color-desat-70),
     )
   );
 
   @include mat.icon-button-overrides(
     (
-      disabled-icon-color: var(--color-desat-70),
-      disabled-state-layer-color: var(--color-desat-90),
+      disabled-icon-color: var(--app-color-desat-70),
+      disabled-state-layer-color: var(--app-color-desat-90),
     )
   );
 
   &.warn {
     @include mat.button-overrides(
       (
-        filled-container-color: var(--color-yellow),
-        tonal-container-color: var(--color-yellow-a),
-        tonal-label-text-color: var(--color-yellow),
-        text-label-text-color: var(--color-yellow),
-        text-state-layer-color: var(--color-yellow),
+        filled-container-color: var(--app-color-yellow),
+        tonal-container-color: var(--app-color-yellow-a),
+        tonal-label-text-color: var(--app-color-yellow),
+        text-label-text-color: var(--app-color-yellow),
+        text-state-layer-color: var(--app-color-yellow),
       )
     );
 
     @include mat.icon-button-overrides(
       (
-        icon-color: var(--color-yellow),
-        state-layer-color: var(--color-yellow),
+        icon-color: var(--app-color-yellow),
+        state-layer-color: var(--app-color-yellow),
       )
     );
   }
   &.danger {
     @include mat.button-overrides(
       (
-        filled-container-color: var(--color-orange),
-        tonal-container-color: var(--color-orange-a),
-        tonal-label-text-color: var(--color-orange),
-        text-label-text-color: var(--color-orange),
-        text-state-layer-color: var(--color-orange),
+        filled-container-color: var(--app-color-orange),
+        tonal-container-color: var(--app-color-orange-a),
+        tonal-label-text-color: var(--app-color-orange),
+        text-label-text-color: var(--app-color-orange),
+        text-state-layer-color: var(--app-color-orange),
       )
     );
 
     @include mat.icon-button-overrides(
       (
-        icon-color: var(--color-orange),
-        state-layer-color: var(--color-orange),
+        icon-color: var(--app-color-orange),
+        state-layer-color: var(--app-color-orange),
       )
     );
   }
@@ -81,18 +81,18 @@ button {
   &.cancel {
     @include mat.button-overrides(
       (
-        filled-container-color: var(--color-red),
-        tonal-container-color: var(--color-red-a),
-        tonal-label-text-color: var(--color-red),
-        text-label-text-color: var(--color-red),
-        text-state-layer-color: var(--color-red),
+        filled-container-color: var(--app-color-red),
+        tonal-container-color: var(--app-color-red-a),
+        tonal-label-text-color: var(--app-color-red),
+        text-label-text-color: var(--app-color-red),
+        text-state-layer-color: var(--app-color-red),
       )
     );
 
     @include mat.icon-button-overrides(
       (
-        icon-color: var(--color-red),
-        state-layer-color: var(--color-red),
+        icon-color: var(--app-color-red),
+        state-layer-color: var(--app-color-red),
       )
     );
   }
@@ -102,54 +102,54 @@ button {
   &.main {
     @include mat.button-overrides(
       (
-        filled-container-color: var(--color-main-50),
-        tonal-container-color: var(--color-main-a),
-        tonal-label-text-color: var(--color-main-50),
-        text-label-text-color: var(--color-main-50),
-        text-state-layer-color: var(--color-main-50),
+        filled-container-color: var(--app-color-main-50),
+        tonal-container-color: var(--app-color-main-a),
+        tonal-label-text-color: var(--app-color-main-50),
+        text-label-text-color: var(--app-color-main-50),
+        text-state-layer-color: var(--app-color-main-50),
       )
     );
 
     @include mat.icon-button-overrides(
       (
-        icon-color: var(--color-main-50),
-        state-layer-color: var(--color-main-50),
+        icon-color: var(--app-color-main-50),
+        state-layer-color: var(--app-color-main-50),
       )
     );
   }
   &.faded {
     @include mat.button-overrides(
       (
-        filled-container-color: var(--color-desat-70),
-        tonal-container-color: var(--color-desat-a),
-        tonal-label-text-color: var(--color-desat),
-        text-label-text-color: var(--color-desat-70),
-        text-state-layer-color: var(--color-desat-70),
+        filled-container-color: var(--app-color-desat-70),
+        tonal-container-color: var(--app-color-desat-a),
+        tonal-label-text-color: var(--app-color-desat),
+        text-label-text-color: var(--app-color-desat-70),
+        text-state-layer-color: var(--app-color-desat-70),
       )
     );
 
     @include mat.icon-button-overrides(
       (
-        icon-color: var(--color-desat-70),
-        state-layer-color: var(--color-desat-70),
+        icon-color: var(--app-color-desat-70),
+        state-layer-color: var(--app-color-desat-70),
       )
     );
   }
   &.dim {
     @include mat.button-overrides(
       (
-        filled-container-color: var(--color-desat-50),
-        tonal-container-color: var(--color-desat-a),
-        tonal-label-text-color: var(--color-desat),
-        text-label-text-color: var(--color-desat-50),
-        text-state-layer-color: var(--color-desat-50),
+        filled-container-color: var(--app-color-desat-50),
+        tonal-container-color: var(--app-color-desat-a),
+        tonal-label-text-color: var(--app-color-desat),
+        text-label-text-color: var(--app-color-desat-50),
+        text-state-layer-color: var(--app-color-desat-50),
       )
     );
 
     @include mat.icon-button-overrides(
       (
-        icon-color: var(--color-desat-50),
-        state-layer-color: var(--color-desat-50),
+        icon-color: var(--app-color-desat-50),
+        state-layer-color: var(--app-color-desat-50),
       )
     );
   }
@@ -219,8 +219,8 @@ button {
 .dim-input {
   @include mat.form-field-overrides(
     (
-      outlined-outline-color: var(--color-desat-80),
-      outlined-hover-outline-color: var(--color-desat-60),
+      outlined-outline-color: var(--app-color-desat-80),
+      outlined-hover-outline-color: var(--app-color-desat-60),
     )
   );
 }

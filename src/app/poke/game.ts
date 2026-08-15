@@ -123,8 +123,11 @@ export class Game {
   /** 0..100 percent for a bar. */
   energyPct = computed(() => Math.floor((this.energy() / this.#config.energyMax) * 100));
 
-  /** Free XP every owned pokémon banks per real second (idle grind). */
-  passiveXpPerSec = computed(() => 1 + this.tier() + XP_PER_ROSTER * this.roster().length);
+  /** Free XP every owned pokémon banks per real second (idle grind), boosted by prestige. */
+  passiveXpPerSec = computed(
+    () =>
+      1 + this.tier() + XP_PER_ROSTER * this.roster().length + PRESTIGE_XP_BONUS * this.prestige(),
+  );
 
   /** Idle coins per second: tier base + per-creature bonus, boosted by prestige. */
   incomePerSec = computed(
@@ -148,7 +151,6 @@ export class Game {
   #_lastSaved = signal(Date.now());
   /** Last persist timestamp as a signal so the Save tab can render it. */
   readonly lastSaved = this.#_lastSaved.asReadonly();
-  #tickIdle: ReturnType<typeof setInterval> | undefined;
 
   #genFilter = inject(GenerationFilter);
   #storage = inject(BrowserStorage);
@@ -160,7 +162,8 @@ export class Game {
     if (!this.#hasSave) this.seed();
     // Apply offline earnings once, then start the live idle tick.
     this.restoreOffline();
-    this.#tickIdle = setInterval(() => {
+    // Runs for the lifetime of the app — the handle is never needed again.
+    setInterval(() => {
       try {
         this.tick();
       } catch (err) {

@@ -1,3 +1,5 @@
+import { BattleEvent } from '@shared/models/battle-event';
+
 /** A single entry in PokeAPI's paginated `/pokemon` list. */
 export interface PokeId {
   name: string;
@@ -82,23 +84,6 @@ export interface Fighter {
   moves: FighterMove[];
   /** Display level (used to show "Lv N" in the arena). Optional: sim ignores it. */
   level?: number;
-}
-
-/** One narrated moment of a battle. */
-export interface BattleEvent {
-  text: string;
-  /** Damage dealt by the attacker this tick (0 for buffs/misses). */
-  damage: number;
-  /** Attacker name. */
-  from: string;
-  /** Target name. */
-  to: string;
-  /** Set when this event knocks out the target. */
-  ko?: boolean;
-  /** Move type used (for type effectiveness display). */
-  type?: string;
-  /** Type effectiveness multiplier (0, 0.5, 1, 2). */
-  effectiveness?: number;
 }
 
 export interface BattleResult {

@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { BattleEvent } from '@poke/poke.model';
+import { BattleEvent } from '@shared/models/battle-event';
 
 /** A battle-log row enriched for the template (no logic in the template). */
 export interface BattleLogRow {

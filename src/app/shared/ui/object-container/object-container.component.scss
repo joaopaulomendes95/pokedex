@@ -8,21 +8,21 @@
   &.main {
     .leading-icon {
       color: var(--mat-sys-surface);
-      background-color: var(--color-main-50);
+      background-color: var(--app-color-main-50);
     }
   }
 
   &.dim {
     .leading-icon {
       color: var(--mat-sys-surface);
-      background-color: var(--color-desat-80);
+      background-color: var(--app-color-desat-80);
     }
   }
 
   &.tonal {
     .leading-icon {
-      color: var(--color-main-60);
-      background-color: var(--color-main-90);
+      color: var(--app-color-main-60);
+      background-color: var(--app-color-main-90);
     }
   }
 }

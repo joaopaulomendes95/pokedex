@@ -6,10 +6,10 @@
 }
 
 .nav-body {
-  width: var(--navbar-closed-width, 72px);
+  width: var(--app-navbar-closed-width, 72px);
   height: 100%;
-  padding: var(--navbar-padding-block, 1.5rem) var(--navbar-padding-inline, 0.75rem);
-  border-right: 1px solid var(--color-desat-80);
+  padding: var(--app-navbar-padding-block, 1.5rem) var(--app-navbar-padding-inline, 0.75rem);
+  border-right: 1px solid var(--app-color-desat-80);
   box-sizing: border-box;
 
   display: flex;
@@ -22,13 +22,13 @@
   overflow: hidden;
 
   transition:
-    width var(--navbar-transition-duration, 0.3s) var(--transition-timming),
-    padding var(--navbar-transition-duration, 0.3s) var(--transition-timming);
+    width var(--app-navbar-transition-duration, 0.3s) var(--app-transition-timming),
+    padding var(--app-navbar-transition-duration, 0.3s) var(--app-transition-timming);
 
   &.opened,
   &:hover,
   &.hovered {
-    width: var(--navbar-open-width, 220px);
+    width: var(--app-navbar-open-width, 220px);
     padding: 1.5rem;
     box-shadow: 0px 0px 12px 4px rgba(0, 0, 0, 0.1);
 
@@ -47,13 +47,13 @@
 
       &:hover,
       &:focus {
-        background-color: var(--color-main-a);
+        background-color: var(--app-color-main-a);
       }
 
       &.active {
-        background-color: var(--color-main-a);
+        background-color: var(--app-color-main-a);
         .nav-item-icon {
-          color: var(--color-main-50);
+          color: var(--app-color-main-50);
         }
       }
     }
@@ -88,7 +88,7 @@
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      background: linear-gradient(135deg, var(--color-main-50), var(--color-purple));
+      background: linear-gradient(135deg, var(--app-color-main-50), var(--app-color-purple));
       display: grid;
       place-items: center;
 
@@ -103,12 +103,12 @@
     .brand-text {
       font: var(--mat-sys-title-large);
       font-weight: 700;
-      color: var(--color-main-50);
+      color: var(--app-color-main-50);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       opacity: 0;
-      transition: opacity var(--default-transition);
+      transition: opacity var(--app-default-transition);
 
       &.nav-text {
         opacity: 0;
@@ -134,7 +134,7 @@
   .income-value {
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--default-transition);
+    transition: opacity var(--app-default-transition);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -150,27 +150,27 @@
     border-radius: 10px;
     border: none;
     background: transparent;
-    color: var(--color-desat-50);
+    color: var(--app-color-desat-50);
     cursor: pointer;
-    transition: all var(--default-transition);
+    transition: all var(--app-default-transition);
     position: relative;
 
     &:hover,
     &:focus {
-      background-color: var(--color-desat-a);
-      color: var(--color-main-50);
+      background-color: var(--app-color-desat-a);
+      color: var(--app-color-main-50);
 
       .nav-item-icon {
-        color: var(--color-main-50);
+        color: var(--app-color-main-50);
       }
     }
 
     &.active {
-      background-color: var(--color-main-a);
-      color: var(--color-main-50);
+      background-color: var(--app-color-main-a);
+      color: var(--app-color-main-50);
 
       .nav-item-icon {
-        color: var(--color-main-50);
+        color: var(--app-color-main-50);
       }
     }
 
@@ -178,8 +178,8 @@
       font-size: 1.5rem;
       width: 1.5rem;
       height: 1.5rem;
-      color: var(--color-desat-50);
-      transition: color var(--default-transition);
+      color: var(--app-color-desat-50);
+      transition: color var(--app-default-transition);
       flex-shrink: 0;
     }
 
@@ -192,7 +192,7 @@
       height: 18px;
       padding: 0 5px;
       border-radius: 999px;
-      background: var(--color-red);
+      background: var(--app-color-red);
       color: white;
       font-size: 0.65rem;
       font-weight: 700;
@@ -207,7 +207,7 @@
     flex-direction: column;
     gap: 0.75rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--color-desat-80);
+    border-top: 1px solid var(--app-color-desat-80);
     margin-top: auto;
   }
 
@@ -219,27 +219,27 @@
     gap: 0.5rem;
     padding: 0.5rem;
     border-radius: 8px;
-    background: var(--color-desat-a);
-    color: var(--color-desat-30);
+    background: var(--app-color-desat-a);
+    color: var(--app-color-desat-30);
     font-size: 0.75rem;
     opacity: 0;
     pointer-events: none;
     transition:
-      opacity var(--default-transition),
-      background var(--default-transition);
+      opacity var(--app-default-transition),
+      background var(--app-default-transition);
     white-space: nowrap;
 
     mat-icon {
       font-size: 1.1rem;
       width: 1.1rem;
       height: 1.1rem;
-      color: var(--color-main-50);
+      color: var(--app-color-main-50);
       flex-shrink: 0;
     }
 
     &:hover {
-      background: var(--color-main-a);
-      color: var(--color-main-10);
+      background: var(--app-color-main-a);
+      color: var(--app-color-main-10);
     }
   }
 }

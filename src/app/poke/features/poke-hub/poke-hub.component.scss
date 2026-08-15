@@ -4,9 +4,9 @@
   gap: 16px;
   padding: 0 24px;
   height: 56px;
-  background: var(--color-main-50);
+  background: var(--app-color-main-50);
   color: var(--mat-sys-on-primary);
-  box-shadow: var(--small-shadow);
+  box-shadow: var(--app-small-shadow);
 
   .brand {
     font-weight: 700;
@@ -26,7 +26,7 @@
     opacity: 0.9;
     padding: 0 8px;
     border-radius: 8px;
-    transition: background var(--default-transition);
+    transition: background var(--app-default-transition);
 
     &:hover {
       background: var(--mat-sys-primary-container);

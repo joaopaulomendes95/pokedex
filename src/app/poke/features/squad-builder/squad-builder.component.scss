@@ -185,7 +185,7 @@ h2 {
     object-fit: contain;
     margin: 0;
     display: block;
-    background: var(--color-desat-90);
+    background: var(--app-color-desat-90);
   }
 
   .sprite-placeholder {
@@ -203,9 +203,10 @@ h2 {
   }
 
   @media (max-width: 820px) {
+    // `[hidden]` out-specifies the Material card image + placeholder display rules.
     img.mat-mdc-card-image[hidden],
     .sprite-placeholder[hidden] {
-      display: none !important;
+      display: none;
     }
   }
 

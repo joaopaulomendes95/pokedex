@@ -14,8 +14,8 @@
 
   * {
     transition-property: color, background, background-color, opacity;
-    transition-duration: var(--transition-duration, 0.2s);
-    transition-timing-function: var(--transition-timming, ease);
+    transition-duration: var(--app-transition-duration, 0.2s);
+    transition-timing-function: var(--app-transition-timming, ease);
   }
 }
 
@@ -52,26 +52,26 @@
     cursor: pointer;
 
     position: relative;
-    border: 1px solid var(--color-desat-80);
+    border: 1px solid var(--app-color-desat-80);
     border-radius: 0.75rem;
     padding: 1rem;
     background-color: var(--mat-sys-surface);
     box-shadow: none;
     transition:
-      border-color var(--default-transition, 0.2s ease),
-      box-shadow var(--default-transition, 0.2s ease),
-      transform var(--default-transition, 0.2s ease);
+      border-color var(--app-default-transition, 0.2s ease),
+      box-shadow var(--app-default-transition, 0.2s ease),
+      transform var(--app-default-transition, 0.2s ease);
 
     &:hover,
     &:focus-visible {
       outline: none;
-      border-color: var(--color-main-50);
-      box-shadow: 0 0.375rem 1rem hsla(var(--main-hue), var(--main-saturation), 30%, 0.14);
+      border-color: var(--app-color-main-50);
+      box-shadow: 0 0.375rem 1rem hsla(var(--app-main-hue), var(--app-main-saturation), 30%, 0.14);
       transform: translateY(-2px);
     }
 
     &.highlighted {
-      background-color: var(--color-yellow-a);
+      background-color: var(--app-color-yellow-a);
     }
   }
 
@@ -79,7 +79,7 @@
     grid-column: 1 / -1;
     text-align: center;
     padding: 40px;
-    color: var(--color-desat-50);
+    color: var(--app-color-desat-50);
   }
 }
 

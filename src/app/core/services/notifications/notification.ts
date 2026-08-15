@@ -11,10 +11,10 @@ import {
 export const DEFAULT_NOTIFICATION_DURATION = 3000;
 
 const TYPE_COLORS: Record<NotificationType, string> = {
-  success: 'var(--color-green)',
-  error: 'var(--color-red)',
-  warning: 'var(--color-yellow)',
-  info: 'var(--color-main-60)',
+  success: 'var(--app-color-green)',
+  error: 'var(--app-color-red)',
+  warning: 'var(--app-color-yellow)',
+  info: 'var(--app-color-main-60)',
 };
 
 const TYPE_ICONS: Record<NotificationType, string> = {
@@ -54,7 +54,7 @@ export class Notifier {
       duration: data.duration ?? DEFAULT_NOTIFICATION_DURATION,
     };
 
-    const config = this.createOverlayConfig(notification);
+    const config = this.createOverlayConfig();
     const ref = this.#overlay.create(config);
 
     const portal = new ComponentPortal(Toast);
@@ -106,7 +106,7 @@ export class Notifier {
     return this.show({ title, message, type: 'info' });
   }
 
-  private createOverlayConfig(notification: Notification): OverlayConfig {
+  private createOverlayConfig(): OverlayConfig {
     // Stack each new toast below the ones already showing.
     const topRem = 1 + this.#toasts.size * 4.6;
     return new OverlayConfig({

@@ -24,7 +24,9 @@ component (`app.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
   Tests are signal-driven, so call `fixture.detectChanges()` /
   `await fixture.whenStable()` after state changes. Import vitest helpers
   (`import { describe, expect, it } from 'vitest'`) explicitly.
-- No lint script; format with `npx prettier --write .` (singleQuote,
+- `npm run lint` — ESLint (`ng lint`, angular-eslint flat config in
+  `eslint.config.js`). Generated `shared/openapi` and `dist/` are ignored;
+  keep the run green. Format with `npx prettier --write .` (singleQuote,
   printWidth 100, angular HTML parser).
 
 ## Structure & conventions
@@ -48,6 +50,10 @@ component (`app.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
   timeline), and the dialog system (`AppDialog`, `ConfirmationDialog`,
   `ResultDialog`, `DetailsDialog`,
   `DetailsSections`). Re-exported through `shared/ui/index.ts`.
+  Domain-neutral models shared by UI and features live in `shared/models/`
+  (e.g. `battle-event.ts`) so `shared/` never imports from `poke/`.
+  Global design tokens are in `src/styles/_tokens.scss`, prefixed `--app-`;
+  component-scoped CSS vars are kebab-case + component name.
 - **Layout** in `layout/`: `navbar` (hover-expand, theme + Shop buttons,
   coins/energy), `toast`, `loaders/pop-loader`.
 

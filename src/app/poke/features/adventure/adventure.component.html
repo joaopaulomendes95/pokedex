@@ -48,7 +48,7 @@
 
       @if (poolLoading()) {
         <div class="pool-loading">
-          <app-custom-spinner style="--CUSTOM-SPINNER-SCALE: 0.5" />
+          <app-custom-spinner [style.--custom-spinner-scale]="'0.5'" />
         </div>
       } @else if (poolError()) {
         <p class="error">

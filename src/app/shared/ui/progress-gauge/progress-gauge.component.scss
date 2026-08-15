@@ -31,7 +31,7 @@
   background: conic-gradient(
     from -90deg,
     hsl(var(--goal-hue), 100%, 50%) 0% calc(1% * var(--progress) / 2),
-    var(--color-desat-90) calc(1% * var(--progress) / 2) 100%
+    var(--app-color-desat-90) calc(1% * var(--progress) / 2) 100%
   );
 
   -webkit-mask: radial-gradient(circle, transparent 50%, black 50.25%);
@@ -57,7 +57,7 @@
     font-weight: 500;
 
     .dim {
-      color: var(--color-desat-50);
+      color: var(--app-color-desat-50);
     }
   }
 }

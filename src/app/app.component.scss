@@ -3,7 +3,7 @@
   height: 100%;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: var(--navbar-closed-width, 72px) 1fr;
+  grid-template-columns: var(--app-navbar-closed-width, 72px) 1fr;
   grid-template-rows: 1fr;
   overflow: hidden;
 }

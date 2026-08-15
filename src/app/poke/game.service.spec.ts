@@ -196,6 +196,21 @@ describe('Game', () => {
     expect(g.wins()).toBe(0);
   });
 
+  it('prestige shards additively boost passive XP per second', () => {
+    TestBed.configureTestingModule({});
+    const g = TestBed.inject(Game);
+    const before = g.passiveXpPerSec();
+    // Advance to the top tier and prestige, then compare the live formula.
+    for (let t = g.tier(); t < 4; t++) {
+      for (let i = 0; i < TIERS[t]!.winsToPromote; i++) g.award('player');
+      g.promote();
+    }
+    expect(g.prestigeReset()).toBe(true);
+    expect(g.passiveXpPerSec()).toBe(
+      before + g.prestige(),
+    );
+  });
+
   it('evolve swaps the species but keeps level, xp and the fielded slot', () => {
     TestBed.configureTestingModule({});
     const g = TestBed.inject(Game);

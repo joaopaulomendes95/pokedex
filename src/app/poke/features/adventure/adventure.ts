@@ -4,7 +4,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { Game } from '@poke/game';
 import { PokeData } from '@poke/poke-data';
 import { Notify } from '@poke/notify';
-import { PokeId } from '@poke/poke.model';
 import { catchChance } from '@poke/economy';
 import { Battle, buildFighter } from '@poke/battle';
 import { generationFromId } from '@poke/generation';
@@ -257,7 +256,7 @@ export class Adventure {
     // Reset the artwork-failure flag whenever the zone changes.
     effect(
       () => {
-        this.currentZone().index;
+        void this.currentZone().index;
         this.artOk.set(true);
       },
       { allowSignalWrites: true },

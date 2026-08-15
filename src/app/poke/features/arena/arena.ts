@@ -9,13 +9,7 @@ import { MatchRunner } from '@poke/match.runner';
 import { PokeData } from '@poke/poke-data';
 import { Notify } from '@poke/notify';
 import { AutoBattle } from '@poke/auto-battle';
-import {
-  CUPS,
-  Cup,
-  CUP_BATTLE_ENERGY,
-  QUICK_BATTLE_ENERGY,
-  getCupsForTier,
-} from '@poke/tournament';
+import { Cup, CUP_BATTLE_ENERGY, QUICK_BATTLE_ENERGY, getCupsForTier } from '@poke/tournament';
 import { poolAroundTier, sampleRivalTeam, RIVAL_POOLS } from '@poke/rivals';
 import { CupRuns } from '@poke/cup-run';
 import { AppDialog, BasicView, BattleLog } from '@shared/ui';

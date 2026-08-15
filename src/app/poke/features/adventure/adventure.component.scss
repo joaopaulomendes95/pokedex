@@ -23,14 +23,14 @@
       }
 
       &.active {
-        border-color: var(--color-green);
-        box-shadow: 0 0 0 2px var(--color-green-a);
+        border-color: var(--app-color-green);
+        box-shadow: 0 0 0 2px var(--app-color-green-a);
       }
 
       .zone-art {
         position: relative;
         height: 90px;
-        background: linear-gradient(135deg, var(--color-main-70), var(--color-main-20));
+        background: linear-gradient(135deg, var(--app-color-main-70), var(--app-color-main-20));
         overflow: hidden;
 
         img {
@@ -156,7 +156,7 @@
         }
 
         &.selected {
-          border-color: var(--color-green);
+          border-color: var(--app-color-green);
           background: #e8f5e9;
         }
       }
@@ -218,14 +218,14 @@
 
     .fight-won {
       background: #e8f5e9;
-      color: var(--color-green);
-      border: 1px solid var(--color-green-60);
+      color: var(--app-color-green);
+      border: 1px solid var(--app-color-green-60);
     }
 
     .fight-lost {
       background: #fdeaea;
-      color: var(--color-red);
-      border: 1px solid var(--color-red-60);
+      color: var(--app-color-red);
+      border: 1px solid var(--app-color-red-60);
     }
 
     .catch-result {
@@ -246,14 +246,14 @@
 
       &.success {
         background: #e8f5e9;
-        color: var(--color-green);
-        border: 1px solid var(--color-green-60);
+        color: var(--app-color-green);
+        border: 1px solid var(--app-color-green-60);
       }
 
       &.fail {
         background: #fdeaea;
-        color: var(--color-red);
-        border: 1px solid var(--color-red-60);
+        color: var(--app-color-red);
+        border: 1px solid var(--app-color-red-60);
       }
     }
 
@@ -268,7 +268,7 @@
   }
 
   .error {
-    color: var(--color-red);
+    color: var(--app-color-red);
     font-size: 0.75rem;
     display: flex;
     align-items: center;

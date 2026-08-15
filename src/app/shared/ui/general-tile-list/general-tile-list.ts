@@ -31,7 +31,7 @@ export class GeneralTileList<T extends Record<string, unknown>> extends GeneralL
   tileMinWidth = input<number>(240);
   tileColumns = input<number>(0);
   /** Stable identity for `@for` tracking; falls back to the row index. */
-  trackBy = input<(row: T) => unknown>((_row) => undefined);
+  trackBy = input<(row: T) => unknown>(() => undefined);
 
   readonly tile = contentChild<TemplateRef<unknown>>('tile');
 

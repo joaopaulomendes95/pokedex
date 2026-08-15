@@ -49,7 +49,7 @@ export class DetailPanel {
   constructor() {
     effect(
       () => {
-        this.data.selected()?.name;
+        void this.data.selected()?.name;
         this.artOk.set(true);
       },
       { allowSignalWrites: true },

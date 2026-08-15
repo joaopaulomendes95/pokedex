@@ -7,7 +7,8 @@ import { Component } from '@angular/core';
  *
  * ```html
  * <app-custom-spinner
- *   style="--CUSTOM-SPINNER-SCALE: 0.6; --CUSTOM-SPINNER-ANIMATION-DURATION: 3s"
+ *   [style.--custom-spinner-scale]="'0.6'"
+ *   [style.--custom-spinner-animation-duration]="'3s'"
  * />
  * ```
  */

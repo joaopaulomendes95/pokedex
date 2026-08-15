@@ -15,7 +15,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(160deg, var(--color-main-20), var(--color-main-50));
+    background: linear-gradient(160deg, var(--app-color-main-20), var(--app-color-main-50));
     overflow: hidden;
 
     img {
@@ -67,8 +67,8 @@
       .type-chip {
         padding: 2px 10px;
         border-radius: 999px;
-        background: var(--color-desat-90);
-        color: var(--color-desat-20);
+        background: var(--app-color-desat-90);
+        color: var(--app-color-desat-20);
         font-size: 0.72rem;
         font-weight: 700;
         text-transform: capitalize;
@@ -86,7 +86,7 @@
         align-items: center;
         padding: 6px 4px;
         border-radius: 8px;
-        background: var(--color-desat-97);
+        background: var(--app-color-desat-97);
 
         span {
           font-size: 0.62rem;
@@ -123,17 +123,17 @@
     .xp-bar {
       height: 8px;
       border-radius: 999px;
-      background: var(--color-desat-90);
+      background: var(--app-color-desat-90);
       overflow: hidden;
 
       .xp-fill {
         height: 100%;
         border-radius: 999px;
-        background: var(--color-main-50);
+        background: var(--app-color-main-50);
         transition: width 0.3s ease;
 
         &.ready {
-          background: var(--color-green);
+          background: var(--app-color-green);
         }
       }
     }
