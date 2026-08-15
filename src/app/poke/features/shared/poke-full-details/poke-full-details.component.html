@@ -1,0 +1,255 @@
+@if (detail(); as d) {
+  <div class="full-details">
+    <!-- Artwork + identity -->
+    <div class="hero" [style.background]="heroStyle(d)">
+      <div class="hero-id">#{{ d.id }}</div>
+      <img [src]="d.artworkUrl || d.spriteUrl" alt="" />
+      <div class="hero-info">
+        <h2>{{ d.name }}</h2>
+        <div class="hero-chips">
+          @for (t of typeChips(); track t.name) {
+            <span
+              class="type-chip"
+              [style.background]="'color-mix(in srgb, ' + t.hex + ' 24%, transparent)'"
+              [style.color]="t.hex"
+              [style.borderColor]="'color-mix(in srgb, ' + t.hex + ' 55%, transparent)'"
+            >
+              {{ t.name }}
+            </span>
+          }
+          <span class="gen-chip">Gen {{ gen() }}</span>
+          @if (owned(); as o) {
+            <span class="owned-chip">
+              <mat-icon>catching_pokemon</mat-icon>
+              Owned · Lv {{ o.level }}
+            </span>
+            @if (o.shiny) {
+              <span class="shiny-chip">✨ Shiny</span>
+            }
+          } @else {
+            <span class="owned-chip muted">Not owned</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <mat-card class="fd-card">
+      <mat-card-header>
+        <mat-card-title>Stats</mat-card-title>
+        <mat-card-subtitle>
+          @if (statsView()?.owned) {
+            Scaled to level {{ owned()!.level }}
+          } @else {
+            Base values
+          }
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (statsView(); as s) {
+          <div class="stat-grid">
+            <div>
+              <span>HP</span><b>{{ s.hp }}</b>
+            </div>
+            <div>
+              <span>Attack</span><b>{{ s.attack }}</b>
+            </div>
+            <div>
+              <span>Defense</span><b>{{ s.defense }}</b>
+            </div>
+            <div>
+              <span>Sp. Atk</span><b>{{ s.spAtk }}</b>
+            </div>
+            <div>
+              <span>Sp. Def</span><b>{{ s.spDef }}</b>
+            </div>
+            <div>
+              <span>Speed</span><b>{{ s.speed }}</b>
+            </div>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Evolution -->
+    @if (chainView().length > 0) {
+      <mat-card class="fd-card">
+        <mat-card-header>
+          <mat-card-title>Evolution</mat-card-title>
+          <mat-card-subtitle>
+            @if (evolvesFrom(); as from) {
+              Evolves from {{ from }} — full chain:
+            } @else {
+              Base form — full chain:
+            }
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chain">
+            @for (node of chainView(); track node.name; let i = $index) {
+              @if (i > 0 && node.trigger) {
+                <div class="chain-trigger">{{ node.trigger }}</div>
+              }
+              <div
+                class="chain-node"
+                [class.current]="node.current"
+                [class.owned]="node.owned"
+                [matTooltip]="
+                  (node.owned ? 'Owned' : 'Not owned') + (node.current ? ' · this pokémon' : '')
+                "
+              >
+                <img [src]="node.sprite" alt="" />
+                <span class="chain-name">{{ node.name }}</span>
+                @if (node.current) {
+                  <span class="you">you</span>
+                }
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Moves -->
+    @if (movesView().length > 0) {
+      <mat-card class="fd-card">
+        <mat-card-header>
+          <mat-card-title>Moves</mat-card-title>
+          <mat-card-subtitle>Real level-up moveset, newest game</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="move-grid">
+            @for (m of movesView(); track m.name) {
+              <div class="move-row">
+                <span class="move-lv">Lv {{ m.level }}</span>
+                <span class="move-name">{{ m.name }}</span>
+                <span class="move-meta">{{ m.type }} · {{ m.category }} · {{ m.power }}p</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Abilities -->
+    @if (abilitiesView().length > 0) {
+      <mat-card class="fd-card">
+        <mat-card-header>
+          <mat-card-title>Abilities</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="ability-list">
+            @for (a of abilitiesView(); track a.name) {
+              <div class="ability-row">
+                <b>{{ a.name }}{{ a.isHidden ? ' (hidden)' : '' }}</b>
+                @if (a.effect) {
+                  <span>{{ a.effect }}</span>
+                } @else {
+                  <span class="dim">Loading effect…</span>
+                }
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Dex entry -->
+    @if (flavor(); as text) {
+      <mat-card class="fd-card">
+        <mat-card-header>
+          <mat-card-title>Pokédex entry</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="flavor">{{ text }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Habitats -->
+    <mat-card class="fd-card">
+      <mat-card-header>
+        <mat-card-title>Found in</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @let h = habitats();
+        @if (h.curated.length > 0) {
+          <div class="habitat-line">
+            <mat-icon>map</mat-icon>
+            <span>{{ h.curated.join(', ') }}</span>
+          </div>
+        }
+        @if (h.discovered.length > 0) {
+          <div class="habitat-line">
+            <mat-icon>explore</mat-icon>
+            <span>Seen at: {{ h.discovered.map((l) => l.name).join(', ') }}</span>
+          </div>
+        }
+        @if (h.curated.length === 0 && h.discovered.length === 0) {
+          <p class="dim">No habitat data yet — explore Adventure zones to discover it.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Catch info -->
+    <mat-card class="fd-card">
+      <mat-card-header>
+        <mat-card-title>Wild data</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="catch-grid">
+          <div>
+            <span>Base XP</span><b>{{ catchInfo().baseXp }}</b>
+          </div>
+          <div>
+            <span>Catch rate</span><b>{{ catchInfo().rate }}%</b>
+          </div>
+          <div>
+            <span>Pokéball cost</span><b>{{ catchInfo().ballCost | number }}¢</b>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Actions -->
+    @if (owned(); as o) {
+      <mat-card class="fd-card actions-card">
+        <mat-card-content>
+          <div class="level-line">
+            <span>Level {{ o.level }}</span>
+            <div class="xp-bar">
+              <div class="xp-fill" [class.ready]="pending() > 0" [style.width.%]="xpPct()"></div>
+            </div>
+            <span class="xp-text">{{ xpPct() }}% to Lv {{ o.level + 1 }}</span>
+          </div>
+          <div class="action-row">
+            @if (pending() > 0) {
+              <button type="button" mat-flat-button color="accent" (click)="bank()">
+                <mat-icon>arrow_upward</mat-icon>
+                Level Up ({{ pending() }} ready)
+              </button>
+            }
+            <button
+              type="button"
+              mat-flat-button
+              color="primary"
+              (click)="train()"
+              [disabled]="!game.canAfford(trainCost())"
+            >
+              <mat-icon>fitness_center</mat-icon>
+              Train +1 Lv · {{ trainCost() | number }}¢
+            </button>
+            @if (canEvolve()) {
+              <button type="button" mat-flat-button class="success" (click)="evolve()">
+                <mat-icon>auto_awesome</mat-icon>
+                Evolve
+              </button>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+} @else {
+  <div class="loading"><mat-spinner diameter="30"></mat-spinner></div>
+}

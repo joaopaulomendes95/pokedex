@@ -5,7 +5,7 @@
     faIcon="people-group"
   >
     @if (hasAnyPending()) {
-      <button mat-flat-button class="success level-up-all" (click)="levelUpAll()">
+      <button type="button" mat-flat-button class="success level-up-all" (click)="levelUpAll()">
         <mat-icon>arrow_upward</mat-icon>
         Level Up All Ready ({{ totalPending() }})
       </button>
@@ -34,9 +34,8 @@
               role="button"
               tabindex="0"
               [attr.aria-label]="'Inspect ' + s.name"
-              (click)="inspect(s.name)"
-              (dblclick)="onSquadDblClick(s.name)"
-              (keydown.enter)="inspect(s.name)"
+              (click)="inspect(s.name, $event)"
+              (keydown.enter)="inspect(s.name, $event)"
             >
               @if (s.sprite) {
                 <img [src]="s.sprite" alt="" />
@@ -47,6 +46,16 @@
               @if (s.pending > 0) {
                 <span class="ready-chip">+{{ s.pending }}</span>
               }
+              <button
+                type="button"
+                class="slot-remove"
+                [attr.aria-label]="'Remove ' + s.name + ' from squad'"
+                title="Remove from squad"
+                (click)="bench(s.name); $event.stopPropagation()"
+                (keydown.enter)="$event.stopPropagation()"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
             </div>
           } @else {
             <div class="slot-empty" cdkDropListPlaceholder>Drop here</div>
@@ -90,7 +99,6 @@
               tabindex="0"
               [attr.aria-label]="'Inspect ' + row.owned.name"
               (click)="inspect(row.owned.name, $event)"
-              (dblclick)="onCollectionDblClick(row.owned.name)"
               (keydown.enter)="inspect(row.owned.name, $event)"
             >
               @if (row.sprite) {
@@ -117,6 +125,7 @@
                 }
                 @if (row.evolvesTo; as to) {
                   <button
+                    type="button"
                     mat-flat-button
                     class="success evolve-btn"
                     (click)="evolve(row.owned.name); $event.stopPropagation()"
@@ -140,13 +149,24 @@
                 <button
                   mat-flat-button
                   color="primary"
-                  (click)="game.toggleSquad(row.owned.name); $event.stopPropagation()"
+                  type="button"
+                  (click)="fieldOrSwap(row.owned.name); $event.stopPropagation()"
                   class="field-toggle"
                 >
                   <mat-icon>{{
                     row.isFielded ? 'remove_circle_outline' : 'add_circle_outline'
                   }}</mat-icon>
                   {{ row.isFielded ? 'Bench' : 'Field' }}
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="transfer-btn"
+                  title="Release for coins"
+                  (click)="transfer(row.owned.name); $event.stopPropagation()"
+                >
+                  <mat-icon>swap_horiz</mat-icon>
+                  +{{ game.releaseValue(row.owned.level) }}¢
                 </button>
               </mat-card-actions>
             </mat-card>
@@ -182,7 +202,7 @@
         </h3>
         <div class="swap-targets">
           @for (t of swapTargets(); track t.name) {
-            <button class="swap-target" (click)="confirmSwap(t.name)">
+            <button type="button" class="swap-target" (click)="confirmSwap(t.name)">
               @if (t.sprite) {
                 <img [src]="t.sprite" alt="" />
               } @else {
@@ -195,7 +215,7 @@
             </button>
           }
         </div>
-        <button mat-stroked-button (click)="cancelSwap()">Cancel</button>
+        <button type="button" mat-stroked-button (click)="cancelSwap()">Cancel</button>
       </div>
     </div>
   }

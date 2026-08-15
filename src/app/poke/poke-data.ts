@@ -53,42 +53,59 @@ export class PokeData {
   #_searchQuery = signal('');
   readonly searchQuery = this.#_searchQuery.asReadonly();
 
-  #dexParams = computed<PokemonListParams>(() => ({
-    limit: this.dexPageSize(),
-    offset: this.dexPage() * this.dexPageSize(),
+  /** Fetch all Pokémon names once for global search (client-side filter). */
+  #masterParams = computed<PokemonListParams>(() => ({
+    limit: maxIdForGen(this.#genFilter.maxGen()),
+    offset: 0,
   }));
 
-  #dexResource = pokemonListResource(this.#dexParams, {
+  /**
+   * The ONE list fetch per save: every Pokémon up to the save's generation
+   * (`maxGen`). Everything the player interacts with — dex pages, search,
+   * adventure wild pools, arena rivals — is derived from this read-only
+   * master list, so no higher-generation species can ever leak in.
+   */
+  #masterResource = pokemonListResource(this.#masterParams, {
     defaultValue: { count: 0, results: [] },
   });
 
-  /** Fetch all Pokémon names once for global search (client-side filter). */
-  #allPokemonResource = pokemonListResource(
-    computed<PokemonListParams>(() => ({ limit: 10000, offset: 0 })),
-    { defaultValue: { count: 0, results: [] } },
-  );
-
-  /**
-   * Search results across the WHOLE PokeAPI dex (name + url with a resolvable
-   * pokédex ID), filtered client-side by `searchQuery`.
-   */
-  readonly searchResults = computed<PokeId[]>(() => {
-    const query = this.searchQuery().toLowerCase().trim();
-    if (!query) return [];
+  /** Read-only master list: every Pokémon up to the save's generation. */
+  readonly masterList = computed<PokeId[]>(() => {
     const maxId = maxIdForGen(this.#genFilter.maxGen());
     const out: PokeId[] = [];
-    for (const e of this.#allPokemonResource.value().results ?? []) {
+    for (const e of this.#masterResource.value().results ?? []) {
       const id = Number(e.url.match(/\/(\d+)\/?$/)?.[1] ?? '0');
-      if (id > 0 && id <= maxId && e.name.toLowerCase().includes(query)) {
-        out.push({ name: e.name, url: e.url });
-      }
+      // Belt-and-braces: even a stale in-flight response can't leak a species
+      // above the save's generation.
+      if (id > 0 && id <= maxId) out.push({ name: e.name, url: e.url });
     }
     return out;
   });
 
-  /** True while the full-list (the search source) is still loading. */
+  /** Fast lowercase name→membership check against the master list. */
+  readonly masterNames = computed(() => new Set(this.masterList().map((e) => e.name)));
+
+  /** Whether a species belongs to the save's generation (rival/pool gating). */
+  isInMasterList(name: string): boolean {
+    return this.masterNames().has(name.toLowerCase());
+  }
+
+  readonly masterLoading = computed(() => this.#masterResource.isLoading());
+  readonly masterError = computed(() => this.#masterResource.error());
+
+  /**
+   * Search results across the master list, filtered client-side by
+   * `searchQuery` (no species above the save's generation can appear).
+   */
+  readonly searchResults = computed<PokeId[]>(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    if (!query) return [];
+    return this.masterList().filter((e) => e.name.includes(query));
+  });
+
+  /** True while the master list (the search source) is still loading. */
   readonly searchLoading = computed(
-    () => this.searchQuery().trim().length > 0 && this.#allPokemonResource.isLoading(),
+    () => this.searchQuery().trim().length > 0 && this.masterLoading(),
   );
 
   #detailName = computed<string>(() => this.selected()?.name ?? '');
@@ -129,6 +146,9 @@ export class PokeData {
   /** name → English Pokédex entry (flavor text) from `/pokemon-species/:name`. */
   #speciesCache = new Map<string, string>();
 
+  /** name → the species it evolves FROM (null = base form), from the species body. */
+  #evolvesFromCache = new Map<string, string | null>();
+
   /** The ability currently being fetched for its effect text. */
   #_abilityName = signal('');
 
@@ -140,44 +160,38 @@ export class PokeData {
   /** ability name → English short effect text from `/ability/:name`. */
   #abilityCache = new Map<string, string>();
 
-  /** species name → evolution-chain URL (harvested from the species body). */
-  #chainUrlByName = new Map<string, string>();
+  /** species name → evolution-chain ID (harvested from the species body). */
+  #chainIdByName = new Map<string, string>();
 
-  /** The chain currently being fetched. */
-  #_chainUrl = signal('');
+  /** The chain currently being fetched (its numeric id as a string). */
+  #_chainId = signal('');
 
-  #chainResource = evolutionChainRetrieveResource(this.#_chainUrl, {
+  #chainResource = evolutionChainRetrieveResource(this.#_chainId, {
     request: (request) =>
       this.shouldFetchChain() ? request : (undefined as unknown as typeof request),
   });
 
-  /** chain URL → flattened evolution steps (dedupe for the request gate). */
-  #chainByUrl = new Map<string, EvoStep[]>();
+  /** chain id → flattened evolution steps (dedupe for the request gate). */
+  #chainById = new Map<string, EvoStep[]>();
 
   /** species name → flattened evolution steps from `/evolution-chain/:id`. */
   #chainCache = new Map<string, EvoStep[]>();
 
-  /** The dex page the game reads from (current page only, filtered by generation). */
+  /**
+   * The dex page the game reads from: a slice of the master list (no
+   * per-page network calls — one list fetch per save).
+   */
   readonly dex = computed<PokeId[]>(() => {
-    const maxId = maxIdForGen(this.#genFilter.maxGen());
-    const entries: PokeId[] = [];
-    for (const e of this.#dexResource.value().results ?? []) {
-      const id = Number(e.url.match(/\/(\d+)\/?$/)?.[1] ?? '0');
-      // Keep only creatures that belong to the allowed generations.
-      if (id <= maxId) entries.push({ name: e.name, url: e.url });
-    }
-    return entries;
+    const all = this.masterList();
+    const start = this.dexPage() * this.dexPageSize();
+    return all.slice(start, start + this.dexPageSize());
   });
 
-  readonly dexLoading = computed(() => this.#dexResource.isLoading());
-  readonly dexError = computed(() => this.#dexResource.error());
+  readonly dexLoading = computed(() => this.masterLoading());
+  readonly dexError = computed(() => this.masterError());
 
-  /** Total creatures in the PokeAPI dex (drives pagination bounds). */
-  readonly dexTotal = computed(() => {
-    const maxGen = this.#genFilter.maxGen();
-    if (maxGen >= 9) return 1025; // all gens
-    return maxIdForGen(maxGen); // last ID of that generation = total count
-  });
+  /** Total creatures in the save's generation (drives pagination bounds). */
+  readonly dexTotal = computed(() => this.masterList().length);
   readonly dexMaxPage = computed(() =>
     Math.max(0, Math.ceil(this.dexTotal() / this.dexPageSize()) - 1),
   );
@@ -210,7 +224,10 @@ export class PokeData {
 
   /** Change page size and reset to first page. */
   setDexPageSize(size: number) {
-    this.#_dexPageSize.set(size);
+    // mat-select emits strings when options are declared with value="N" —
+    // coerce so `limit`/`offset` stay numbers for the PokeAPI request.
+    const n = Math.max(1, Math.min(1000, Number(size) || DEFAULT_DEX_PAGE_SIZE));
+    this.#_dexPageSize.set(n);
     this.#_dexPage.set(0);
   }
 
@@ -300,11 +317,7 @@ export class PokeData {
     // depending on the current page/filters (kept out of the computeds so they
     // stay pure).
     effect(() => {
-      for (const e of this.#dexResource.value().results ?? []) {
-        const id = Number(e.url.match(/\/(\d+)\/?$/)?.[1] ?? '0');
-        if (id) this.#nameToId.set(e.name, id);
-      }
-      for (const e of this.#allPokemonResource.value().results ?? []) {
+      for (const e of this.#masterResource.value().results ?? []) {
         const id = Number(e.url.match(/\/(\d+)\/?$/)?.[1] ?? '0');
         if (id) this.#nameToId.set(e.name, id);
       }
@@ -333,8 +346,11 @@ export class PokeData {
       if (raw && name && name === this.#_speciesName()) {
         const flavor = parseFlavor(raw);
         if (flavor) this.#speciesCache.set(name, flavor);
-        const chainUrl = parseChainUrl(raw);
-        if (chainUrl) this.#chainUrlByName.set(name, chainUrl);
+        // The generated resource builds `evolution-chain/${id}/` — it needs the
+        // numeric chain ID, not the URL the species body hands back.
+        const chainId = chainIdFromUrl(parseChainUrl(raw));
+        if (chainId) this.#chainIdByName.set(name, chainId);
+        this.#evolvesFromCache.set(name, parseEvolvesFrom(raw));
       }
     });
     // Harvest every fetched ability (guarded against stale values).
@@ -349,10 +365,10 @@ export class PokeData {
     // Harvest every fetched evolution chain into memory.
     effect(() => {
       const raw = this.#chainResource.value();
-      const url = this.#_chainUrl();
-      if (raw && url && url === this.#_chainUrl()) {
+      const id = this.#_chainId();
+      if (raw && id && id === this.#_chainId()) {
         const steps = parseChain(raw);
-        this.#chainByUrl.set(url, steps);
+        this.#chainById.set(id, steps);
         // Map the flattened steps back to every species mentioned in the chain.
         for (const species of speciesInChain(raw)) {
           this.#chainCache.set(species, steps);
@@ -414,7 +430,12 @@ export class PokeData {
     const areas = areaUrls
       .map((url) => this.#areaDataCache.get(url))
       .filter((a): a is LocationArea => Boolean(a));
-    const pool = buildZonePool(areas, genCap).slice(0, poolSize);
+    // The wild pool never exceeds the save's generation: cap the zone era by
+    // maxGen AND drop anything missing from the master list.
+    const cap = Math.min(genCap, this.#genFilter.maxGen());
+    const pool = buildZonePool(areas, cap)
+      .filter((p) => this.masterNames().has(p.name))
+      .slice(0, poolSize);
     void this.ensureInCache(pool.map((p) => p.name)).catch(() => undefined);
     return pool;
   }
@@ -447,6 +468,15 @@ export class PokeData {
   /** The English Pokédex entry for a species (cached, no request if absent). */
   speciesFlavor(name: string): string | null {
     return this.#speciesCache.get(name) ?? null;
+  }
+
+  /**
+   * The species this one evolves FROM (`null` = base form, `undefined` =
+   * species body not fetched yet). Drives the "first evolutions only" wild
+   * filter and the evolution UI.
+   */
+  evolvesFrom(name: string): string | null | undefined {
+    return this.#evolvesFromCache.has(name) ? this.#evolvesFromCache.get(name)! : undefined;
   }
 
   /** English short effect text for an ability (cached, no request if absent). */
@@ -499,7 +529,7 @@ export class PokeData {
   }
 
   retryDex() {
-    this.#dexResource.reload();
+    this.#masterResource.reload();
   }
 
   retryDetail() {
@@ -566,10 +596,10 @@ export class PokeData {
   async ensureChainFor(pokeNames: string[], timeoutMs = 5000): Promise<void> {
     for (const name of pokeNames) {
       if (this.#chainCache.has(name)) continue;
-      const url = this.#chainUrlByName.get(name);
-      if (!url) continue;
-      this.#_chainUrl.set(url);
-      await waitFor(() => this.#chainByUrl.has(url), timeoutMs);
+      const id = this.#chainIdByName.get(name);
+      if (!id) continue;
+      this.#_chainId.set(id);
+      await waitFor(() => this.#chainById.has(id), timeoutMs);
     }
   }
 
@@ -593,9 +623,16 @@ export class PokeData {
 
   /** Cannot fetch when no chain is requested or it is already flattened. */
   private shouldFetchChain(): boolean {
-    const url = this.#_chainUrl();
-    return Boolean(url && !this.#chainByUrl.has(url));
+    const id = this.#_chainId();
+    return Boolean(id && !this.#chainById.has(id));
   }
+}
+
+/** Extracts the numeric evolution-chain id from its API URL. */
+export function chainIdFromUrl(url: string | null): string | null {
+  if (!url) return null;
+  const m = url.match(/(\d+)\/?$/);
+  return m?.[1] ?? null;
 }
 
 /** Resolves when `predicate` becomes truthy (checked every 30ms). */
@@ -764,6 +801,16 @@ interface RawFlavorEntry {
 
 interface RawSpecies {
   flavor_text_entries?: RawFlavorEntry[];
+  evolves_from_species?: { name?: string } | null;
+}
+
+/**
+ * Exported for unit tests — the species this one evolves from (null = base
+ * form) from a raw `/pokemon-species/:name` body.
+ */
+export function parseEvolvesFrom(raw: unknown): string | null {
+  const r = raw as RawSpecies;
+  return r.evolves_from_species?.name ?? null;
 }
 
 /**

@@ -14,6 +14,32 @@
     <app-kpi-block [metricData]="missionsMetric()" />
   </div>
 
+  <!-- Daily login reward -->
+  <mat-card class="daily-card">
+    <mat-card-content>
+      <div class="daily-info">
+        <mat-icon class="daily-icon">calendar_today</mat-icon>
+        <div>
+          <h3>Daily reward — {{ daily.label() }}</h3>
+          <p class="hint">
+            Come back every day to grow the streak. Missing a day resets it — the reward grows with
+            your streak.
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        mat-raised-button
+        color="primary"
+        [disabled]="!daily.available()"
+        (click)="claimDaily()"
+      >
+        <mat-icon>{{ daily.claimed() ? 'check_circle' : 'redeem' }}</mat-icon>
+        {{ daily.claimed() ? 'Claimed today' : `Claim +${daily.reward()}¢` }}
+      </button>
+    </mat-card-content>
+  </mat-card>
+
   <mat-card class="prestige-card">
     <app-container-mark title="Prestige" edge="main">
       <div class="prestige-grid">
@@ -35,6 +61,7 @@
           </p>
           <div class="actions">
             <button
+              type="button"
               mat-raised-button
               color="primary"
               [disabled]="!game.canPrestige()"
@@ -48,18 +75,79 @@
     </app-container-mark>
   </mat-card>
 
+  <!-- How resets work: what you keep, what you lose, concrete numbers -->
+  <mat-card class="reset-guide">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>school</mat-icon>
+      <mat-card-title>How resets work</mat-card-title>
+      <mat-card-subtitle>Why prestige, and what actually happens</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="guide-grid">
+        <div class="guide-col keep">
+          <h3>✅ You keep</h3>
+          <ul>
+            <li><b>Prestige shards</b> — the permanent income/XP boost.</li>
+            <li><b>Elite Series rank</b> and cups won (your endless tournament progress).</li>
+            <li>Mission claim history.</li>
+          </ul>
+        </div>
+        <div class="guide-col lose">
+          <h3>💥 You lose</h3>
+          <ul>
+            <li>Your collection, squad and coins.</li>
+            <li>Ladder tier and wins.</li>
+            <li>Items in your bag.</li>
+          </ul>
+        </div>
+        <div class="guide-col gain">
+          <h3>✨ Each shard gives</h3>
+          <ul>
+            <li><b>+25%</b> idle income per second (stacks).</li>
+            <li><b>+1</b> passive XP/sec for the whole collection.</li>
+            <li>More shards the deeper your run: <b>1 + wins/5</b>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="guide-example">
+        <h3>📊 Your numbers right now</h3>
+        <p>
+          Income <b>{{ incomeMetric().current }}</b> · passive XP
+          <b>+{{ game.passiveXpPerSec().toFixed(1) }}/s</b> · each shard ≈
+          <b>+{{ shardIncomeBonus().toFixed(2) }}¢/s</b>.
+        </p>
+        <p>
+          @let shards = game.prestigeGain();
+          Prestiging now banks <b>{{ shards }}</b> {{ shards === 1 ? 'shard' : 'shards' }} → income
+          jumps to ≈ <b>{{ projectedIncome().toFixed(2) }}¢/s</b> from the start of the next run.
+        </p>
+        <p class="tip">
+          💡 Tip: at Champion Cup, keep winning quick fights before resetting — every 5 wins adds
+          one more shard to the bank.
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
   <div class="missions-head">
-    <h2 class="text-topic-title">
-      Missions <span class="color-label">— Tier {{ missions.missionTier() }}</span>
-    </h2>
-    <p class="color-label">
-      {{ doneCount() }} / {{ missions.missions().length }} done · {{ claimedCount() }} claimed
-    </p>
+    <div>
+      <h2 class="text-topic-title">
+        Missions <span class="color-label">— Tier {{ missions.missionTier() + 1 }}</span>
+      </h2>
+      <p class="color-label">
+        {{ doneCount() }} / {{ missions.missions().length }} done · {{ claimedCount() }} claimed
+      </p>
+    </div>
+    <button type="button" mat-stroked-button class="reset-missions" (click)="resetMissions()">
+      <mat-icon>restart_alt</mat-icon>
+      Reset missions
+    </button>
   </div>
 
   <div class="tier-bar">
     <span class="color-label">
-      Tier {{ missions.missionTier() }} progress — claim everything to unlock the next tier:
+      Tier {{ missions.missionTier() + 1 }} progress — claim everything to unlock the next tier:
     </span>
     <mat-progress-bar mode="determinate" [value]="tierProgress()"></mat-progress-bar>
   </div>
@@ -85,7 +173,11 @@
         ></mat-progress-bar>
         <div class="mission-foot">
           <span class="color-label">Reward: +{{ m.reward }}¢</span>
+          @if (missions.claimed().has(m.id)) {
+            <span class="claim-count">Claimed {{ claimCount(m) }}×</span>
+          }
           <button
+            type="button"
             mat-raised-button
             color="primary"
             [disabled]="!missions.canClaim(m)"
@@ -97,6 +189,38 @@
       </mat-card>
     } @empty {
       <p class="color-label">No missions available yet.</p>
+    }
+  </div>
+
+  <!-- Achievements: permanent one-time goals -->
+  <div class="achievements-head">
+    <h2 class="text-topic-title">
+      Achievements
+      <span class="color-label"
+        >— {{ achievements.unlockedCount() }}/{{ achievementsList().length }}</span
+      >
+    </h2>
+    <p class="color-label">One-time goals — auto-rewarded the moment you hit them.</p>
+  </div>
+
+  <div class="achievement-grid">
+    @for (row of achievementsList(); track row.a.id) {
+      <mat-card
+        class="achievement-card"
+        [class.unlocked]="row.unlocked"
+        [class.done]="row.done && !row.unlocked"
+      >
+        <mat-card-content>
+          <div class="ach-head">
+            <mat-icon class="ach-icon">{{ row.unlocked ? 'check_circle' : row.a.icon }}</mat-icon>
+            <div class="ach-text">
+              <span class="ach-title">{{ row.a.title }}</span>
+              <span class="ach-desc">{{ row.a.description }}</span>
+            </div>
+            <span class="ach-reward">+{{ row.a.reward }}¢</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
     }
   </div>
 </div>

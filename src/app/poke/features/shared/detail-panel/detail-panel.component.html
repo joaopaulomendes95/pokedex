@@ -93,13 +93,14 @@
         </div>
 
         @if (pending() > 0) {
-          <button mat-flat-button color="accent" class="level-up" (click)="bank()">
+          <button type="button" mat-flat-button color="accent" class="level-up" (click)="bank()">
             <mat-icon>arrow_upward</mat-icon>
             Level Up ({{ pending() }} ready)
           </button>
         }
 
         <button
+          type="button"
           mat-flat-button
           color="primary"
           (click)="train()"
@@ -108,19 +109,33 @@
           <mat-icon>fitness_center</mat-icon>
           Train +1 Lv · {{ trainCost() | number }}¢
         </button>
+
+        <button type="button" mat-stroked-button (click)="openFullDetails()">
+          <mat-icon>magnifying-glass</mat-icon>
+          Full details
+        </button>
       </mat-card-actions>
     } @else {
       <mat-card-actions>
-        <button mat-flat-button (click)="buy()" [disabled]="game.canAfford(price()) === false">
+        <button
+          type="button"
+          mat-flat-button
+          (click)="buy()"
+          [disabled]="game.canAfford(price()) === false"
+        >
           <mat-icon>add_shopping_cart</mat-icon>
           Buy · {{ price() | number }}¢
+        </button>
+        <button type="button" mat-stroked-button (click)="openFullDetails()">
+          <mat-icon>magnifying-glass</mat-icon>
+          Full details
         </button>
       </mat-card-actions>
     }
 
     @if (data.detailError()) {
       <p class="error">Failed detail fetch.</p>
-      <button mat-stroked-button (click)="data.retryDetail()">Retry</button>
+      <button type="button" mat-stroked-button (click)="data.retryDetail()">Retry</button>
     }
   </mat-card>
 } @else {

@@ -96,10 +96,15 @@ export const BASE_CUPS: Cup[] = [
   },
 ];
 
-/** Generate infinite cups for a given tier (post-Champion Cup). */
-export function generateInfiniteCups(tier: number): Cup[] {
+/**
+ * Generate the current Elite Series cups for a 0-based elite rank.
+ * Rank 0 → "Elite Series 1", rank 1 → "Elite Series 2", … each rank
+ * scales difficulty, entry fee and prizes, so the cups are truly endless
+ * and every series win ranks you up into the next one.
+ */
+export function getEliteCups(rank: number): Cup[] {
   const cups: Cup[] = [];
-  const series = tier - 4; // tiers 0-3 are base, 4 is Champion Cup
+  const series = Math.max(0, rank);
   const baseRivalLevel = 15 + series * 3;
   const baseEntryFee = 600 + series * 200;
   const basePrizePerBattle = 200 + series * 50;
@@ -108,7 +113,7 @@ export function generateInfiniteCups(tier: number): Cup[] {
   for (let i = 0; i < 3; i++) {
     const difficultyMultiplier = 1 + i * 0.25 + series * 0.15;
     cups.push({
-      id: `series-${series}-${i}`,
+      id: `elite-${series}-${i}`,
       name: `Elite Series ${series + 1}-${i + 1}`,
       tagline: `Elite challengers await. Series ${series + 1}, Division ${i + 1}.`,
       icon: 'military_tech',
@@ -123,6 +128,11 @@ export function generateInfiniteCups(tier: number): Cup[] {
     });
   }
   return cups;
+}
+
+/** Generate infinite cups for a given tier (post-Champion Cup). */
+export function generateInfiniteCups(tier: number): Cup[] {
+  return getEliteCups(tier - 4);
 }
 
 /** Get all available cups for a given tier. */

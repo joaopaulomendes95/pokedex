@@ -7,6 +7,8 @@ import { GenerationFilter } from '@poke/generation-filter';
 import { Notify } from '@poke/notify';
 import { AppDialog, BasicView } from '@shared/ui';
 import { BrowserStorage } from '@core/services/storage';
+import { SaveIo } from '@core/services/save-io/save-io';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-poke-user',
@@ -22,6 +24,8 @@ export class User {
   #notify = inject(Notify);
   #dialog = inject(AppDialog);
   #storage = inject(BrowserStorage);
+  #saveIo = inject(SaveIo);
+  #document = inject(DOCUMENT);
 
   /** Generation the next save will fight into (chosen before the wipe). */
   newGen = signal(2);
@@ -73,5 +77,52 @@ export class User {
   saveNow() {
     this.game.saveNow();
     this.#notify.show(`Saved at ${this.lastSaved()}.`);
+  }
+
+  /** Download the whole save (game + missions + elite) as a JSON file. */
+  exportSave() {
+    const payload = this.#saveIo.buildExport();
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = this.#document.createElement('a');
+    a.href = url;
+    a.download = `poke-liga-idle-save-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    this.#notify.show('Save exported — keep the file somewhere safe.');
+  }
+
+  /** Validate a picked import file and confirm before applying it. */
+  onImportPicked(file: File | undefined) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result ?? '');
+      const error = this.#saveIo.validateImport(text);
+      if (error) {
+        this.#notify.showError(error);
+        return;
+      }
+      this.#dialog
+        .open({
+          type: 'warn',
+          title: 'Import this save?',
+          message:
+            'This replaces your CURRENT save (game, missions and Elite Series) with the file. The page will reload to load it.',
+          actionLabel: 'Import & reload',
+        })
+        .afterClosed()
+        .subscribe((confirmed) => {
+          if (!confirmed) return;
+          if (this.#saveIo.applyImport(text)) {
+            this.#notify.show('Save imported — reloading…');
+            this.#document.defaultView?.location.reload();
+          } else {
+            this.#notify.showError('Import failed — nothing was changed.');
+          }
+        });
+    };
+    reader.onerror = () => this.#notify.showError('Could not read that file.');
+    reader.readAsText(file);
   }
 }

@@ -2,7 +2,12 @@ import { Component, computed, effect, inject, input } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PokeData } from '@poke/poke-data';
 import { Game } from '@poke/game';
-import { type CustomChipColor, type DetailsBlockRow, type DetailsSection } from '@shared/ui';
+import {
+  type CustomChipColor,
+  type DetailsBlock,
+  type DetailsBlockRow,
+  type DetailsSection,
+} from '@shared/ui';
 import { DetailsSections } from '@shared/ui/dialog/details-sections/details-sections';
 import { CustomChip } from '@shared/ui';
 import { xpForLevel } from '@poke/economy';
@@ -140,23 +145,32 @@ export class PokeDetailsContent {
       sections.push({ name: 'Moves', rows });
     }
 
-    // Real evolution chain from `/evolution-chain/:id`.
-    const evo = this.poke.evolutionFor(this.data().name);
-    if (evo.length > 0) {
-      sections.push({
-        name: 'Evolution',
-        rows: [
-          {
-            cols: 2,
-            items: evo.map((step) => ({
-              label: step.species,
-              data: [`→ ${step.to}`],
-              suffix: `(${step.trigger})`,
-              faIcon: 'arrow-trend-up',
-            })),
-          },
-        ],
-      });
+    // Real evolution chain from `/evolution-chain/:id` — the species this one
+    // evolves FROM plus the stages it evolves INTO, each with its trigger.
+    const name = this.data().name;
+    const from = this.poke.evolvesFrom(name);
+    const evo = this.poke.evolutionFor(name);
+    const direct = evo.filter((s) => s.species === name);
+    if (from || direct.length > 0) {
+      const items: DetailsBlock[] = [];
+      if (from) {
+        const fromTrigger = evo.find((s) => s.to === name)?.trigger;
+        items.push({
+          label: 'Evolves from',
+          data: [from],
+          suffix: fromTrigger ? `(${fromTrigger})` : undefined,
+          faIcon: 'arrow-down',
+        });
+      }
+      for (const s of direct) {
+        items.push({
+          label: 'Next stage',
+          data: [s.to],
+          suffix: `(${s.trigger})`,
+          faIcon: 'arrow-trend-up',
+        });
+      }
+      sections.push({ name: 'Evolution', rows: [{ cols: 1, items }] });
     }
 
     return sections;
@@ -167,12 +181,17 @@ export class PokeDetailsContent {
     effect(() => {
       const name = this.data().name;
       if (!name) return;
-      void this.poke.ensureSpecies([name]).then(() => void this.poke.ensureChainFor([name]));
+      // Swallow rejections — warmups are best-effort (and an unhandled
+      // rejection trips the dev-server error overlay over the whole app).
+      this.poke
+        .ensureSpecies([name])
+        .then(() => this.poke.ensureChainFor([name]))
+        .catch(() => undefined);
     });
     // Warm ability effect texts for the current pokémon.
     effect(() => {
       const names = this.detail()?.abilities.map((a) => a.name) ?? [];
-      if (names.length) void this.poke.ensureAbilities(names);
+      if (names.length) this.poke.ensureAbilities(names).catch(() => undefined);
     });
   }
 

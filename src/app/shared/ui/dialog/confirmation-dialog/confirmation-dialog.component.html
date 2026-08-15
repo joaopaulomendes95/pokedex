@@ -11,8 +11,8 @@
   }
 </div>
 <mat-dialog-actions align="end">
-  <button matButton (click)="cancel()" class="faded">Cancel</button>
-  <button matButton="filled" (click)="confirm()" [class]="dialogData.type">
+  <button type="button" matButton (click)="cancel()" class="faded">Cancel</button>
+  <button type="button" matButton="filled" (click)="confirm()" [class]="dialogData.type">
     {{ dialogData.actionLabel || 'Confirm' }}
   </button>
 </mat-dialog-actions>

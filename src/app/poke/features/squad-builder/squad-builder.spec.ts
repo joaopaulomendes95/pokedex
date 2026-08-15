@@ -26,8 +26,14 @@ function stubPokeData(): PokeData {
     shinySpriteUrl: () => '',
     selected: () => null,
     selectByName: () => undefined,
-    evolutionFor: () => [],
-    ensureInCache: () => undefined,
+    evolutionFor: (n: string) =>
+      n === 'bulbasaur' || n === 'ivysaur' || n === 'venusaur'
+        ? [
+            { species: 'bulbasaur', to: 'ivysaur', trigger: 'level 16' },
+            { species: 'ivysaur', to: 'venusaur', trigger: 'level 32' },
+          ]
+        : [],
+    ensureInCache: async () => undefined,
     ensureSpecies: async () => undefined,
     ensureChainFor: async () => undefined,
     detail: () => undefined,
@@ -48,7 +54,14 @@ describe('SquadBuilder swap modal', () => {
       providers: [
         provideZonelessChangeDetection(),
         { provide: PokeData, useValue: stubPokeData() },
-        { provide: Notify, useValue: { show: () => undefined, showError: () => undefined, showSuccess: () => undefined } },
+        {
+          provide: Notify,
+          useValue: {
+            show: () => undefined,
+            showError: () => undefined,
+            showSuccess: () => undefined,
+          },
+        },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(SquadBuilder);
@@ -61,7 +74,7 @@ describe('SquadBuilder swap modal', () => {
     // Fill the squad to the cap so a double-click opens the swap modal.
     game.setSquad(['bulbasaur', 'bulbasaur', 'bulbasaur', 'bulbasaur', 'bulbasaur', 'bulbasaur']);
     game.add('pikachu', 1);
-    fixture.componentInstance.onCollectionDblClick('pikachu');
+    fixture.componentInstance.fieldOrSwap('pikachu');
     fixture.detectChanges();
     expect(fixture.componentInstance.swapModal()).toEqual({ incoming: 'pikachu' });
 
@@ -78,7 +91,7 @@ describe('SquadBuilder swap modal', () => {
     const game = TestBed.inject(Game);
     game.setSquad(['bulbasaur', 'bulbasaur', 'bulbasaur', 'bulbasaur', 'bulbasaur', 'bulbasaur']);
     game.add('pikachu', 1);
-    fixture.componentInstance.onCollectionDblClick('pikachu');
+    fixture.componentInstance.fieldOrSwap('pikachu');
     fixture.detectChanges();
     expect(fixture.componentInstance.swapModal()).toEqual({ incoming: 'pikachu' });
 
@@ -96,7 +109,7 @@ describe('SquadBuilder swap modal', () => {
     const game = TestBed.inject(Game);
     game.setSquad(['bulbasaur', 'bulbasaur', 'bulbasaur', 'bulbasaur', 'bulbasaur', 'bulbasaur']);
     game.add('pikachu', 1);
-    fixture.componentInstance.onCollectionDblClick('pikachu');
+    fixture.componentInstance.fieldOrSwap('pikachu');
     fixture.detectChanges();
     expect(fixture.componentInstance.swapModal()).toEqual({ incoming: 'pikachu' });
 
@@ -104,5 +117,22 @@ describe('SquadBuilder swap modal', () => {
     overlay.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await fixture.whenStable();
     expect(fixture.componentInstance.swapModal()).toBeNull();
+  });
+
+  it('only offers an evolve step that starts from the pokémon itself', async () => {
+    await mount();
+    const game = TestBed.inject(Game);
+
+    // Fully evolved member of the same chain — no step starts from it.
+    game.add('venusaur', 40);
+    const rows = fixture.componentInstance.team();
+    expect(rows.find((r) => r.owned.name === 'venusaur')?.evolvesTo).toBeNull();
+    // Not at the required level yet.
+    expect(rows.find((r) => r.owned.name === 'bulbasaur')?.evolvesTo).toBeNull();
+
+    // Reach the first level trigger → the direct next stage appears.
+    game.addLevel('bulbasaur', 20);
+    const rows2 = fixture.componentInstance.team();
+    expect(rows2.find((r) => r.owned.name === 'bulbasaur')?.evolvesTo).toBe('ivysaur');
   });
 });

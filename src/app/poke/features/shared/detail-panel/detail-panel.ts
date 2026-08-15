@@ -11,6 +11,8 @@ import { OwnedPoke } from '@poke/poke.model';
 import { xpForLevel, trainCost as trainCostFn } from '@poke/economy';
 import { levelScale } from '@poke/battle';
 import { typeHex } from '@poke/features/shared/poke-type-color';
+import { PokeFullDetails } from '@poke/features/shared/poke-full-details/poke-full-details';
+import { AppDialog } from '@shared/ui';
 
 /** Level-scaled stat block for an owned pokémon. */
 interface ScaledStats {
@@ -37,6 +39,7 @@ export class DetailPanel {
   readonly data = inject(PokeData);
   readonly game = inject(Game);
   readonly xpDisplay = inject(XpDisplay);
+  #dialog = inject(AppDialog);
 
   /** The owned pokémon behind the selected dex card, if any. */
   readonly owned = computed<OwnedPoke | null>(() => {
@@ -153,5 +156,18 @@ export class DetailPanel {
     const name = this.data.selected()?.name;
     if (!name) return;
     this.game.applyLevelUps(name);
+  }
+
+  /** Open the dedicated full-details dialog for the selected pokémon. */
+  openFullDetails() {
+    const name = this.data.selected()?.name;
+    if (!name) return;
+    this.#dialog.openDetails({
+      name,
+      headline: 'Full details',
+      faIcon: 'magnifying-glass',
+      content: PokeFullDetails,
+      contentData: { name },
+    });
   }
 }

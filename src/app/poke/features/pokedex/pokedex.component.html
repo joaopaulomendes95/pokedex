@@ -17,13 +17,14 @@
       <app-custom-spinner />
     } @else if (data.dexError()) {
       <p class="error">
-        Couldn't load the dex. <button mat-stroked-button (click)="data.retryDex()">Retry</button>
+        Couldn't load the dex.
+        <button type="button" mat-stroked-button (click)="data.retryDex()">Retry</button>
       </p>
     } @else {
       <app-general-tile-list
         [dataProvider]="rows()"
         [columns]="columns"
-        [initialPageSize]="30"
+        [initialPageSize]="data.dexPageSize()"
         [pageSizeOptions]="[10, 30]"
         [showSearchInput]="true"
         [showPagination]="false"
@@ -62,6 +63,7 @@
 
       <div class="pager">
         <button
+          type="button"
           mat-icon-button
           [disabled]="!data.hasPrevPage()"
           (click)="data.firstDexPage()"
@@ -70,6 +72,7 @@
           <mat-icon>first_page</mat-icon>
         </button>
         <button
+          type="button"
           mat-icon-button
           [disabled]="!data.hasPrevPage()"
           (click)="data.prevDexPage()"
@@ -90,6 +93,7 @@
           of {{ data.dexMaxPage() + 1 }}
         </span>
         <button
+          type="button"
           mat-icon-button
           [disabled]="!data.hasNextPage()"
           (click)="data.nextDexPage()"
@@ -98,6 +102,7 @@
           <mat-icon>chevron_right</mat-icon>
         </button>
         <button
+          type="button"
           mat-icon-button
           [disabled]="!data.hasNextPage()"
           (click)="data.lastDexPage()"
@@ -111,10 +116,10 @@
             [value]="data.dexPageSize()"
             (selectionChange)="data.setDexPageSize($event.value)"
           >
-            <mat-option value="10">10</mat-option>
-            <mat-option value="30">30</mat-option>
-            <mat-option value="50">50</mat-option>
-            <mat-option value="100">100</mat-option>
+            <mat-option [value]="10">10</mat-option>
+            <mat-option [value]="30">30</mat-option>
+            <mat-option [value]="50">50</mat-option>
+            <mat-option [value]="100">100</mat-option>
           </mat-select>
         </mat-form-field>
       </div>

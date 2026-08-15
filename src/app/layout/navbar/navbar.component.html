@@ -13,6 +13,7 @@
     </div>
 
     <button
+      type="button"
       class="nav-item collapse-toggle"
       (click)="toggle()"
       [matTooltip]="expanded() ? 'Collapse navbar' : 'Expand navbar'"
@@ -27,8 +28,9 @@
     </button>
 
     <div class="nav-links">
-      @for (item of navItems; track item.id) {
+      @for (item of navItems(); track item.id) {
         <button
+          type="button"
           class="nav-item"
           [class.active]="currentTab() === item.id"
           [class.has-badge]="item.badge && item.badge > 0"
@@ -54,6 +56,7 @@
 
   <div class="nav-foot">
     <button
+      type="button"
       class="nav-item theme-toggle"
       (click)="openShop()"
       [matTooltip]="'Shop & Bag: ' + totalItems() + ' items'"
@@ -67,6 +70,7 @@
       <span class="nav-text">Shop ({{ totalItems() }})</span>
     </button>
     <button
+      type="button"
       class="nav-item theme-toggle"
       (click)="toggleTheme()"
       [matTooltip]="themeMode() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"

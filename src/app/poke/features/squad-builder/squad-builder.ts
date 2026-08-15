@@ -12,7 +12,7 @@ import { XpDisplay } from '@poke/xp-display';
 import { levelScale } from '@poke/battle';
 import { Notify } from '@poke/notify';
 import { DetailPanel } from '@poke/features/shared/detail-panel/detail-panel';
-import { BasicView } from '@shared/ui';
+import { AppDialog, BasicView } from '@shared/ui';
 
 /** Level-scaled stat block for an owned pokémon. */
 interface ScaledStats {
@@ -71,6 +71,7 @@ export class SquadBuilder {
   readonly data = inject(PokeData);
   readonly game = inject(Game);
   #notify = inject(Notify);
+  #dialog = inject(AppDialog);
 
   /** Collection cards enriched with every display value the template needs. */
   readonly team = computed<TeamRow[]>(() => {
@@ -100,6 +101,10 @@ export class SquadBuilder {
   private evolutionStep(name: string, level: number): string | null {
     const steps = this.data.evolutionFor(name);
     const step = steps.find((s) => {
+      // Only steps that START from this species count — the chain cache maps
+      // every member of a chain to the full flattened list, so a Charizard
+      // would otherwise match the Charmander → Charmeleon step.
+      if (s.species !== name) return false;
       const m = s.trigger.match(/^level (\d+)$/);
       return m ? level >= Number(m[1]) : false;
     });
@@ -178,6 +183,26 @@ export class SquadBuilder {
     this.data.selectByName(name);
   }
 
+  /** Confirm + release a pokémon for coins (clears the collection slot). */
+  transfer(name: string) {
+    const owned = this.game.own(name);
+    if (!owned) return;
+    const value = this.game.releaseValue(owned.level);
+    this.#dialog
+      .open({
+        type: 'warn',
+        title: `Release ${name}?`,
+        message: `You'll get ${value}¢ and ${name} leaves your collection (and the squad if fielded). This can't be undone.`,
+        actionLabel: `Release for ${value}¢`,
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
+        const got = this.game.release(name);
+        if (got) this.#notify.show(`${name} released — +${got}¢.`);
+      });
+  }
+
   /** Apply all banked level-ups for all owned Pokémon. */
   levelUpAll() {
     const count = this.game.applyAllLevelUps();
@@ -217,8 +242,16 @@ export class SquadBuilder {
     this.game.setSquad(squad);
   }
 
-  /** Handle double-click on collection card. */
-  onCollectionDblClick(name: string) {
+  /**
+   * Field/Bench button: benches when fielded, fields when there's room, and
+   * opens the swap modal when the squad is full (the discoverable replacement
+   * for the old double-click shortcut).
+   */
+  fieldOrSwap(name: string) {
+    if (this.game.squad().includes(name)) {
+      this.game.setSquad(this.game.squad().filter((n) => n !== name));
+      return;
+    }
     if (this.game.squad().length < SQUAD_MAX) {
       this.game.setSquad([...this.game.squad(), name]);
     } else {
@@ -226,8 +259,8 @@ export class SquadBuilder {
     }
   }
 
-  /** Handle double-click on squad slot. */
-  onSquadDblClick(name: string) {
+  /** Remove a squad member (explicit bench button on each slot). */
+  bench(name: string) {
     this.game.setSquad(this.game.squad().filter((n) => n !== name));
   }
 
@@ -262,9 +295,14 @@ export class SquadBuilder {
     effect(() => {
       const names = this.team().map((t) => t.owned.name);
       if (names.length) {
-        this.data.ensureInCache(names);
+        // Fire-and-forget warmups MUST swallow rejections: an unhandled
+        // rejection trips the dev-server error overlay and covers the app.
+        this.data.ensureInCache(names).catch(() => undefined);
         // Evolution readiness needs the species + chain warmed.
-        void this.data.ensureSpecies(names).then(() => void this.data.ensureChainFor(names));
+        this.data
+          .ensureSpecies(names)
+          .then(() => this.data.ensureChainFor(names))
+          .catch(() => undefined);
       }
     });
   }

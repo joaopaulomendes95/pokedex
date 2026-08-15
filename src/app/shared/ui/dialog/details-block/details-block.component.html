@@ -6,7 +6,13 @@
     <span class="head-title">{{ dialogData.name }}</span>
     <span class="head-desc">{{ dialogData.headline }}</span>
   </div>
-  <button matIconButton class="close-button" [matTooltip]="'Close'" (click)="cancel()">
+  <button
+    type="button"
+    matIconButton
+    class="close-button"
+    [matTooltip]="'Close'"
+    (click)="cancel()"
+  >
     <i class="fa-solid fa-xmark"></i>
   </button>
 </div>
@@ -36,6 +42,7 @@
     @for (action of dialogActions(); track $index) {
       @if (!action.hidden) {
         <button
+          type="button"
           [disabled]="action.disabled"
           [matButton]="action.appearance ?? 'filled'"
           (click)="handleAction(action)"

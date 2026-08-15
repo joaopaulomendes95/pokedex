@@ -1,6 +1,8 @@
 import { computed, effect, inject, signal, Service } from '@angular/core';
 import { Game } from '@poke/game';
 import { BrowserStorage } from '@core/services/storage';
+import { Notify } from '@poke/notify';
+import { UiState, TAB_QUESTS } from '@poke/ui-state';
 
 export interface Mission {
   id: string;
@@ -103,6 +105,25 @@ const BASE_MISSIONS: Omit<Mission, 'tier'>[] = [
 
 const MISSION_KEY = 'poke-league-missions';
 
+/** The localStorage key mission progress lives under (for save import/export). */
+export const MISSIONS_KEY = MISSION_KEY;
+
+/**
+ * Mission ids look like "first-win-t3" — the base id is the part before the
+ * `-tN` tier suffix. Claim counts are tracked per base mission across tiers.
+ */
+export function baseMissionId(id: string): string {
+  const idx = id.lastIndexOf('-t');
+  return idx > 0 ? id.slice(0, idx) : id;
+}
+
+interface MissionsSave {
+  claimed: string[];
+  tier: number;
+  /** base mission id → how many times it has been claimed (across tiers). */
+  counts: Record<string, number>;
+}
+
 /**
  * Mission/quest catalog with claimable rewards. Progress reads the lifetime
  * career stats from `Game`; a claimed-set persists to localStorage so
@@ -116,6 +137,15 @@ export class Missions {
   /** Set of mission ids already claimed (read-only for the UI). */
   readonly claimed = computed(() => new Set<string>(this.#_claimed()));
   #_claimed = signal<Set<string>>(new Set());
+
+  /** base mission id → number of times it has been claimed across tiers. */
+  #_counts = signal<Record<string, number>>({});
+  readonly counts = this.#_counts.asReadonly();
+
+  /** How many times the given mission's base type has been claimed. */
+  claimCount(mission: Mission): number {
+    return this.#_counts()[baseMissionId(mission.id)] ?? 0;
+  }
 
   /** Current mission tier (increments when all missions in current tier are claimed). */
   #_missionTier = signal(0);
@@ -174,25 +204,102 @@ export class Missions {
     return !this.#_claimed().has(mission.id) && this.isDone(mission);
   }
 
+  /** How many missions are ready to claim right now (navbar badge + toasts). */
+  readonly readyCount = computed(() => this.missions().filter((m) => this.canClaim(m)).length);
+
   /** Claims a completed mission: pays coins + drops it into the claimed set. */
   claim(mission: Mission): boolean {
     if (!this.canClaim(mission)) return false;
     this.#game.grantCoins(mission.reward);
     this.#_claimed.update((s) => new Set(s).add(mission.id));
-    this.persist();
-    // Check if tier is complete
+    const base = baseMissionId(mission.id);
+    this.#_counts.update((c) => ({ ...c, [base]: (c[base] ?? 0) + 1 }));
+    // Advance the tier BEFORE persisting — otherwise a save written right
+    // after the last claim of a tier could lock the missions forever.
     if (this.tierComplete()) {
       this.#_missionTier.update((t) => t + 1);
     }
+    this.persist();
     return true;
+  }
+
+  /**
+   * Wipe ALL mission progress: claimed set, claim counts and tier (back to 0).
+   * Career stats (battles/wins/catches…) are kept, so the next tier-0 missions
+   * may already be complete and claimable.
+   */
+  resetAll(): void {
+    this.#_claimed.set(new Set());
+    this.#_counts.set({});
+    this.#_missionTier.set(0);
+    this.#seenReady = new Set(
+      this.missions()
+        .filter((m) => this.canClaim(m))
+        .map((m) => m.id),
+    );
+    this.#seenTier = 0;
+    this.persist();
+  }
+
+  /** Persist the current mission state immediately (used by save export). */
+  flush(): void {
+    this.persist();
   }
 
   #game = inject(Game);
   #storage = inject(BrowserStorage);
+  #notify = inject(Notify);
+  #ui = inject(UiState);
+
+  /** Claimable mission ids already seen (so a completion only toasts once). */
+  #seenReady = new Set<string>();
+  /** Mission tier already announced (so tier-ups toast once, not at boot). */
+  #seenTier = -1;
 
   constructor() {
     this.load();
     effect(() => void this.#game.stats()); // reactive anchor for derived UI
+    // Seed the seen-sets so a fresh boot doesn't toast missions that were
+    // already claimable before this session.
+    this.#seenReady = new Set(
+      this.missions()
+        .filter((m) => this.canClaim(m))
+        .map((m) => m.id),
+    );
+    this.#seenTier = this.missionTier();
+
+    // Mission finished while the player is elsewhere → toast + navbar badge.
+    effect(() => {
+      const ready = new Set(
+        this.missions()
+          .filter((m) => this.canClaim(m))
+          .map((m) => m.id),
+      );
+      const fresh = [...ready].filter((id) => !this.#seenReady.has(id));
+      this.#seenReady = ready;
+      if (fresh.length === 0) return;
+      // Already looking at the missions — no need to announce them.
+      if (this.#ui.tab() === TAB_QUESTS) return;
+      const titles = this.missions()
+        .filter((m) => fresh.includes(m.id))
+        .map((m) => m.title);
+      const msg =
+        titles.length === 1
+          ? `🏁 Mission ready: ${titles[0]} — claim it in the Idle tab!`
+          : `🏁 ${titles.length} missions ready: ${titles.join(', ')} — claim them in the Idle tab!`;
+      this.#notify.show(msg);
+    });
+
+    // A whole tier cleared → next tier's missions appear, announce the unlock.
+    effect(() => {
+      const tier = this.missionTier();
+      if (tier > this.#seenTier) {
+        this.#seenTier = tier;
+        this.#notify.show(
+          `🏆 Mission tier ${tier} unlocked — new missions, doubled goals and rewards!`,
+        );
+      }
+    });
   }
 
   private load() {
@@ -203,6 +310,14 @@ export class Missions {
       if (data.claimed) {
         this.#_claimed.set(new Set(data.claimed));
         this.#_missionTier.set(data.tier ?? 0);
+        this.#_counts.set(data.counts ?? {});
+        // Soft-lock guard: a save that ended with a fully-claimed tier (the
+        // old persist-before-bump bug) would block every future claim — skip
+        // straight past any tier that is already entirely claimed.
+        let guard = 0;
+        while (this.tierComplete() && guard++ < 100) {
+          this.#_missionTier.update((t) => t + 1);
+        }
       } else {
         // Old format
         this.#_claimed.set(new Set(data as string[]));
@@ -219,7 +334,8 @@ export class Missions {
         JSON.stringify({
           claimed: [...this.#_claimed()],
           tier: this.#_missionTier(),
-        }),
+          counts: this.#_counts(),
+        } satisfies MissionsSave),
       );
     } catch {
       /* storage blocked — keep in memory */

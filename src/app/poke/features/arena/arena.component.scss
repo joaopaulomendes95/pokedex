@@ -283,6 +283,56 @@
       }
     }
   }
+  /* Shared controls row (energy pill + actions) — quick fight + manual lobby */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    .energy-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--app-color-desat-90);
+      font-size: 0.75rem;
+      font-weight: 600;
+
+      mat-icon {
+        font-size: 0.95rem;
+        width: 0.95rem;
+        height: 0.95rem;
+        color: var(--app-color-orange);
+      }
+
+      &.low {
+        color: var(--app-color-red);
+      }
+    }
+  }
+
+  /* Collapsible battle log: compact preview + expand toggle */
+  .log-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .log-toggle {
+      align-self: flex-start;
+      font-size: 0.72rem;
+      line-height: 1.4;
+      min-height: 0;
+      padding: 0 10px;
+
+      mat-icon {
+        font-size: 0.95rem;
+        width: 0.95rem;
+        height: 0.95rem;
+      }
+    }
+  }
   @media (max-width: 640px) {
     .fight-card .stage {
       grid-template-columns: 1fr 56px 1fr;

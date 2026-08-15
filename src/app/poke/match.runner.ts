@@ -73,7 +73,11 @@ export class MatchRunner {
     this.#_settled.set(false);
 
     const squad = this.#game.squad();
-    await this.#poke.ensureInCache([...squad, ...rivalNames]);
+    try {
+      await this.#poke.ensureInCache([...squad, ...rivalNames]);
+    } catch {
+      // Detail warmup is best-effort — the sim can still fall back.
+    }
     // Real move details drive the sim — resolve them (best-effort; the sim
     // falls back to generic attacks when a move fetch fails).
     try {

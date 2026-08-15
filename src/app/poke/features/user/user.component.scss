@@ -120,3 +120,13 @@
   gap: 10px;
   flex-wrap: wrap;
 }
+
+.import-input {
+  display: none;
+}
+
+.import-hint {
+  margin-top: 10px;
+  font-size: 0.76rem;
+  opacity: 0.6;
+}

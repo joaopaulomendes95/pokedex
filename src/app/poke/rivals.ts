@@ -19,6 +19,21 @@ export function poolAroundTier(tier: number): string[] {
   return [...(RIVAL_POOLS[t] ?? []), ...(RIVAL_POOLS[Math.min(t + 1, 8)] ?? [])];
 }
 
+/**
+ * Rival pool gated by the save's generation: `isKnown` drops species outside
+ * the master list. Falls back to the strongest lower tier that still has
+ * eligible rivals (so high tiers never render an empty team on low-gen saves).
+ */
+export function gatedRivalPool(tier: number, isKnown: (name: string) => boolean): string[] {
+  const filtered = poolAroundTier(tier).filter(isKnown);
+  if (filtered.length > 0) return [...new Set(filtered)];
+  for (let t = Math.max(0, tier - 1); t >= 0; t--) {
+    const f = (RIVAL_POOLS[t] ?? []).filter(isKnown);
+    if (f.length > 0) return [...new Set(f)];
+  }
+  return poolAroundTier(0);
+}
+
 /** Sample a compact rival team (unique names) for a battle. */
 export function sampleRivalTeam(pool: string[], size: number): string[] {
   const names = [...new Set(pool)];

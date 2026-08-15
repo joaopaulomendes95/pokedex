@@ -1,11 +1,64 @@
 .adventure {
-  .zone-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 10px;
+  /* Dex completion meter */
+  .dex-meter {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 12px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--app-hairline);
+    background: var(--mat-sys-surface-container-low);
+    font-size: 0.8rem;
+
+    mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+      color: var(--app-color-green);
+    }
+
+    b {
+      font-family: var(--app-font-display);
+    }
+
+    small {
+      opacity: 0.6;
+      font-size: 0.68rem;
+    }
+  }
+
+  /* Region groups (macro-zone header + its in-gen regions) */
+  .region-group {
     margin-bottom: 16px;
 
-    .zone-card {
+    .group-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--app-hairline);
+
+      h3 {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+
+      .group-gens {
+        font-size: 0.66rem;
+        opacity: 0.6;
+      }
+    }
+
+    .region-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .region-card {
       border: 1px solid var(--app-hairline);
       border-radius: 12px;
       overflow: hidden;
@@ -13,9 +66,7 @@
       cursor: pointer;
       padding: 0;
       text-align: left;
-      transition:
-        transform 0.15s ease,
-        box-shadow 0.15s ease;
+      transition: transform 0.15s ease;
 
       &:hover {
         transform: translateY(-2px);
@@ -27,9 +78,9 @@
         box-shadow: 0 0 0 2px var(--app-color-green-a);
       }
 
-      .zone-art {
+      .region-art {
         position: relative;
-        height: 90px;
+        height: 88px;
         background: linear-gradient(135deg, var(--app-color-main-90), var(--app-color-desat-90));
         overflow: hidden;
 
@@ -41,16 +92,15 @@
           max-width: 55%;
           object-fit: contain;
           filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
-          animation: region-art-in 0.4s ease both;
         }
 
-        .zone-tint {
+        .region-tint {
           position: absolute;
           inset: 0;
-          background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.5) 100%);
+          background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.5));
         }
 
-        .zone-title {
+        .region-title {
           position: absolute;
           left: 10px;
           right: 10px;
@@ -60,38 +110,32 @@
 
           h2 {
             margin: 0 0 2px;
-            font-size: 1.05rem;
+            font-size: 1.02rem;
           }
 
           p {
             margin: 0;
             opacity: 0.92;
-            font-size: 0.64rem;
+            font-size: 0.62rem;
           }
         }
       }
 
-      .zone-foot {
+      .region-foot {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 5px 8px;
 
-        .zone-caught {
+        .region-caught {
           display: inline-flex;
           align-items: center;
           gap: 3px;
           font-size: 0.7rem;
           font-weight: 600;
-
-          mat-icon {
-            font-size: 0.85rem;
-            width: 0.85rem;
-            height: 0.85rem;
-          }
         }
 
-        .zone-gen {
+        .region-gen {
           font-size: 0.62rem;
           opacity: 0.6;
         }
@@ -111,6 +155,42 @@
         margin: 0;
         font-size: 0.95rem;
       }
+
+      .pool-sub {
+        margin: 2px 0 0;
+        font-size: 0.68rem;
+        opacity: 0.6;
+      }
+    }
+
+    .pool-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pool-ttl {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--app-color-main-50);
+      background: var(--app-color-main-a);
+      padding: 3px 9px;
+      border-radius: 999px;
+
+      mat-icon {
+        font-size: 0.85rem;
+        width: 0.85rem;
+        height: 0.85rem;
+      }
+
+      &.low {
+        color: var(--app-color-orange);
+        background: var(--app-color-orange-a);
+      }
     }
 
     .pool-loading {
@@ -121,46 +201,104 @@
 
     .pool-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      gap: 6px;
+      grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+      gap: 8px;
 
       .pool-card {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 2px;
-        padding: 6px 4px;
+        gap: 3px;
+        padding: 8px 6px 6px;
         border: 1px solid var(--app-hairline);
-        border-radius: 10px;
+        border-radius: 12px;
         background: var(--mat-sys-surface-container-low);
         cursor: pointer;
         transition:
           transform 0.15s ease,
-          border-color 0.15s ease;
+          border-color 0.15s ease,
+          box-shadow 0.15s ease;
 
-        img {
-          width: 44px;
-          height: 44px;
-          object-fit: contain;
-          filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+        .pool-sprite {
+          position: relative;
+          display: grid;
+          place-items: center;
+
+          img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
+          }
+
+          .owned-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            display: grid;
+            place-items: center;
+            background: var(--app-color-green);
+            color: #04140a;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+
+            mat-icon {
+              font-size: 0.9rem;
+              width: 0.9rem;
+              height: 0.9rem;
+            }
+          }
         }
 
         .pool-name {
           font-weight: 600;
           text-transform: capitalize;
-          font-size: 0.62rem;
+          font-size: 0.78rem;
           text-align: center;
           color: var(--app-color-desat-30);
+        }
+
+        .pool-rarity {
+          font-size: 0.58rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          padding: 1px 7px;
+          border-radius: 999px;
+          color: var(--rc);
+          background: color-mix(in srgb, var(--rc) 14%, transparent);
+
+          &.common {
+            --rc: #9aa3b2;
+          }
+          &.uncommon {
+            --rc: #43b581;
+          }
+          &.rare {
+            --rc: #4d9fff;
+          }
+          &.epic {
+            --rc: #a06bff;
+          }
+          &.legendary {
+            --rc: #ffb347;
+          }
         }
 
         &:hover {
           transform: translateY(-2px);
           border-color: var(--app-color-main-50);
+          box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.6);
         }
 
         &.selected {
           border-color: var(--app-color-green);
           background: var(--app-color-green-a);
+        }
+
+        &.owned:not(.selected) {
+          opacity: 0.82;
         }
       }
     }

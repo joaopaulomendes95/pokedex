@@ -55,3 +55,8 @@ src/app/shared/openapi
 
 # ai stuff
 .ralph/
+
+# Skill / agent-generated artifacts
+.context/
+__screenshots__/
+docs/solutions/

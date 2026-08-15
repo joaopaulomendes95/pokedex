@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { typeMultiplier } from '@poke/type-chart';
 import {
   buildZonePool,
+  chainIdFromUrl,
   parseAbilityEffect,
   parseChain,
   parseChainUrl,
   parseDetail,
+  parseEvolvesFrom,
   parseFlavor,
   parseMove,
   speciesInChain,
@@ -266,5 +268,22 @@ describe('buildZonePool', () => {
       1,
     );
     expect(pool).toEqual([]); // 249 > gen-1 cap 151
+  });
+});
+
+describe('parseEvolvesFrom', () => {
+  it('extracts the pre-evolution from the species body', () => {
+    expect(parseEvolvesFrom({ evolves_from_species: { name: 'charmander' } })).toBe('charmander');
+    expect(parseEvolvesFrom({ evolves_from_species: null })).toBeNull();
+    expect(parseEvolvesFrom({})).toBeNull();
+  });
+});
+
+describe('chainIdFromUrl', () => {
+  it('extracts the numeric chain id the generated client needs', () => {
+    expect(chainIdFromUrl('https://pokeapi.co/api/v2/evolution-chain/42/')).toBe('42');
+    expect(chainIdFromUrl('https://pokeapi.co/api/v2/evolution-chain/1')).toBe('1');
+    expect(chainIdFromUrl(null)).toBeNull();
+    expect(chainIdFromUrl('https://pokeapi.co/api/v2/species/1/')).toBe('1');
   });
 });

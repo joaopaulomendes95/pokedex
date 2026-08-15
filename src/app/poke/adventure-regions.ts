@@ -304,3 +304,28 @@ export function zoneAreaUrls(zone: WorldZone): string[] {
     r.areas.map((a) => a.url),
   );
 }
+
+/** All area URLs belonging to a single region. */
+export function regionAreaUrls(region: RegionDef): string[] {
+  return region.areas.map((a) => a.url);
+}
+
+/** One travelable group on the adventure map: a macro-zone + its in-gen regions. */
+export interface RegionGroup {
+  zone: WorldZone;
+  regions: RegionDef[];
+}
+
+/**
+ * The adventure map for a save: every macro-zone that has at least one region
+ * within the save's generation, with the regions filtered to that gen. Regions
+ * above the save's gen simply don't exist for this save (no locked cards).
+ */
+export function groupedRegions(maxGen: number): RegionGroup[] {
+  const groups: RegionGroup[] = [];
+  for (const zone of WORLD_ZONES) {
+    const regions = KANTO_REGIONS.filter((r) => zone.regionIds.includes(r.id) && r.gen <= maxGen);
+    if (regions.length > 0) groups.push({ zone, regions });
+  }
+  return groups;
+}

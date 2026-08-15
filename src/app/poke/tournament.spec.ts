@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BASE_CUPS, getCupsForTier } from '@poke/tournament';
+import { BASE_CUPS, getCupsForTier, getEliteCups } from '@poke/tournament';
 
 describe('tournaments', () => {
   it('gates base cups behind ladder tiers', () => {
@@ -17,5 +17,28 @@ describe('tournaments', () => {
       expect(cur.rivalLevel).toBeGreaterThan(prev.rivalLevel);
       expect(cur.finalPrize).toBeGreaterThan(prev.finalPrize);
     }
+  });
+});
+
+describe('elite series cups', () => {
+  it('scales difficulty and prizes with rank', () => {
+    const rank0 = getEliteCups(0);
+    const rank2 = getEliteCups(2);
+    expect(rank0.length).toBe(3);
+    expect(rank2.length).toBe(3);
+    for (let i = 0; i < 3; i++) {
+      expect(rank2[i]!.rivalLevel).toBeGreaterThan(rank0[i]!.rivalLevel);
+      expect(rank2[i]!.entryFee).toBeGreaterThan(rank0[i]!.entryFee);
+      expect(rank2[i]!.finalPrize).toBeGreaterThan(rank0[i]!.finalPrize);
+      expect(rank2[i]!.series).toBe(2);
+    }
+  });
+
+  it('elite cups are gated behind the Champion tier and rank up per win', () => {
+    const champion = getCupsForTier(4);
+    expect(champion.every((c) => c.series !== undefined)).toBe(true);
+    // Winning a cup moves to the next series (rank + 1).
+    const next = getEliteCups(champion[0]!.series! + 1);
+    expect(next[0]!.series).toBe(champion[0]!.series! + 1);
   });
 });

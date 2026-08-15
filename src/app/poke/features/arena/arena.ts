@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,11 +10,17 @@ import { PokeData } from '@poke/poke-data';
 import { Notify } from '@poke/notify';
 import { AutoBattle } from '@poke/auto-battle';
 import { Cup, CUP_BATTLE_ENERGY, QUICK_BATTLE_ENERGY, getCupsForTier } from '@poke/tournament';
-import { poolAroundTier, sampleRivalTeam, RIVAL_POOLS } from '@poke/rivals';
+import { gatedRivalPool, sampleRivalTeam, RIVAL_POOLS } from '@poke/rivals';
 import { CupRuns } from '@poke/cup-run';
+import { EliteSeries } from '@poke/elite-series';
 import { AppDialog, BasicView, BattleLog } from '@shared/ui';
 import { ManualBattle } from '@poke/manual-battle';
-import type { ArenaFighter } from '@poke/match.runner';
+import type { ArenaFighter, MatchSummary } from '@poke/match.runner';
+import type { FighterMove } from '@poke/poke.model';
+import type { BattleEvent } from '@shared/models/battle-event';
+
+/** Arena battle modes — the player picks one up front (manual is the default). */
+export type ArenaMode = 'quick' | 'manual' | 'cup';
 
 /** A fighter row enriched with every display value the template needs. */
 interface FighterView {
@@ -24,14 +30,17 @@ interface FighterView {
   hpPct: number;
 }
 
-function poolForCup(cup: Cup): string[] {
+/** Cup rival pool gated by the save's generation (falls back when empty). */
+function poolForCup(cup: Cup, isKnown: (name: string) => boolean): string[] {
   const flat: string[] = [];
   const start = cup.rivalLevel >= 13 ? 6 : cup.rivalLevel >= 8 ? 3 : 0;
   const end = cup.rivalLevel >= 13 ? 9 : cup.rivalLevel >= 8 ? 6 : 3;
   for (let t = start; t < end; t++) {
     flat.push(...(RIVAL_POOLS[t] ?? []));
   }
-  return flat;
+  const filtered = [...new Set(flat.filter(isKnown))];
+  if (filtered.length > 0) return filtered;
+  return gatedRivalPool(0, isKnown);
 }
 
 @Component({
@@ -56,16 +65,65 @@ export class Arena {
   readonly auto = inject(AutoBattle);
   readonly manual = inject(ManualBattle);
   readonly cupRuns = inject(CupRuns);
+  readonly elite = inject(EliteSeries);
   #notify = inject(Notify);
   #dialog = inject(AppDialog);
+
+  /** Selected arena mode — manual turn-by-turn battles are the default. */
+  #_mode = signal<ArenaMode>('manual');
+  readonly mode = this.#_mode.asReadonly();
+
+  setMode(m: ArenaMode) {
+    if (this.afk()) return;
+    this.#_mode.set(m);
+  }
+
+  /** AFK idle-fight mode locks every other arena interaction. */
+  readonly afk = computed(() => this.auto.autoPlaying());
+
+  // ---- Collapsible battle logs (preview shows only the last actions) ----
+  readonly showQuickLog = signal(false);
+  readonly showManualLog = signal(false);
+  toggleQuickLog() {
+    this.showQuickLog.update((v) => !v);
+  }
+  toggleManualLog() {
+    this.showManualLog.update((v) => !v);
+  }
+
+  /** The last `n` events — the collapsed preview of a battle. */
+  lastEvents(events: BattleEvent[], n = 2): BattleEvent[] {
+    return events.slice(-n);
+  }
+
+  /** One-line KO summary for the result panel (intuitive outcome). */
+  koLine(s: MatchSummary): string {
+    if (s.winner === 'player') {
+      return s.rivalLost.length
+        ? `You knocked out: ${s.rivalLost.join(', ')}`
+        : 'Rival team fainted';
+    }
+    return s.playerLost.length
+      ? `Your squad fainted: ${s.playerLost.join(', ')}`
+      : 'Your squad fainted';
+  }
+
+  /** Player's selectable moves — falls back to Struggle when none are known. */
+  readonly playerMoves = computed<FighterMove[]>(() => {
+    const f = this.manual.playerFighter();
+    const moves = f?.moves ?? [];
+    return moves.length > 0 ? moves : [STRUGGLE_MOVE];
+  });
 
   canBattle = computed(() => this.game.squad().length > 0);
   /** Quick fight unlocked: squad ready and energy to spare. */
   canQuick = computed(() => this.canBattle() && this.game.energy() >= QUICK_BATTLE_ENERGY);
   canCupBattle = computed(() => this.canBattle() && this.game.energy() >= CUP_BATTLE_ENERGY);
 
-  /** Cups available for the current tier (infinite after Champion Cup). */
-  cups = computed(() => getCupsForTier(this.game.tier()));
+  /** Cups available: base cups by ladder tier, endless Elite Series after Champion. */
+  cups = computed(() =>
+    this.game.tier() >= 4 ? this.elite.cups() : getCupsForTier(this.game.tier()),
+  );
 
   /** Active cup run — lives on a root service so tab switches don't lose it. */
   get cupRun() {
@@ -101,7 +159,6 @@ export class Arena {
   });
 
   /** Quick fight: a small rival team drawn from your tier's pool. */
-  /** Quick fight: a small rival team drawn from your tier's pool. */
   start() {
     if (!this.canQuick() || this.runner.busy()) return;
     if (!this.game.spendEnergy(QUICK_BATTLE_ENERGY)) {
@@ -109,7 +166,7 @@ export class Arena {
       return;
     }
     const tier = Math.min(Math.max(this.game.tier(), 0), 8);
-    const pool = [...new Set(poolAroundTier(tier))];
+    const pool = gatedRivalPool(tier, (n) => this.data.isInMasterList(n));
     const rival = sampleRivalTeam(pool, Math.min(3, pool.length));
     void this.runner.play(rival);
   }
@@ -127,9 +184,13 @@ export class Arena {
     }
     const squad = this.game.squad();
     const tier = Math.min(Math.max(this.game.tier(), 0), 8);
-    const pool = [...new Set(poolAroundTier(tier))];
+    const pool = gatedRivalPool(tier, (n) => this.data.isInMasterList(n));
     const rival = sampleRivalTeam(pool, Math.min(3, pool.length));
-    await this.data.ensureInCache([...squad, ...rival]);
+    try {
+      await this.data.ensureInCache([...squad, ...rival]);
+    } catch {
+      /* best-effort warmup — fighters fall back to generic stats */
+    }
     await this.data.ensureMoves([...squad, ...rival]).catch(() => undefined);
 
     const playerTeam = this.runner.spawn(squad, this.game.tier() + 1, false);
@@ -146,6 +207,19 @@ export class Arena {
   }
 
   constructor() {
+    // AFK mode is exclusive: entering it quits any in-progress manual battle.
+    effect(() => {
+      if (this.auto.autoPlaying() && this.manual.active()) this.manual.quit();
+    });
+
+    // A new battle collapses any expanded log back to the 2-action preview.
+    effect(() => {
+      if (this.runner.result()) this.showQuickLog.set(false);
+    });
+    effect(() => {
+      if (this.manual.log().length === 0) this.showManualLog.set(false);
+    });
+
     // Pay out once when a manual battle ends.
     effect(() => {
       const winner = this.manual.winner();
@@ -197,7 +271,10 @@ export class Arena {
     }
     this.game.spendEnergy(CUP_BATTLE_ENERGY);
 
-    const rival = sampleRivalTeam(poolForCup(run.cup), run.cup.rivalTeamSize);
+    const rival = sampleRivalTeam(
+      poolForCup(run.cup, (n) => this.data.isInMasterList(n)),
+      run.cup.rivalTeamSize,
+    );
     const res = await this.runner.play(rival, run.cup.rivalLevel);
     this.runner.collect();
 
@@ -208,7 +285,15 @@ export class Arena {
       if (wins.length >= run.cup.battles) {
         this.game.grantCoins(run.cup.finalPrize);
         this.cupRun.set({ cup: run.cup, wins, status: 'won' });
-        this.#notify.show(`Cup won! Bonus +${run.cup.finalPrize}¢.`);
+        if (run.cup.series !== undefined) {
+          // Elite Series win → rank up into the next, harder series.
+          this.elite.wonCup();
+          this.#notify.show(
+            `Elite Series ${run.cup.series + 1} won! Ranked up — Series ${this.elite.seriesNumber()} unlocked.`,
+          );
+        } else {
+          this.#notify.show(`Cup won! Bonus +${run.cup.finalPrize}¢.`);
+        }
       } else {
         this.cupRun.set({ cup: run.cup, wins, status: 'active' });
       }
@@ -252,3 +337,11 @@ export class Arena {
     }));
   }
 }
+
+/** Last-resort move used when a fighter knows no real moves yet. */
+const STRUGGLE_MOVE: FighterMove = {
+  name: 'struggle',
+  type: 'normal',
+  category: 'physical',
+  power: 25,
+};

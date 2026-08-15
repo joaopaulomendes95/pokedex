@@ -1,49 +1,83 @@
 <div class="adventure">
   <app-basic-view
     pageTitle="Adventure"
-    headline="Pick a zone, go catch some wild Pokémon — beat them in a fight, then throw a ball!"
+    headline="Pick a region, go catch some wild Pokémon — beat them in a fight, then throw a ball!"
     faIcon="map-location-dot"
   >
-    <!-- Zone map -->
-    <section class="zone-grid">
-      @for (zone of zones(); track zone.def.id) {
-        <button
-          class="zone-card"
-          [class.active]="zone.index === currentZone().index"
-          (click)="openZone(zone.index)"
-        >
-          <div class="zone-art">
-            @if (artOk() && zone.index === currentZone().index) {
-              <img [src]="zone.art" alt="" (error)="artOk.set(false)" />
-            }
-            <div class="zone-tint"></div>
-            <div class="zone-title">
-              <h2>{{ zone.def.name }}</h2>
-              <p>{{ zone.def.tagline }}</p>
-            </div>
-          </div>
-          <div class="zone-foot">
-            <span class="zone-caught">
-              <mat-icon>catching_pokemon</mat-icon>
-              {{ zone.caught }} owned
-            </span>
-            <span class="zone-gen"
-              >Gen {{ zone.def.genStart
-              }}{{ zone.def.gen > zone.def.genStart ? '–' + zone.def.gen : '' }}</span
-            >
-          </div>
-        </button>
-      }
-    </section>
+    <!-- Dex completion meter -->
+    <div class="dex-meter">
+      <mat-icon>catching_pokemon</mat-icon>
+      <span>
+        Gen {{ genFilterMaxGen() }} Pokédex:
+        <b>{{ dexOwned() }}/{{ dexTotal() }}</b>
+        <small>({{ dexPct() }}%)</small>
+      </span>
+    </div>
 
-    <!-- Wild pool for the active zone -->
+    <!-- Region map (only the save's generations — nothing locked) -->
+    @for (group of regionCards(); track group.group.zone.id) {
+      <section class="region-group">
+        <div class="group-head">
+          <h3>{{ group.group.zone.name }}</h3>
+          <span class="group-gens"
+            >Gen {{ group.group.zone.genStart
+            }}{{
+              group.group.zone.gen > group.group.zone.genStart ? '–' + group.group.zone.gen : ''
+            }}</span
+          >
+        </div>
+        <div class="region-grid">
+          @for (region of group.cards; track region.def.id) {
+            <button
+              type="button"
+              class="region-card"
+              [class.active]="region.def.id === currentRegion()?.id"
+              (click)="openRegion(region.def.id)"
+            >
+              <div class="region-art">
+                @if (artOk() && region.def.id === currentRegion()?.id) {
+                  <img [src]="region.art" alt="" (error)="artOk.set(false)" />
+                }
+                <div class="region-tint"></div>
+                <div class="region-title">
+                  <h2>{{ region.def.name }}</h2>
+                  <p>{{ region.def.tagline }}</p>
+                </div>
+              </div>
+              <div class="region-foot">
+                <span class="region-caught">
+                  <mat-icon>catching_pokemon</mat-icon>
+                  {{ region.caught }} owned
+                </span>
+                <span class="region-gen">Gen {{ region.def.gen }}</span>
+              </div>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Wild pool for the active region -->
     <section class="pool-section">
       <div class="pool-head">
-        <h2>{{ currentZone().def.name }} — wild pool</h2>
-        <button mat-stroked-button (click)="loadPool()" [disabled]="poolLoading()">
-          <mat-icon>refresh</mat-icon>
-          Re-roll pool
-        </button>
+        <div>
+          <h2>{{ currentRegion()?.name ?? '—' }} — wild pool</h2>
+          <p class="pool-sub">
+            First evolutions only — catch the base stage, then evolve it in your Squad.
+          </p>
+        </div>
+        <div class="pool-actions">
+          @if (poolSecondsLeft() > 0 && pool().length > 0) {
+            <span class="pool-ttl" [class.low]="poolSecondsLeft() <= 10">
+              <mat-icon>schedule</mat-icon>
+              New pool in {{ poolSecondsLeft() }}s
+            </span>
+          }
+          <button type="button" mat-stroked-button (click)="loadPool()" [disabled]="poolLoading()">
+            <mat-icon>refresh</mat-icon>
+            Re-roll pool
+          </button>
+        </div>
       </div>
 
       @if (poolLoading()) {
@@ -53,7 +87,7 @@
       } @else if (poolError()) {
         <p class="error">
           Couldn't load the wild pool.
-          <button mat-stroked-button (click)="retryPool()">Retry</button>
+          <button type="button" mat-stroked-button (click)="retryPool()">Retry</button>
         </p>
       } @else if (pool().length === 0) {
         <p class="empty">Open a zone to see its wild Pokémon.</p>
@@ -61,12 +95,24 @@
         <div class="pool-grid">
           @for (pick of pool(); track pick.name) {
             <button
+              type="button"
               class="pool-card"
               [class.selected]="selectedWild()?.name === pick.name"
+              [class.owned]="owns(pick.name)"
               (click)="selectWild(pick)"
             >
-              <img [src]="pick.sprite" alt="" />
+              <div class="pool-sprite">
+                <img [src]="pick.sprite" alt="" />
+                @if (owns(pick.name)) {
+                  <span class="owned-badge" title="Already owned">
+                    <mat-icon>check_circle</mat-icon>
+                  </span>
+                }
+              </div>
               <span class="pool-name">{{ pick.name }}</span>
+              <span class="pool-rarity" [class]="pick.rarity">
+                {{ pick.rarity }}
+              </span>
             </button>
           }
         </div>
@@ -87,7 +133,13 @@
         @if (!champion()) {
           <p class="hint">You need at least one Pokémon — buy a starter in the Shop first.</p>
         } @else if (fightResult() === null) {
-          <button mat-raised-button color="primary" (click)="fight()" [disabled]="fighting()">
+          <button
+            type="button"
+            mat-raised-button
+            color="primary"
+            (click)="fight()"
+            [disabled]="fighting()"
+          >
             <mat-icon>sports_martial_arts</mat-icon>
             {{ fighting() ? 'Resolving…' : `Fight it with ${champion()!.name}` }}
           </button>
@@ -111,6 +163,7 @@
           @if (!catchResult()?.success) {
             <div class="catch-actions">
               <button
+                type="button"
                 mat-raised-button
                 color="primary"
                 (click)="throwBall()"
@@ -119,7 +172,7 @@
                 <mat-icon>sports_handball</mat-icon>
                 Throw {{ bestBall()?.name ?? 'Pokéball' }} ({{ catchPct() }}%)
               </button>
-              <button mat-stroked-button (click)="selectWild(wild)">Let it go</button>
+              <button type="button" mat-stroked-button (click)="selectWild(wild)">Let it go</button>
             </div>
             @if (!bestBall()) {
               <p class="hint">No Pokéballs! Buy some in the Shop.</p>
@@ -130,9 +183,9 @@
             <mat-icon>sentiment_very_dissatisfied</mat-icon>
             <span>The wild {{ wild.name }} got away…</span>
           </div>
-          <button mat-stroked-button (click)="fight()" [disabled]="fighting()">
-            <mat-icon>replay</mat-icon>
-            Fight again
+          <button type="button" mat-stroked-button (click)="selectedWild.set(null)">
+            <mat-icon>arrow_back</mat-icon>
+            Back to the pool
           </button>
         }
       </section>

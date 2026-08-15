@@ -66,10 +66,19 @@ export interface CareerStats {
   catches: number;
   coinsEarned: number;
   levelUps: number;
+  /** Total evolutions performed (feeds achievements). */
+  evolves: number;
 }
 
 /** Fresh career counters for a brand-new run. */
-const FRESH_STATS: CareerStats = { battles: 0, wins: 0, catches: 0, coinsEarned: 0, levelUps: 0 };
+const FRESH_STATS: CareerStats = {
+  battles: 0,
+  wins: 0,
+  catches: 0,
+  coinsEarned: 0,
+  levelUps: 0,
+  evolves: 0,
+};
 
 /** Coins earned per owned creature, per second (collection-scaled income). */
 const COINS_PER_ROSTER = 0.15;
@@ -292,6 +301,7 @@ export class Game {
       return next;
     });
     this.#_squad.update((s) => s.map((n) => (n === from ? to : n)));
+    this.#_stats.update((s) => ({ ...s, evolves: s.evolves + 1 }));
     this.persist();
     return true;
   }
@@ -457,6 +467,31 @@ export class Game {
     this.#_coins.update((c) => c - price);
     this.persist();
     return true;
+  }
+
+  /** Coins paid out when transferring/releasing a pokémon (level-scaled). */
+  releaseValue(level: number): number {
+    return 10 + level * 4;
+  }
+
+  /**
+   * Release/transfer an owned pokémon for coins: removes it from the
+   * collection (and the squad if fielded) and pays out `releaseValue`. Returns
+   * the coins earned, or 0 when the pokémon isn't owned.
+   */
+  release(name: string): number {
+    const owned = this.collection().get(name);
+    if (!owned) return 0;
+    const value = this.releaseValue(owned.level);
+    this.#_collection.update((map) => {
+      const next = new Map(map);
+      next.delete(name);
+      return next;
+    });
+    this.#_squad.update((s) => s.filter((n) => n !== name));
+    this.grantCoins(value);
+    this.persist();
+    return value;
   }
 
   /** Adds coins (prizes, winnings). Never negative. */

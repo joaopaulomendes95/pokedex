@@ -6,6 +6,8 @@ import {
   artworkUrlForDexId,
   WORLD_ZONES,
   zoneAreaUrls,
+  groupedRegions,
+  regionAreaUrls,
 } from '@poke/adventure-regions';
 
 describe('world map', () => {
@@ -71,5 +73,38 @@ describe('world map', () => {
     for (const zone of WORLD_ZONES) {
       expect(zoneAreaUrls(zone).length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('generation-gated map', () => {
+  it('regionAreaUrls returns every area of a region', () => {
+    const pallet = KANTO_REGIONS[0]!;
+    expect(regionAreaUrls(pallet)).toEqual(pallet.areas.map((a) => a.url));
+  });
+
+  it('groupedRegions hides regions above the save generation', () => {
+    const gen1 = groupedRegions(1);
+    expect(gen1.length).toBe(1); // only Kanto
+    expect(gen1[0]!.regions.every((r) => r.gen <= 1)).toBe(true);
+    expect(gen1[0]!.regions.length).toBe(6); // the six Kanto regions
+
+    const gen2 = groupedRegions(2);
+    const gens = gen2.flatMap((g) => g.regions.map((r) => r.gen));
+    expect(Math.max(...gens)).toBe(2);
+    expect(gen2.length).toBe(2); // Kanto + Johto&Hoenn (Johto only)
+  });
+
+  it('every generation 1-8 is travelable at its own save gen', () => {
+    for (let gen = 1; gen <= 8; gen++) {
+      const groups = groupedRegions(gen);
+      expect(groups.length).toBeGreaterThan(0);
+      const gens = new Set(groups.flatMap((g) => g.regions.map((r) => r.gen)));
+      expect(gens.has(gen)).toBe(true);
+    }
+  });
+
+  it('a gen-8 save sees the whole world', () => {
+    const all = groupedRegions(8).flatMap((g) => g.regions);
+    expect(all.length).toBe(KANTO_REGIONS.length);
   });
 });

@@ -21,6 +21,7 @@ import {
 } from '@poke/ui-state';
 import { Game } from '@poke/game';
 import { Theme } from '@poke/theme';
+import { Missions } from '@poke/missions';
 
 interface NavItem {
   id: number;
@@ -41,6 +42,7 @@ export class Navbar {
   #theme = inject(Theme);
   #dialog = inject(MatDialog);
   #storage = inject(BrowserStorage);
+  #missions = inject(Missions);
 
   /** Navbar starts expanded; the toggle collapses it to hover-expand mode. */
   readonly expanded = signal(this.#storage.get(NAVBAR_KEY) !== 'collapsed');
@@ -54,14 +56,19 @@ export class Navbar {
     this.#storage.set(NAVBAR_KEY, this.expanded() ? 'expanded' : 'collapsed');
   }
 
-  readonly navItems: NavItem[] = [
-    { id: TAB_SQUAD, label: 'Squad', icon: 'groups' },
-    { id: TAB_POKEDEX, label: 'Pokédex', icon: 'menu_book' },
-    { id: TAB_ADVENTURE, label: 'Adventure', icon: 'explore' },
-    { id: TAB_ARENA, label: 'Arena', icon: 'sports_martial_arts' },
-    { id: TAB_QUESTS, label: 'Idle', icon: 'auto_awesome', badge: 0 },
-    { id: TAB_USER, label: 'Save', icon: 'save' },
-  ];
+  /** Nav items — the Idle tab carries a badge with claimable missions. */
+  readonly navItems = computed<NavItem[]>(() => {
+    // The badge hides while the player is actually looking at the missions.
+    const badge = this.currentTab() === TAB_QUESTS ? 0 : this.#missions.readyCount();
+    return [
+      { id: TAB_SQUAD, label: 'Squad', icon: 'groups' },
+      { id: TAB_POKEDEX, label: 'Pokédex', icon: 'menu_book' },
+      { id: TAB_ADVENTURE, label: 'Adventure', icon: 'explore' },
+      { id: TAB_ARENA, label: 'Arena', icon: 'sports_martial_arts' },
+      { id: TAB_QUESTS, label: 'Idle', icon: 'auto_awesome', badge },
+      { id: TAB_USER, label: 'Save', icon: 'save' },
+    ];
+  });
 
   readonly currentTab = this.#ui.tab;
   readonly themeMode = this.#theme.mode;

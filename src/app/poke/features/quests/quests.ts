@@ -5,6 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Game } from '@poke/game';
 import { Mission, Missions } from '@poke/missions';
+import { Achievements, ACHIEVEMENTS } from '@poke/achievements';
+import { DailyReward } from '@poke/daily-reward';
 import { Notify } from '@poke/notify';
 import { KpiBlock, MetricData } from '@shared/ui/kpi-block/kpi-block';
 import { ProgressGauge } from '@shared/ui/progress-gauge/progress-gauge';
@@ -30,6 +32,8 @@ import { AppDialog } from '@shared/ui/dialog/app-dialog';
 export class Quests {
   readonly game = inject(Game);
   readonly missions = inject(Missions);
+  readonly achievements = inject(Achievements);
+  readonly daily = inject(DailyReward);
   #notify = inject(Notify);
   #dialog = inject(AppDialog);
 
@@ -80,6 +84,20 @@ export class Quests {
     () => this.missions.missions().filter((m) => this.missions.claimed().has(m.id)).length,
   );
 
+  /** All achievements, enriched for the template. */
+  readonly achievementsList = computed(() =>
+    ACHIEVEMENTS.map((a) => ({
+      a,
+      done: this.achievements.isDone(a),
+      unlocked: this.achievements.isUnlocked(a),
+    })),
+  );
+
+  /** Claim today's daily reward. */
+  claimDaily() {
+    this.daily.claim();
+  }
+
   chipFor(m: Mission): { color: CustomChipColor; label: string; faIcon: string } {
     const claimed = this.missions.claimed().has(m.id);
     const done = this.missions.isDone(m);
@@ -90,12 +108,51 @@ export class Quests {
     };
   }
 
+  /** Times this mission's base type has been claimed across tiers. */
+  claimCount(m: Mission): number {
+    return this.missions.claimCount(m);
+  }
+
+  /** Coins one more prestige shard would add per second (from current income). */
+  readonly shardIncomeBonus = computed(() => {
+    const p = this.game.prestige();
+    const cur = this.game.incomePerSec();
+    const base = p > 0 ? cur / (1 + 0.25 * p) : cur;
+    return base * 0.25;
+  });
+
+  /** Projected income if the player prestiges right now (shards + gain). */
+  readonly projectedIncome = computed(() => {
+    const cur = this.game.incomePerSec();
+    const p = this.game.prestige();
+    const gain = this.game.prestigeGain();
+    return cur * (1 + (0.25 * gain) / (1 + 0.25 * p));
+  });
+
   claim(m: Mission) {
     if (this.missions.claim(m)) {
       this.#notify.show(`Mission complete! +${m.reward}¢`);
     } else {
       this.#notify.show('Mission not ready yet.');
     }
+  }
+
+  /** Wipe all mission progress (claimed set, counts and tier). */
+  resetMissions() {
+    this.#dialog
+      .open({
+        type: 'warn',
+        title: 'Reset all missions?',
+        message:
+          'This clears every claimed mission, the claim counters and the tier — missions go back to Tier 1. Your coins, collection and career stats are NOT touched (already-complete missions may be claimable again immediately).',
+        actionLabel: 'Reset missions',
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
+        this.missions.resetAll();
+        this.#notify.show('Missions reset — back to Tier 1.');
+      });
   }
 
   prestige() {

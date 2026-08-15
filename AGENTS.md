@@ -42,7 +42,11 @@ component (`app.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
   `app.config.ts` via `{ provide: ErrorHandler, useClass }`),
   `services/storage.ts` (the only place that touches `localStorage`),
   `services/notifications/notification.ts` (CDK-overlay toasts),
-  `services/error-reporting/error-reporting.ts`, `models/*`.
+  `services/error-reporting/error-reporting.ts`,
+  `services/save-io/` (save import/export: localStorage is origin-scoped, so a
+  dev-port change looks like a wiped save — `SaveIo` bundles the game, missions
+  and Elite Series keys into one JSON file for port/browser portability),
+  `models/*`.
 - **UI building blocks in `shared/ui/`**: `basic-view`,
   `kpi-block`, `custom-chip`, `progress-gauge`, `container-mark`,
   `object-container`, `general-tile-list` (+ `GeneralListBase` engine),
@@ -91,10 +95,16 @@ component (`app.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
 - `poke/adventure-regions.ts` — the adventure **world map**: 13 curated
   regions (all with real, verified `location-area` IDs) grouped into **5
   macro-zones** (`WORLD_ZONES`: Kanto · Johto&Hoenn · Sinnoh&Unova ·
-  Kalos&Alola · Galar). Adventure flow is fight-to-catch: pick a zone →
-  "Go catch some" fetches a shuffled wild pool (`PokeData.zonePool`),
-  pick one and FIGHT it (Battle sim, 1v1 vs your strongest owned) — winning
-  gives a chance to throw a ball (catch + 1/64 shiny roll).
+  Kalos&Alola · Galar). The map is **generation-gated**: `groupedRegions(maxGen)`
+  shows only the zones/regions within the save's generation (no locked cards),
+  so a save's regions always cover every gen ≤ maxGen and the Pokédex of that
+  generation can be completed. Adventure flow is fight-to-catch: pick a region →
+  "Go catch some" fetches a shuffled wild pool (`PokeData.zonePool`, capped by
+  the save's gen + master-list membership), pick one and FIGHT it (Battle sim,
+  1v1 vs your strongest owned) — winning gives a chance to throw a ball (catch +
+  1/64 shiny roll). The pool is first-evolutions-only, weighted to the region's
+  strongest species with random picks mixed in, and re-rolls on a TTL
+  (`POOL_TTL_MS`) like random encounters.
 
 - `poke/game.ts` is the state machine: `coins`, `collection`
   (name → `OwnedPoke`), `squad` (max 6), `wins`, `tier`. `tick()` (1s
@@ -124,9 +134,19 @@ shiny)` — catches roll a 1/64 shiny variant (`OwnedPoke.shiny`, ✨ badge +
   in dev mode it runs `checkNoChanges` on every view and throws
   `ExpressionChanged` with a live game.
 
-- `poke/missions.ts` — mission catalog (8 missions), progress derived
-  from `Game.stats()`, claimed-set persisted to `poke-league-missions`.
-  `claim(mission)` pays coins once.
+- `poke/missions.ts` — mission catalog (8 missions) with **infinite tiers**: each
+  tier doubles goals/rewards, and claiming everything advances the tier
+  (bump-before-persist + a load-time guard skip past fully-claimed tiers, so
+  missions can never soft-lock). Claim counts per base mission persist in
+  `poke-league-missions`; `resetAll()` wipes everything. `readyCount()` feeds
+  the navbar Idle badge, and a root effect toasts newly-claimable missions
+  (and tier unlocks) whenever the player is on another tab.
+
+- `poke/achievements.ts` — permanent one-time goals (auto-rewarded with coins
+  + toast the moment their predicate flips; persisted per save across
+  prestiges). `poke/daily-reward.ts` — daily login streak reward (`dailyStatus`
+  is a pure, unit-tested function; streak grows by returning day after day and
+  resets when a day is missed).
 
 - `poke/auto-battle.ts` — idle loop running quick fights every ~4s.
   `toggle()` starts/stops; inject into Arena for the UI button.

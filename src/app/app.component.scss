@@ -3,7 +3,9 @@
   height: 100%;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: var(--app-navbar-closed-width, 72px) 1fr;
+  /* `auto` (not a fixed 72px): the expanded navbar must push the content
+     instead of floating over it and swallowing clicks on left-side buttons. */
+  grid-template-columns: auto 1fr;
   grid-template-rows: 1fr;
   overflow: hidden;
 }

@@ -41,11 +41,30 @@
         </p>
 
         <div class="actions">
-          <button mat-stroked-button (click)="saveNow()">
+          <button type="button" mat-stroked-button (click)="saveNow()">
             <mat-icon>save</mat-icon>
             Save now
           </button>
+          <button type="button" mat-stroked-button (click)="exportSave()">
+            <mat-icon>download</mat-icon>
+            Export save
+          </button>
+          <button type="button" mat-stroked-button (click)="importInput.click()">
+            <mat-icon>upload</mat-icon>
+            Import save
+          </button>
+          <input
+            #importInput
+            type="file"
+            accept=".json,application/json"
+            class="import-input"
+            (change)="onImportPicked(importInput.files?.[0])"
+          />
         </div>
+        <p class="hint import-hint">
+          Your save lives in this browser (scoped to the app's port). Export it to a file to move it
+          between ports, browsers or machines.
+        </p>
       </mat-card-content>
     </mat-card>
 
@@ -63,6 +82,7 @@
         <div class="gen-row">
           <span class="gen-label">Next run is Gen</span>
           <button
+            type="button"
             mat-icon-button
             (click)="decGen()"
             [disabled]="newGen() === 1"
@@ -72,6 +92,7 @@
           </button>
           <span class="gen-value">{{ newGen() }}</span>
           <button
+            type="button"
             mat-icon-button
             (click)="incGen()"
             [disabled]="newGen() === 9"
@@ -83,7 +104,7 @@
         </div>
 
         <div class="actions">
-          <button mat-flat-button color="warn" (click)="doReset()">
+          <button type="button" mat-flat-button color="warn" (click)="doReset()">
             <mat-icon>restart_alt</mat-icon>
             Restart game
           </button>

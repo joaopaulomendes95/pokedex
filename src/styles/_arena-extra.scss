@@ -1,0 +1,429 @@
+// Arena extras (mode picker, AFK panel, manual battle, Elite Series counter).
+// Kept global (scoped under .arena) because the arena's per-component SCSS
+// budget is tight; these selectors only match inside the arena root.
+
+.arena {
+  /* Mode picker — choose quick / manual / tournament up front */
+  .mode-picker {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+
+    .mode-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 10px 8px;
+      border: 1px solid var(--app-hairline);
+      border-radius: 12px;
+      background: var(--mat-sys-surface-container-low);
+      color: var(--app-color-desat-30);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition:
+        transform 0.15s ease,
+        border-color 0.15s ease,
+        background 0.15s ease;
+
+      mat-icon {
+        font-size: 1.3rem;
+        width: 1.3rem;
+        height: 1.3rem;
+        margin-bottom: 2px;
+      }
+
+      .mode-desc {
+        font-weight: 500;
+        font-size: 0.62rem;
+        opacity: 0.6;
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+        border-color: var(--app-color-main-50);
+      }
+
+      &.active {
+        border-color: var(--app-color-orange);
+        background: var(--app-color-orange-a);
+        color: var(--app-color-orange);
+      }
+    }
+  }
+
+  .afk-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+
+    .afk-hint {
+      font-size: 0.7rem;
+      opacity: 0.6;
+    }
+  }
+
+  .afk-card {
+    border: 1px solid var(--app-color-orange);
+    background: linear-gradient(180deg, var(--app-color-orange-a), transparent 80%);
+    padding: 18px;
+
+    .afk-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+
+      mat-icon {
+        font-size: 2.2rem;
+        width: 2.2rem;
+        height: 2.2rem;
+        color: var(--app-color-orange);
+        animation: afk-blink 1.4s ease-in-out infinite;
+      }
+
+      h2 {
+        margin: 0 0 4px;
+        font-size: 1.15rem;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.8rem;
+        opacity: 0.75;
+      }
+    }
+
+    .afk-tally {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+
+      .tally {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 700;
+
+        mat-icon {
+          font-size: 0.9rem;
+          width: 0.9rem;
+          height: 0.9rem;
+        }
+
+        &.win {
+          background: var(--app-color-green-a);
+          color: var(--app-color-green);
+        }
+        &.loss {
+          background: var(--app-color-red-a);
+          color: var(--app-color-red);
+        }
+        &.coins {
+          background: var(--app-color-orange-a);
+          color: var(--app-color-orange);
+        }
+      }
+    }
+
+    .afk-stage {
+      display: grid;
+      grid-template-columns: 1fr 50px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--app-hairline);
+      background: var(--mat-sys-surface-container-low);
+      margin-bottom: 10px;
+
+      .afk-side {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .afk-fighter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 8px;
+        background: var(--app-color-desat-a);
+
+        img {
+          width: 36px;
+          height: 36px;
+          object-fit: contain;
+          image-rendering: pixelated;
+        }
+
+        .afk-info {
+          min-width: 0;
+          flex: 1;
+
+          .afk-name {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: capitalize;
+            display: block;
+
+            small {
+              opacity: 0.6;
+              font-weight: 500;
+            }
+          }
+
+          .hp-bar {
+            width: 100%;
+            height: 5px;
+            border-radius: 999px;
+            background: var(--app-color-desat-90);
+            overflow: hidden;
+            margin-top: 3px;
+
+            .hp-fill {
+              height: 100%;
+              background: linear-gradient(90deg, var(--app-color-green-60), var(--app-color-green));
+              border-radius: 999px;
+              transition: width 0.3s ease;
+
+              &.rival {
+                background: linear-gradient(90deg, var(--app-color-red-60), var(--app-color-red));
+              }
+            }
+          }
+        }
+      }
+
+      .vs {
+        align-self: center;
+        text-align: center;
+        font-family: var(--app-font-display);
+        font-weight: 700;
+        color: var(--app-color-main-50);
+      }
+    }
+
+    .afk-last {
+      margin: 0 0 12px;
+      font-size: 0.76rem;
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes afk-blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  .manual-lobby .hint {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin: 0 0 12px;
+  }
+
+  .manual-panel {
+    .manual-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+
+      .manual-title {
+        font-family: var(--app-font-display);
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--app-color-main-50);
+      }
+    }
+
+    .manual-winner {
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 10px;
+
+      &.win {
+        background: var(--app-color-green-a);
+        color: var(--app-color-green);
+      }
+      &.loss {
+        background: var(--app-color-red-a);
+        color: var(--app-color-red);
+      }
+    }
+
+    .manual-stage {
+      display: grid;
+      grid-template-columns: 1fr 60px 1fr;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 14px;
+
+      .manual-side {
+        display: flex;
+        justify-content: center;
+      }
+
+      .manual-fighter {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid var(--app-hairline);
+        background: var(--mat-sys-surface-container-low);
+        min-width: 0;
+
+        img {
+          width: 64px;
+          height: 64px;
+          object-fit: contain;
+          image-rendering: pixelated;
+        }
+
+        .mf-info {
+          min-width: 0;
+
+          .mf-name {
+            font-weight: 700;
+            text-transform: capitalize;
+            font-size: 0.9rem;
+
+            small {
+              opacity: 0.6;
+              font-weight: 500;
+            }
+          }
+
+          .hp-bar {
+            width: 110px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--app-color-desat-90);
+            overflow: hidden;
+            margin-top: 4px;
+
+            .hp-fill {
+              height: 100%;
+              background: linear-gradient(90deg, var(--app-color-green-60), var(--app-color-green));
+              border-radius: 999px;
+              transition: width 0.3s ease;
+
+              &.rival {
+                background: linear-gradient(90deg, var(--app-color-red-60), var(--app-color-red));
+              }
+            }
+          }
+        }
+      }
+
+      .vs {
+        text-align: center;
+        font-family: var(--app-font-display);
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: var(--app-color-main-50);
+      }
+    }
+
+    .manual-moves {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .move-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        padding: 8px 10px;
+        border: 1px solid var(--app-hairline);
+        border-radius: 10px;
+        background: var(--mat-sys-surface-container-low);
+        cursor: pointer;
+        text-align: left;
+        transition:
+          transform 0.12s ease,
+          border-color 0.12s ease;
+
+        .move-name {
+          font-weight: 700;
+          font-size: 0.85rem;
+          text-transform: capitalize;
+        }
+
+        .move-meta {
+          font-size: 0.68rem;
+          opacity: 0.6;
+        }
+
+        &:hover {
+          transform: translateY(-2px);
+          border-color: var(--app-color-main-50);
+        }
+      }
+    }
+  }
+
+  .elite-counter {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    border: 1px solid color-mix(in srgb, var(--app-color-orange) 55%, transparent);
+    border-radius: 12px;
+    background: var(--app-color-orange-a);
+    flex-wrap: wrap;
+
+    > mat-icon {
+      font-size: 1.7rem;
+      width: 1.7rem;
+      height: 1.7rem;
+      color: var(--app-color-orange);
+    }
+
+    .elite-stat {
+      display: flex;
+      flex-direction: column;
+      min-width: 110px;
+
+      .label {
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.65;
+      }
+
+      b {
+        font-family: var(--app-font-display);
+        font-size: 1.15rem;
+        color: var(--app-color-orange);
+      }
+    }
+  }
+
+  @media (max-width: 640px) {
+    .mode-picker {
+      grid-template-columns: 1fr;
+    }
+  }
+}

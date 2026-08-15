@@ -206,9 +206,7 @@ describe('Game', () => {
       g.promote();
     }
     expect(g.prestigeReset()).toBe(true);
-    expect(g.passiveXpPerSec()).toBe(
-      before + g.prestige(),
-    );
+    expect(g.passiveXpPerSec()).toBe(before + g.prestige());
   });
 
   it('evolve swaps the species but keeps level, xp and the fielded slot', () => {
@@ -244,5 +242,20 @@ describe('Game', () => {
     // Plain add keeps the old default.
     g.add('meowth', 1);
     expect(g.own('meowth')?.shiny).toBe(false);
+  });
+
+  it('release pays level-scaled coins and removes from collection + squad', () => {
+    TestBed.configureTestingModule({});
+    const g = TestBed.inject(Game);
+    g.add('pikachu', 5);
+    g.setSquad(['pikachu']);
+    const coinsBefore = g.coins();
+    const got = g.release('pikachu');
+    expect(got).toBe(g.releaseValue(5));
+    expect(g.coins()).toBe(coinsBefore + got);
+    expect(g.own('pikachu')).toBeUndefined();
+    expect(g.squad()).toEqual([]);
+    // Releasing a missing pokémon is a no-op.
+    expect(g.release('pikachu')).toBe(0);
   });
 });

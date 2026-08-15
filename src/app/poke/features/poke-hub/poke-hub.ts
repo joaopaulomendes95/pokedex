@@ -50,6 +50,6 @@ export class PokeHub {
 
   /** Warm the first dex entries so the very first battle can start instantly. */
   constructor() {
-    void this.data.warmup();
+    void this.data.warmup().catch(() => undefined);
   }
 }

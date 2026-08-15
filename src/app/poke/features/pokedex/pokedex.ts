@@ -20,6 +20,7 @@ import {
   GeneralTileList,
 } from '@shared/ui';
 import { PokeDetailsContent } from '@poke/features/shared/poke-details-content/poke-details-content';
+import { PokeFullDetails } from '@poke/features/shared/poke-full-details/poke-full-details';
 import { typeHex } from '@poke/features/shared/poke-type-color';
 
 interface DexRow extends Record<string, unknown> {
@@ -150,13 +151,33 @@ export class Pokedex {
       ],
       content: PokeDetailsContent,
       contentData: { name: row.name },
-      actions,
+      actions: [
+        ...actions,
+        // Dedicated full-details mode: everything about the creature.
+        {
+          label: 'Full details',
+          appearance: 'tonal',
+          icon: 'magnifying-glass',
+          handler: () => this.openFullDetails(row.name),
+        },
+      ],
     });
 
     // Restore the pre-dialog selection once the slide-in closes.
     ref.afterClosed().subscribe(() => {
       if (previous) this.data.select(previous);
       else this.data.clearSelection();
+    });
+  }
+
+  /** Open the dedicated full-details dialog (everything about the creature). */
+  openFullDetails(name: string): void {
+    this.#dialog.openDetails({
+      name,
+      headline: `Full details`,
+      faIcon: 'magnifying-glass',
+      content: PokeFullDetails,
+      contentData: { name },
     });
   }
 
