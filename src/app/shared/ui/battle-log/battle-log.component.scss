@@ -3,13 +3,14 @@
 }
 
 .battle-log {
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--app-color-desat-a);
+  border: 1px solid var(--app-hairline);
   border-radius: 8px;
   padding: 10px;
   max-height: 150px;
   overflow-y: auto;
   font-size: 0.75rem;
-  font-family: monospace;
+  font-family: var(--app-font-display);
 
   .log-entry {
     display: flex;
@@ -27,7 +28,7 @@
       border-left-color: var(--app-color-red);
     }
     &.ko {
-      background: rgba(255, 0, 0, 0.07);
+      background: var(--app-color-red-a);
     }
 
     .log-icon {

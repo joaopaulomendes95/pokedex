@@ -6,10 +6,10 @@
     margin-bottom: 16px;
 
     .zone-card {
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
+      border: 1px solid var(--app-hairline);
+      border-radius: 12px;
       overflow: hidden;
-      background: var(--mat-sys-surface);
+      background: var(--mat-sys-surface-container-low);
       cursor: pointer;
       padding: 0;
       text-align: left;
@@ -19,7 +19,7 @@
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.6);
       }
 
       &.active {
@@ -30,7 +30,7 @@
       .zone-art {
         position: relative;
         height: 90px;
-        background: linear-gradient(135deg, var(--app-color-main-70), var(--app-color-main-20));
+        background: linear-gradient(135deg, var(--app-color-main-90), var(--app-color-desat-90));
         overflow: hidden;
 
         img {
@@ -130,9 +130,9 @@
         align-items: center;
         gap: 2px;
         padding: 6px 4px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        border-radius: 8px;
-        background: var(--mat-sys-surface);
+        border: 1px solid var(--app-hairline);
+        border-radius: 10px;
+        background: var(--mat-sys-surface-container-low);
         cursor: pointer;
         transition:
           transform 0.15s ease,
@@ -142,6 +142,7 @@
           width: 44px;
           height: 44px;
           object-fit: contain;
+          filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
         }
 
         .pool-name {
@@ -149,15 +150,17 @@
           text-transform: capitalize;
           font-size: 0.62rem;
           text-align: center;
+          color: var(--app-color-desat-30);
         }
 
         &:hover {
           transform: translateY(-2px);
+          border-color: var(--app-color-main-50);
         }
 
         &.selected {
           border-color: var(--app-color-green);
-          background: #e8f5e9;
+          background: var(--app-color-green-a);
         }
       }
     }
@@ -166,9 +169,9 @@
   .fight-panel {
     margin-top: 14px;
     padding: 12px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    background: var(--mat-sys-surface);
+    border: 1px solid var(--app-hairline);
+    border-radius: 12px;
+    background: var(--mat-sys-surface-container-low);
 
     .wild-preview {
       display: flex;
@@ -217,15 +220,15 @@
     }
 
     .fight-won {
-      background: #e8f5e9;
+      background: var(--app-color-green-a);
       color: var(--app-color-green);
-      border: 1px solid var(--app-color-green-60);
+      border: 1px solid color-mix(in srgb, var(--app-color-green) 55%, transparent);
     }
 
     .fight-lost {
-      background: #fdeaea;
+      background: var(--app-color-red-a);
       color: var(--app-color-red);
-      border: 1px solid var(--app-color-red-60);
+      border: 1px solid color-mix(in srgb, var(--app-color-red) 55%, transparent);
     }
 
     .catch-result {
@@ -245,15 +248,15 @@
       }
 
       &.success {
-        background: #e8f5e9;
+        background: var(--app-color-green-a);
         color: var(--app-color-green);
-        border: 1px solid var(--app-color-green-60);
+        border: 1px solid color-mix(in srgb, var(--app-color-green) 55%, transparent);
       }
 
       &.fail {
-        background: #fdeaea;
+        background: var(--app-color-red-a);
         color: var(--app-color-red);
-        border: 1px solid var(--app-color-red-60);
+        border: 1px solid color-mix(in srgb, var(--app-color-red) 55%, transparent);
       }
     }
 

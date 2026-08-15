@@ -2,7 +2,7 @@
   <mat-spinner diameter="28"></mat-spinner>
 } @else if (data.detail(); as d) {
   <mat-card class="detail">
-    <div class="art-banner">
+    <div class="art-banner" [style.background]="bannerStyle()">
       <span class="id-tag">#{{ d.id }}</span>
       <img [src]="d.artworkUrl" alt="" (error)="artOk.set(false)" />
       @if (owned()?.shiny) {
@@ -14,8 +14,15 @@
         {{ d.name }}
       </h3>
       <div class="types">
-        @for (t of d.types; track t) {
-          <span class="type-chip">{{ t }}</span>
+        @for (t of typeChips(); track t.name) {
+          <span
+            class="type-chip"
+            [style.background]="'color-mix(in srgb, ' + t.hex + ' 24%, transparent)'"
+            [style.color]="t.hex"
+            [style.borderColor]="'color-mix(in srgb, ' + t.hex + ' 55%, transparent)'"
+          >
+            {{ t.name }}
+          </span>
         }
       </div>
       <div class="stat-grid">

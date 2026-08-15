@@ -38,6 +38,38 @@ input[type='number'] {
   }
 }
 
+// Game-console backdrop: a faint blue glow bleeding from the top corner.
+body {
+  background-color: var(--mat-sys-surface);
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -12%, var(--app-color-main-a), transparent 62%),
+    radial-gradient(
+      ellipse 70% 45% at 108% 108%,
+      hsla(var(--app-main-hue), 80%, 45%, 0.07),
+      transparent 60%
+    );
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+// Display voice for native headings (Material classes keep their own fonts).
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--app-font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--app-font-body);
+}
+
 .line-input {
   width: 100%;
   position: relative;
@@ -58,7 +90,7 @@ input[type='number'] {
     position: absolute;
     z-index: 1;
     bottom: -2px;
-    background-color: rgba($color: #818181, $alpha: 0.25);
+    background-color: var(--app-hairline-strong);
   }
 
   &:after {

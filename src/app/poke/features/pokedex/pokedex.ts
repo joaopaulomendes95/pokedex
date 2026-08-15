@@ -20,6 +20,7 @@ import {
   GeneralTileList,
 } from '@shared/ui';
 import { PokeDetailsContent } from '@poke/features/shared/poke-details-content/poke-details-content';
+import { typeHex } from '@poke/features/shared/poke-type-color';
 
 interface DexRow extends Record<string, unknown> {
   name: string;
@@ -90,6 +91,13 @@ export class Pokedex {
 
   /** Stable @for identity for the tile list (rows are filtered/sorted). */
   readonly rowTrackKey = (row: DexRow) => row.name;
+
+  /** Classic hex for a row's primary type (drives the tile glow). */
+  readonly typeHex = typeHex;
+
+  tileHex(row: DexRow): string {
+    return typeHex(row.types[0] ?? 'normal');
+  }
 
   readonly columns: ColumnDefinition<DexRow>[] = [
     { key: 'id', header: 'Dex #', isId: true, sortable: true },

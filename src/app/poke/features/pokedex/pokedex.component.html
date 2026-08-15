@@ -39,6 +39,7 @@
           <div
             class="dex-tile anim-fade-in-up"
             [style.--i]="(index ?? 0) % 20"
+            [style.--tile-hex]="tileHex(row)"
             [class.owned]="row.owned"
           >
             <img [src]="row.sprite" alt="" />
@@ -46,7 +47,13 @@
             <div class="dex-tile-id">#{{ row.id }}</div>
             <div class="dex-tile-types">
               @for (t of row.types; track t) {
-                <span class="dex-tile-type">{{ t }}</span>
+                <span
+                  class="dex-tile-type"
+                  [style.color]="typeHex(t)"
+                  [style.background]="'color-mix(in srgb, ' + typeHex(t) + ' 16%, transparent)'"
+                  [style.borderColor]="'color-mix(in srgb, ' + typeHex(t) + ' 45%, transparent)'"
+                  >{{ t }}</span
+                >
               }
             </div>
           </div>

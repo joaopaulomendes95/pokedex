@@ -79,13 +79,23 @@
   align-items: center;
   gap: 0.25rem;
   text-align: center;
+  position: relative;
+  background:
+    radial-gradient(
+      ellipse 85% 60% at 50% -8%,
+      color-mix(in srgb, var(--tile-hex, var(--app-color-main-50)) 22%, transparent),
+      transparent 75%
+    ),
+    transparent;
+  padding-top: 4px;
 
   img {
     width: 72px;
     height: 72px;
     object-fit: contain;
     image-rendering: pixelated;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
+    transition: transform var(--app-default-transition);
   }
 
   .dex-tile-name {
@@ -96,7 +106,8 @@
   }
 
   .dex-tile-id {
-    font-size: 0.75rem;
+    font-family: var(--app-font-display);
+    font-size: 0.72rem;
     color: var(--app-color-desat-50);
   }
 
@@ -108,12 +119,17 @@
   }
 
   .dex-tile-type {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 0.1rem 0.4rem;
+    letter-spacing: 0.05em;
+    padding: 0.1rem 0.45rem;
     border-radius: 999px;
-    background: var(--app-color-container-primary);
-    color: var(--app-color-desat-70);
+    border: 1px solid transparent;
+    font-weight: 600;
   }
+}
+
+// Type-tinted glow + sprite lift on hover (tile list handles the card frame).
+.tile-item:hover .dex-tile img {
+  transform: scale(1.08);
 }

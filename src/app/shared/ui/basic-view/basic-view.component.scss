@@ -13,6 +13,48 @@
   background-color: var(--mat-sys-surface);
 }
 
+.container-header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.25rem 0.25rem 0.5rem;
+
+  .leading-icon {
+    flex: 0 0 auto;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 0.85rem;
+    display: grid;
+    place-items: center;
+    background: var(--app-color-main-a);
+    border: 1px solid var(--app-hairline);
+    color: var(--app-color-main-50);
+    font-size: 1.15rem;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-color-main-50) 10%, transparent);
+  }
+
+  .head-info {
+    min-width: 0;
+
+    .head-title {
+      display: block;
+      font-family: var(--app-font-display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      line-height: 1.25;
+      letter-spacing: 0.02em;
+      color: var(--app-color-desat-10);
+    }
+
+    .head-desc {
+      display: block;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      margin-top: 2px;
+    }
+  }
+}
+
 .basic-view-body {
   flex: 1 1 auto;
   min-height: 0;

@@ -10,6 +10,7 @@ import { XpDisplay } from '@poke/xp-display';
 import { OwnedPoke } from '@poke/poke.model';
 import { xpForLevel, trainCost as trainCostFn } from '@poke/economy';
 import { levelScale } from '@poke/battle';
+import { typeHex } from '@poke/features/shared/poke-type-color';
 
 /** Level-scaled stat block for an owned pokémon. */
 interface ScaledStats {
@@ -45,6 +46,21 @@ export class DetailPanel {
 
   /** True until the artwork fails to load (falls back to the banner gradient). */
   readonly artOk = signal(true);
+
+  /** Type-tinted gradient for the artwork stage (driven by the first type). */
+  readonly bannerStyle = computed(() => {
+    const d = this.data.detail();
+    const t = d?.types?.[0];
+    const hex = t ? typeHex(t) : 'var(--app-color-main-50)';
+    return {
+      background: `linear-gradient(168deg, color-mix(in srgb, ${hex} 82%, #070a12) 0%, color-mix(in srgb, ${hex} 38%, #0a0e17) 58%, #0a0e17 100%)`,
+    };
+  });
+
+  /** Type chips carrying their classic hex colours. */
+  readonly typeChips = computed(() =>
+    (this.data.detail()?.types ?? []).map((t) => ({ name: t, hex: typeHex(t) })),
+  );
 
   constructor() {
     effect(

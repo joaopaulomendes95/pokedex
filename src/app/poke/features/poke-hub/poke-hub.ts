@@ -1,6 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { CommonModule } from '@angular/common';
 import { PokeData } from '@poke/poke-data';
 import { Game } from '@poke/game';
@@ -22,17 +21,7 @@ import { Quests } from '@poke/features/quests/quests';
 
 @Component({
   selector: 'app-poke-hub',
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatToolbarModule,
-    SquadBuilder,
-    Pokedex,
-    Adventure,
-    Arena,
-    User,
-    Quests,
-  ],
+  imports: [CommonModule, MatIconModule, SquadBuilder, Pokedex, Adventure, Arena, User, Quests],
   templateUrl: './poke-hub.component.html',
   styleUrl: './poke-hub.component.scss',
 })

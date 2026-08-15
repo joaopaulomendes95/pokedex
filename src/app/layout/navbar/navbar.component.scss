@@ -9,7 +9,7 @@
   width: var(--app-navbar-closed-width, 72px);
   height: 100%;
   padding: var(--app-navbar-padding-block, 1.5rem) var(--app-navbar-padding-inline, 0.75rem);
-  border-right: 1px solid var(--app-color-desat-80);
+  border-right: 1px solid var(--app-hairline);
   box-sizing: border-box;
 
   display: flex;
@@ -17,7 +17,7 @@
   justify-content: space-between;
   gap: 1.5rem;
 
-  background-color: var(--mat-sys-surface);
+  background-color: var(--mat-sys-surface-container-lowest);
   white-space: nowrap;
   overflow: hidden;
 
@@ -30,7 +30,7 @@
   &.hovered {
     width: var(--app-navbar-open-width, 220px);
     padding: 1.5rem;
-    box-shadow: 0px 0px 12px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 6px 0 24px -12px rgba(0, 0, 0, 0.5);
 
     .nav-text,
     .coins-value,
@@ -42,24 +42,16 @@
 
     .nav-item {
       justify-content: start;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
 
-      &:hover,
-      &:focus {
-        background-color: var(--app-color-main-a);
-      }
-
-      &.active {
-        background-color: var(--app-color-main-a);
-        .nav-item-icon {
-          color: var(--app-color-main-50);
-        }
+      &.active::before {
+        opacity: 1;
       }
     }
 
     .nav-links {
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
     .coins-display,
@@ -81,43 +73,43 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.1rem;
 
-    .brand-icon {
-      flex: 0 0 36px;
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--app-color-main-50), var(--app-color-purple));
-      display: grid;
-      place-items: center;
+    .brand-mark {
+      flex: 0 0 auto;
+      position: relative;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ff5a5f 0 46%, #f2f4f8 46% 54%, #f2f4f8 54% 100%);
+      box-shadow: inset 0 0 0 2.5px #0b0e13;
 
-      .poke-icon {
-        font-size: 1.5rem;
-        width: 1.5rem;
-        height: 1.5rem;
-        color: white;
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 50% auto auto 50%;
+        transform: translate(-50%, -50%);
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #f2f4f8;
+        box-shadow:
+          inset 0 0 0 2.5px #0b0e13,
+          0 0 0 2.5px #0b0e13;
       }
     }
 
     .brand-text {
-      font: var(--mat-sys-title-large);
+      font: var(--mat-sys-title-medium);
+      font-family: var(--app-font-display);
       font-weight: 700;
+      letter-spacing: 0.05em;
       color: var(--app-color-main-50);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       opacity: 0;
       transition: opacity var(--app-default-transition);
-
-      &.nav-text {
-        opacity: 0;
-      }
-    }
-
-    &.opened .brand-text,
-    &:hover .brand-text {
-      opacity: 1;
     }
   }
 
@@ -150,15 +142,33 @@
     border-radius: 10px;
     border: none;
     background: transparent;
-    color: var(--app-color-desat-50);
+    color: var(--app-color-desat-40);
     cursor: pointer;
-    transition: all var(--app-default-transition);
+    transition:
+      background var(--app-default-transition),
+      color var(--app-default-transition);
     position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 0;
+      border-radius: 999px;
+      background: var(--app-color-main-50);
+      transition:
+        height var(--app-default-transition),
+        opacity var(--app-default-transition);
+      opacity: 0;
+    }
 
     &:hover,
     &:focus {
       background-color: var(--app-color-desat-a);
-      color: var(--app-color-main-50);
+      color: var(--app-color-main-20);
 
       .nav-item-icon {
         color: var(--app-color-main-50);
@@ -167,17 +177,22 @@
 
     &.active {
       background-color: var(--app-color-main-a);
-      color: var(--app-color-main-50);
+      color: var(--app-color-main-20);
 
       .nav-item-icon {
         color: var(--app-color-main-50);
       }
+
+      &::before {
+        height: 60%;
+        opacity: 1;
+      }
     }
 
     .nav-item-icon {
-      font-size: 1.5rem;
-      width: 1.5rem;
-      height: 1.5rem;
+      font-size: 1.4rem;
+      width: 1.4rem;
+      height: 1.4rem;
       color: var(--app-color-desat-50);
       transition: color var(--app-default-transition);
       flex-shrink: 0;
@@ -193,7 +208,7 @@
       padding: 0 5px;
       border-radius: 999px;
       background: var(--app-color-red);
-      color: white;
+      color: #fff;
       font-size: 0.65rem;
       font-weight: 700;
       display: flex;
@@ -207,7 +222,7 @@
     flex-direction: column;
     gap: 0.75rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--app-color-desat-80);
+    border-top: 1px solid var(--app-hairline);
     margin-top: auto;
   }
 
@@ -220,7 +235,7 @@
     padding: 0.5rem;
     border-radius: 8px;
     background: var(--app-color-desat-a);
-    color: var(--app-color-desat-30);
+    color: var(--app-color-desat-40);
     font-size: 0.75rem;
     opacity: 0;
     pointer-events: none;
@@ -239,7 +254,14 @@
 
     &:hover {
       background: var(--app-color-main-a);
-      color: var(--app-color-main-10);
+      color: var(--app-color-main-20);
     }
+  }
+
+  .coins-display .coins-value {
+    color: var(--app-color-yellow);
+    font-family: var(--app-font-display);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
   }
 }

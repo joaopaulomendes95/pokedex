@@ -1,24 +1,31 @@
-<mat-toolbar class="appbar" color="primary">
-  <span class="brand">Poké-Liga Idle</span>
-  <span class="spacer"></span>
-  <span class="stat">
-    <mat-icon>emoji_events</mat-icon>
-    {{ tierName() }} · {{ winsDisplay() }} wins
-  </span>
-  <span class="stat">
-    <mat-icon>hourglass_bottom</mat-icon>
-    {{ income() }}
-  </span>
-  <span class="stat">
-    <mat-icon>monetization_on</mat-icon>
-    {{ coins() | number }}¢
-  </span>
-  <span class="stat">
-    <mat-icon>bolt</mat-icon>
-    {{ energy() }}/100
-  </span>
-  <span class="stat build-tag" title="build">v4</span>
-</mat-toolbar>
+<header class="hud">
+  <div class="hud-brand" title="Poké-Liga Idle">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">Poké-Liga <em>Idle</em></span>
+  </div>
+
+  <div class="hud-stats">
+    <div class="hud-stat" title="Tier & record">
+      <mat-icon>emoji_events</mat-icon>
+      <span class="hud-value">{{ tierName() }}</span>
+      <span class="hud-sub">{{ winsDisplay() }}</span>
+    </div>
+    <div class="hud-stat" title="Idle income">
+      <mat-icon>hourglass_bottom</mat-icon>
+      <span class="hud-value">{{ income() }}</span>
+    </div>
+    <div class="hud-stat coins" title="Coins">
+      <mat-icon>monetization_on</mat-icon>
+      <span class="hud-value">{{ coins() | number }}¢</span>
+    </div>
+    <div class="hud-stat energy" title="Squad energy">
+      <mat-icon>bolt</mat-icon>
+      <span class="hud-value">{{ energy() }}</span>
+      <span class="hud-energy-bar"><span class="fill" [style.width.%]="energy()"></span></span>
+    </div>
+    <span class="build-tag" title="build">v4</span>
+  </div>
+</header>
 
 <div class="tab-content">
   @switch (tab()) {

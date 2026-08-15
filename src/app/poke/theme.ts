@@ -38,8 +38,7 @@ export class Theme {
   private load(): ThemeMode {
     const stored = this.#storage.get(STORAGE_KEY);
     if (stored === 'light' || stored === 'dark') return stored;
-    // Always boot light regardless of OS preference, so the app never looks
-    // like dark mode out of the box (users complained it was very dark).
-    return 'light';
+    // Boot the dark game-console by default; the toggle persists a choice.
+    return 'dark';
   }
 }

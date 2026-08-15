@@ -1,87 +1,173 @@
-.appbar {
+.hud {
+  position: sticky;
+  top: 0;
+  z-index: 80;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
-  padding: 0 24px;
-  height: 56px;
-  background: var(--app-color-main-50);
-  color: var(--mat-sys-on-primary);
-  box-shadow: var(--app-small-shadow);
+  height: 52px;
+  padding: 0 20px;
+  background: color-mix(in srgb, var(--mat-sys-surface-container) 82%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--app-hairline);
 
-  .brand {
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    font-size: 1.1rem;
+  .hud-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+
+    .brand-mark {
+      flex: 0 0 auto;
+      position: relative;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ff5a5f 0 46%, #f2f4f8 46% 54%, #f2f4f8 54% 100%);
+      box-shadow: inset 0 0 0 2px #0b0e13;
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 50% auto auto 50%;
+        transform: translate(-50%, -50%);
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #f2f4f8;
+        box-shadow:
+          inset 0 0 0 2px #0b0e13,
+          0 0 0 2px #0b0e13;
+      }
+    }
+
+    .brand-name {
+      font-family: var(--app-font-display);
+      font-weight: 700;
+      font-size: 1.02rem;
+      letter-spacing: 0.06em;
+      color: var(--app-color-desat-10);
+      white-space: nowrap;
+
+      em {
+        font-style: normal;
+        color: var(--app-color-main-50);
+      }
+    }
   }
 
-  .spacer {
-    flex: 1;
-  }
-
-  .stat {
+  .hud-stats {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.85rem;
-    opacity: 0.9;
-    padding: 0 8px;
-    border-radius: 8px;
-    transition: background var(--app-default-transition);
+  }
 
-    &:hover {
-      background: var(--mat-sys-primary-container);
-    }
+  .hud-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    color: var(--app-color-desat-40);
+    transition:
+      background var(--app-default-transition),
+      color var(--app-default-transition);
 
     mat-icon {
-      font-size: 1.2rem;
-      width: 1.2rem;
-      height: 1.2rem;
+      font-size: 1.05rem;
+      width: 1.05rem;
+      height: 1.05rem;
+      color: var(--app-color-main-50);
+    }
+
+    .hud-value {
+      font-family: var(--app-font-display);
+      font-weight: 600;
+      font-size: 0.9rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--app-color-desat-20);
+      white-space: nowrap;
+    }
+
+    .hud-sub {
+      font-size: 0.72rem;
+      color: var(--app-color-desat-50);
+      white-space: nowrap;
+    }
+
+    &:hover {
+      background: var(--app-color-main-a);
+      color: var(--app-color-main-20);
+    }
+
+    &.coins .hud-value {
+      color: var(--app-color-yellow);
+    }
+
+    &.energy {
+      .hud-energy-bar {
+        width: 46px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--app-color-desat-90);
+        overflow: hidden;
+
+        .fill {
+          display: block;
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg, var(--app-color-green-60), var(--app-color-green));
+          transition: width 0.4s ease;
+        }
+      }
     }
   }
 
-  .gen-picker {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-    padding: 6px 14px;
-    background: rgba(255, 255, 255, 0.1);
-
-    .gen-label {
-      font-weight: 600;
-      font-size: 0.8rem;
-      opacity: 0.9;
-    }
-
-    .gen-value {
-      font-weight: 700;
-      font-size: 1rem;
-      min-width: 1.5em;
-      text-align: center;
-    }
+  .build-tag {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--app-color-desat-60);
+    border: 1px solid var(--app-hairline);
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-left: 6px;
   }
 }
 
 .tab-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 20px 16px 32px;
   width: 100%;
   box-sizing: border-box;
 }
 
-@media (max-width: 768px) {
-  .appbar {
+@media (max-width: 900px) {
+  .hud {
     padding: 0 12px;
-    height: 52px;
-  }
 
-  .stat span {
-    display: none;
+    .hud-sub,
+    .hud-stat.energy .hud-energy-bar {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .hud {
+    .brand-name {
+      display: none;
+    }
+
+    .hud-stat.energy,
+    .hud-stat:has(.hud-sub) {
+      display: none;
+    }
   }
 
   .tab-content {
-    padding: 16px 8px;
+    padding: 12px 8px 24px;
   }
 }

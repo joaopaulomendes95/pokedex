@@ -2,13 +2,14 @@
 
 // ---- Global reusable surfaces / helpers (mirrors the work repo's design system) ----
 .flat-container {
-  border: 1px solid var(--app-color-desat-80);
+  border: 1px solid var(--app-hairline);
   border-radius: 1rem;
   background: var(--mat-sys-surface);
   overflow: hidden;
 }
 
 .full-container {
+  border: 1px solid var(--app-hairline);
   border-radius: 1rem;
   background: var(--mat-sys-surface);
   box-shadow: var(--app-all-around-shadow);
@@ -1160,5 +1161,96 @@
     font-size: 0.7rem;
     opacity: 0.6;
     margin: 6px 0;
+  }
+}
+
+// ---- Swap modal (squad builder) ----
+.swap-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--mat-sys-scrim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+.swap-modal {
+  background: var(--mat-sys-surface-container-high);
+  border: 1px solid var(--app-hairline);
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  animation: slideUp 0.2s ease;
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 1.05rem;
+    text-align: center;
+    color: var(--app-color-desat-10);
+  }
+}
+
+.swap-targets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .swap-target {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px;
+    border: 1px solid var(--app-hairline-strong);
+    border-radius: 12px;
+    background: var(--mat-sys-surface-container-low);
+    color: var(--app-color-desat-20);
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s,
+      transform 0.1s;
+
+    img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+    }
+
+    span {
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    &:hover {
+      border-color: var(--app-color-green);
+      box-shadow: 0 0 0 2px var(--app-color-green-a);
+      transform: translateY(-2px);
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

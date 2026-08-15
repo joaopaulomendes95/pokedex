@@ -5,9 +5,11 @@
 .detail {
   position: sticky;
   top: 12px;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--app-hairline);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  background: var(--mat-sys-surface-container-low);
 
   .art-banner {
     position: relative;
@@ -15,14 +17,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(160deg, var(--app-color-main-20), var(--app-color-main-50));
     overflow: hidden;
 
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 70% 60% at 50% 40%,
+        rgba(255, 255, 255, 0.16),
+        transparent 70%
+      );
+      pointer-events: none;
+    }
+
     img {
+      position: relative;
       height: 100%;
       max-width: 100%;
       object-fit: contain;
-      filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+      filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55));
       animation: detail-art-in 0.4s ease both;
     }
 
@@ -38,40 +52,45 @@
       position: absolute;
       top: 10px;
       left: 12px;
-      padding: 2px 8px;
+      padding: 2px 10px;
       border-radius: 999px;
-      background: rgba(0, 0, 0, 0.35);
+      background: rgba(6, 9, 15, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       color: #fff;
-      font-size: 0.75rem;
-      font-weight: 700;
+      font-size: 0.72rem;
+      font-family: var(--app-font-display);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      backdrop-filter: blur(4px);
     }
   }
 
   mat-card-content {
-    padding: 12px 14px;
+    padding: 14px 16px 8px;
 
     h3 {
-      margin: 0 0 6px;
-      font-size: 1.5rem;
+      margin: 0 0 8px;
+      font-size: 1.45rem;
       text-transform: capitalize;
       display: flex;
       align-items: center;
       gap: 8px;
+      color: var(--app-color-desat-10);
     }
 
     .types {
       display: flex;
       gap: 6px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
 
       .type-chip {
-        padding: 2px 10px;
+        padding: 3px 12px;
         border-radius: 999px;
-        background: var(--app-color-desat-90);
-        color: var(--app-color-desat-20);
+        border: 1px solid transparent;
         font-size: 0.72rem;
         font-weight: 700;
         text-transform: capitalize;
+        letter-spacing: 0.03em;
       }
     }
 
@@ -84,19 +103,23 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 6px 4px;
-        border-radius: 8px;
-        background: var(--app-color-desat-97);
+        padding: 8px 4px;
+        border-radius: 10px;
+        background: var(--app-color-desat-a);
+        border: 1px solid var(--app-hairline);
 
         span {
-          font-size: 0.62rem;
-          opacity: 0.6;
+          font-size: 0.6rem;
+          opacity: 0.65;
           text-transform: uppercase;
-          letter-spacing: 0.04em;
+          letter-spacing: 0.06em;
         }
 
         b {
           font-size: 1.05rem;
+          font-family: var(--app-font-display);
+          font-weight: 600;
+          color: var(--app-color-main-20);
         }
       }
     }
@@ -106,7 +129,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 0 14px 14px;
+    padding: 0 16px 16px;
 
     .level-line {
       display: flex;
@@ -117,6 +140,7 @@
       > span:first-child {
         font-weight: 700;
         font-size: 0.85rem;
+        color: var(--app-color-desat-20);
       }
     }
 
@@ -129,11 +153,11 @@
       .xp-fill {
         height: 100%;
         border-radius: 999px;
-        background: var(--app-color-main-50);
+        background: linear-gradient(90deg, var(--app-color-main-70), var(--app-color-main-50));
         transition: width 0.3s ease;
 
         &.ready {
-          background: var(--app-color-green);
+          background: linear-gradient(90deg, var(--app-color-green-60), var(--app-color-green));
         }
       }
     }
@@ -146,6 +170,7 @@
       .xp-text {
         font-size: 0.72rem;
         opacity: 0.7;
+        font-variant-numeric: tabular-nums;
       }
     }
 

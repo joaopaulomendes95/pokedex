@@ -117,12 +117,31 @@ button {
       )
     );
   }
+  &.success {
+    @include mat.button-overrides(
+      (
+        filled-container-color: var(--app-color-green),
+        filled-label-text-color: #06130a,
+        tonal-container-color: var(--app-color-green-a),
+        tonal-label-text-color: var(--app-color-green),
+        text-label-text-color: var(--app-color-green),
+        text-state-layer-color: var(--app-color-green),
+      )
+    );
+
+    @include mat.icon-button-overrides(
+      (
+        icon-color: var(--app-color-green),
+        state-layer-color: var(--app-color-green),
+      )
+    );
+  }
   &.faded {
     @include mat.button-overrides(
       (
         filled-container-color: var(--app-color-desat-70),
         tonal-container-color: var(--app-color-desat-a),
-        tonal-label-text-color: var(--app-color-desat),
+        tonal-label-text-color: var(--app-color-desat-40),
         text-label-text-color: var(--app-color-desat-70),
         text-state-layer-color: var(--app-color-desat-70),
       )
@@ -140,7 +159,7 @@ button {
       (
         filled-container-color: var(--app-color-desat-50),
         tonal-container-color: var(--app-color-desat-a),
-        tonal-label-text-color: var(--app-color-desat),
+        tonal-label-text-color: var(--app-color-desat-40),
         text-label-text-color: var(--app-color-desat-50),
         text-state-layer-color: var(--app-color-desat-50),
       )
