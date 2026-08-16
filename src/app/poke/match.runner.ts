@@ -1,6 +1,6 @@
 import { computed, inject, signal, Service } from '@angular/core';
 import { BattleResult, Fighter, PokeDetail } from '@poke/poke.model';
-import { Battle, buildFighter } from '@poke/battle';
+import { Battle, buildFighter, SYNERGY_MIN, SYNERGY_MULT } from '@poke/battle';
 import { Game } from '@poke/game';
 import { PokeData } from '@poke/poke-data';
 
@@ -128,6 +128,15 @@ export class MatchRunner {
 
   /** Build battle-ready teams for the given names (public for the manual mode). */
   spawn(names: string[], level: number, isRival: boolean, levelCap?: number): ArenaFighter[] {
+    // Squad synergy (player only): 3+ fighters sharing a primary type boost
+    // each other (the Raid-style faction bonus).
+    const typeCounts = new Map<string, number>();
+    if (!isRival) {
+      for (const n of names) {
+        const t = this.#poke.pokeByName(n)?.types?.[0];
+        if (t) typeCounts.set(t, (typeCounts.get(t) ?? 0) + 1);
+      }
+    }
     return names
       .map((name): ArenaFighter | null => {
         const detail = this.#poke.pokeByName(name);
@@ -135,6 +144,8 @@ export class MatchRunner {
         const owned = isRival ? undefined : this.#game.own(name);
         const ownedLevel = owned?.level ?? 0;
         const finalLevel = levelCap ? Math.min(level + ownedLevel, levelCap) : level + ownedLevel;
+        const primary = detail.types[0];
+        const synergy = primary && (typeCounts.get(primary) ?? 0) >= SYNERGY_MIN ? SYNERGY_MULT : 1;
         return {
           name,
           detail,
@@ -154,6 +165,7 @@ export class MatchRunner {
             this.#poke.movesFor(name),
             owned?.stars ?? 0,
             !isRival && this.#poke.isApex(name),
+            synergy,
           ),
         };
       })

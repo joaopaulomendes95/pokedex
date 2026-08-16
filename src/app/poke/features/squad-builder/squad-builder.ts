@@ -156,6 +156,17 @@ export class SquadBuilder {
   /** Whether any Pokémon has pending level-ups. */
   readonly hasAnyPending = computed(() => this.totalPending() > 0);
 
+  /** Active squad type synergy (3+ same-type members boost each other +10%). */
+  readonly synergy = computed<{ type: string; count: number } | null>(() => {
+    const counts = new Map<string, number>();
+    for (const name of this.game.squad()) {
+      const t = this.data.pokeByName(name)?.types?.[0];
+      if (t) counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+    const best = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
+    return best && best[1] >= 3 ? { type: best[0], count: best[1] } : null;
+  });
+
   /** Collection names only (for drag data) - independent of fielded state. */
   readonly collectionNames = computed(() => this.game.roster().map((r) => r.name));
 

@@ -440,6 +440,28 @@ export class PokeData {
     return pool;
   }
 
+  /**
+   * One-off detail fetch safe to run CONCURRENTLY (unlike `ensureInCache`,
+   * which drives the shared `selected` signal). Used by the summon portal's
+   * rarity-band warmup.
+   */
+  async fetchDetailParallel(name: string, timeoutMs = 8000): Promise<PokeDetail | null> {
+    if (this.#detailCache.has(name)) return this.#detailCache.get(name)!;
+    const sig = signal(name);
+    const ref = pokemonRetrieveResource(sig);
+    try {
+      await waitFor(() => !ref.isLoading() && ref.value() !== undefined, timeoutMs);
+    } catch {
+      return null;
+    }
+    const raw = ref.value();
+    if (!raw) return null;
+    const d = parseDetail(raw);
+    this.#detailCache.set(d.name, d);
+    this.#nameToId.set(d.name, d.id);
+    return d;
+  }
+
   /** Reads a cached detail (no request if it hasn't been fetched yet). */
   pokeByName(name: string): PokeDetail | null {
     return this.#detailCache.get(name) ?? null;

@@ -11,6 +11,7 @@ import {
   TAB_ARENA,
   TAB_USER,
   TAB_QUESTS,
+  TAB_SUMMON,
 } from '@poke/ui-state';
 import { SquadBuilder } from '@poke/features/squad-builder/squad-builder';
 import { Pokedex } from '@poke/features/pokedex/pokedex';
@@ -18,10 +19,21 @@ import { Adventure } from '@poke/features/adventure/adventure';
 import { Arena } from '@poke/features/arena/arena';
 import { User } from '@poke/features/user/user';
 import { Quests } from '@poke/features/quests/quests';
+import { SummonScreen } from '@poke/features/summon/summon';
 
 @Component({
   selector: 'app-poke-hub',
-  imports: [CommonModule, MatIconModule, SquadBuilder, Pokedex, Adventure, Arena, User, Quests],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    SquadBuilder,
+    Pokedex,
+    Adventure,
+    Arena,
+    User,
+    Quests,
+    SummonScreen,
+  ],
   templateUrl: './poke-hub.component.html',
   styleUrl: './poke-hub.component.scss',
 })
@@ -46,6 +58,7 @@ export class PokeHub {
     arena: TAB_ARENA,
     user: TAB_USER,
     quests: TAB_QUESTS,
+    summon: TAB_SUMMON,
   };
 
   /** Warm the first dex entries so the very first battle can start instantly. */

@@ -6,6 +6,9 @@ import { BattleEvent } from '@shared/models/battle-event';
 export const STAR_STAT_BONUS = 0.08;
 /** Stat bonus for single-stage (no-evolution) pokémon — they can't evolve. */
 export const APEX_STAT_BONUS = 0.08;
+/** Squad synergy: 3+ fighters sharing a type boost each other. */
+export const SYNERGY_MIN = 3;
+export const SYNERGY_MULT = 1.1;
 
 /** Scales raw base stats to a battle-ready fighter at `level` (plus stars). */
 export function buildFighter(
@@ -24,12 +27,17 @@ export function buildFighter(
   moves: FighterMove[] = [],
   stars = 0,
   apex = false,
+  mult = 1,
 ): Fighter {
   const scale = (v: number) =>
     Math.max(
       1,
       Math.round(
-        v * levelScale(level) * (1 + STAR_STAT_BONUS * stars) * (1 + (apex ? APEX_STAT_BONUS : 0)),
+        v *
+          levelScale(level) *
+          (1 + STAR_STAT_BONUS * stars) *
+          (1 + (apex ? APEX_STAT_BONUS : 0)) *
+          mult,
       ),
     );
   return {

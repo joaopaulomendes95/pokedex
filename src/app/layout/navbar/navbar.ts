@@ -18,6 +18,7 @@ import {
   TAB_ARENA,
   TAB_USER,
   TAB_QUESTS,
+  TAB_SUMMON,
 } from '@poke/ui-state';
 import { Game } from '@poke/game';
 import { Theme } from '@poke/theme';
@@ -66,6 +67,7 @@ export class Navbar {
       { id: TAB_ADVENTURE, label: 'Adventure', icon: 'explore' },
       { id: TAB_ARENA, label: 'Arena', icon: 'sports_martial_arts' },
       { id: TAB_QUESTS, label: 'Idle', icon: 'auto_awesome', badge },
+      { id: TAB_SUMMON, label: 'Summon', icon: 'casino' },
       { id: TAB_USER, label: 'Save', icon: 'save' },
     ];
   });

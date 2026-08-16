@@ -165,3 +165,13 @@ describe('buildFighter stars + apex', () => {
     expect(both.hp).toBe(Math.round(plain.hp * 1.16 * 1.08));
   });
 });
+
+describe('buildFighter synergy multiplier', () => {
+  it('scales stats by the squad-synergy multiplier', () => {
+    const base = { hp: 35, attack: 55, defense: 40, spAtk: 50, spDef: 50, speed: 90 };
+    const plain = buildFighter('x', '', ['fire'], base, 10);
+    const syn = buildFighter('x', '', ['fire'], base, 10, [], 0, false, 1.1);
+    expect(syn.hp).toBe(Math.round(plain.hp * 1.1));
+    expect(syn.attack).toBe(Math.round(plain.attack * 1.1));
+  });
+});

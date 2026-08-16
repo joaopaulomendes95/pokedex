@@ -16,6 +16,13 @@
       reorder it.
     </p>
 
+    @if (synergy(); as s) {
+      <div class="synergy-banner">
+        <mat-icon>groups</mat-icon>
+        Type synergy: {{ s.type }} ×{{ s.count }} — those fighters get +10% stats in battle!
+      </div>
+    }
+
     <div
       class="fielded"
       cdkDropList

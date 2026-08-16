@@ -4,6 +4,26 @@
   text-align: left;
 }
 
+.synergy-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--app-color-purple);
+  background: var(--app-color-purple-a);
+  border: 1px solid color-mix(in srgb, var(--app-color-purple) 45%, transparent);
+
+  mat-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
 .dnd-hint {
   margin: 2px 0 10px;
   font-size: 0.75rem;

@@ -7,6 +7,7 @@ export const TAB_ADVENTURE = 2;
 export const TAB_ARENA = 3;
 export const TAB_USER = 4;
 export const TAB_QUESTS = 5;
+export const TAB_SUMMON = 6;
 
 /**
  * Tiny cross-tab coordinator: lets any screen (e.g. the Pokédex' "Found in →

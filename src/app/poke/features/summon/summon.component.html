@@ -1,0 +1,94 @@
+<div class="summon">
+  <app-basic-view
+    pageTitle="Summon Portal"
+    headline="Spend coins, pull rare creatures — the gacha rush. Rates and pity are shown, no tricks."
+    faIcon="diamond"
+  >
+    <div class="summon-head">
+      <span class="pill coins">
+        <mat-icon>monetization_on</mat-icon>
+        {{ coins() | number }}¢
+      </span>
+      @if (!summon.bandsReady) {
+        <span class="warm-hint">
+          <mat-icon>auto_awesome</mat-icon>
+          Warming the portal… {{ (summon.warmProgress() * 100).toFixed(0) }}%
+        </span>
+      }
+    </div>
+
+    @if (!summon.bandsReady) {
+      <mat-progress-bar
+        mode="determinate"
+        [value]="summon.warmProgress() * 100"
+        color="accent"
+      ></mat-progress-bar>
+    }
+
+    <!-- Pull result -->
+    @if (lastPull(); as pull) {
+      <div class="pull-result" [style.--glow]="rarityHex[pull.rarity]">
+        <div class="pull-sprite">
+          <img [src]="pullSprite()" alt="" />
+          @if (pull.newSpecies) {
+            <span class="new-tag">NEW!</span>
+          }
+          @if (pull.pity) {
+            <span class="pity-tag">PITY</span>
+          }
+        </div>
+        <div class="pull-info">
+          <span class="pull-rarity" [style.color]="rarityHex[pull.rarity]">
+            {{ pull.rarity }}
+          </span>
+          <span class="pull-name">{{ pull.name }}</span>
+          <span class="pull-level">Lv {{ pull.level }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Summon tiers -->
+    <div class="summon-grid">
+      @for (type of summonTypes; track type.id) {
+        <mat-card class="summon-card">
+          <mat-card-header>
+            <mat-icon class="summon-icon">{{ type.icon }}</mat-icon>
+            <mat-card-title>{{ type.name }}</mat-card-title>
+            <mat-card-subtitle>{{ type.blurb }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="rates">
+              @for (r of rarities; track r) {
+                <div class="rate-row" [style.color]="rarityHex[r]">
+                  <span class="rate-name">{{ r }}</span>
+                  <span class="rate-value">{{ ratePct(type.id, r) }}</span>
+                </div>
+              }
+            </div>
+            <div class="pity-row">
+              <mat-icon>shield</mat-icon>
+              {{ pityLabel(type.id, type.pityEvery) }} {{ type.pityRarity }}+
+            </div>
+          </mat-card-content>
+          <mat-card-actions>
+            <button
+              type="button"
+              mat-flat-button
+              color="primary"
+              (click)="pull(type.id)"
+              [disabled]="!summon.bandsReady || !game.canAfford(type.cost)"
+            >
+              <mat-icon>auto_awesome</mat-icon>
+              Pull · {{ type.cost | number }}¢
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+
+    <p class="footnote">
+      Pulls draw from your generation's pool — first stages, middle stages and evolved forms
+      included. Duplicates go to your collection like any catch.
+    </p>
+  </app-basic-view>
+</div>

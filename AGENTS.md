@@ -154,6 +154,14 @@ shiny)` — catches roll a 1/64 shiny variant (`OwnedPoke.shiny`, ✨ badge +
     is a pure, unit-tested function; streak grows by returning day after day and
     resets when a day is missed).
 
+- `poke/summon.ts` — the gacha engine (Summon Portal tab): coin-powered pulls on
+  three tiers (Basic/Advanced/Legendary) with per-rarity drop rates, pity
+  counters that guarantee the tier floor (Rare+ every 10 / Epic+ every 8 /
+  Legendary every 5), and a one-time parallel rarity-band warmup
+  (`PokeData.fetchDetailParallel` — the only concurrent-safe detail fetch).
+  Squad type synergy: 3+ fielded pokémon sharing a primary type get +10% stats
+  (`SYNERGY_MIN`/`SYNERGY_MULT` in battle.ts).
+
 - `poke/auto-battle.ts` — idle loop running quick fights every ~4s.
   `toggle()` starts/stops; inject into Arena for the UI button.
 
