@@ -9,7 +9,7 @@ import { Game } from '@poke/game';
 import { XpDisplay } from '@poke/xp-display';
 import { OwnedPoke } from '@poke/poke.model';
 import { xpForLevel, trainCost as trainCostFn } from '@poke/economy';
-import { levelScale, STAR_STAT_BONUS } from '@poke/battle';
+import { levelScale, STAR_STAT_BONUS, APEX_STAT_BONUS } from '@poke/battle';
 import { typeHex } from '@poke/features/shared/poke-type-color';
 import { PokeFullDetails } from '@poke/features/shared/poke-full-details/poke-full-details';
 import { AppDialog } from '@shared/ui';
@@ -105,7 +105,10 @@ export class DetailPanel {
     const o = this.owned();
     const base = this.data.detail();
     if (!o || !base) return null;
-    const k = levelScale(o.level) * (1 + STAR_STAT_BONUS * (o.stars ?? 0));
+    const k =
+      levelScale(o.level) *
+      (1 + STAR_STAT_BONUS * (o.stars ?? 0)) *
+      (1 + (this.data.isApex(o.name) ? APEX_STAT_BONUS : 0));
     return {
       hp: Math.max(1, Math.round(base.stats.hp * k)),
       attack: Math.max(1, Math.round(base.stats.attack * k)),

@@ -9,7 +9,7 @@ import { PokeData } from '@poke/poke-data';
 import { Game } from '@poke/game';
 import { Mastery } from '@poke/mastery';
 import { xpForLevel, trainCost as trainCostFn, ballCost, catchChance } from '@poke/economy';
-import { levelScale, STAR_STAT_BONUS } from '@poke/battle';
+import { levelScale, STAR_STAT_BONUS, APEX_STAT_BONUS } from '@poke/battle';
 import { knownHabitatsFor } from '@poke/habitats';
 import { generationFromId } from '@poke/generation';
 import { typeHex } from '@poke/features/shared/poke-type-color';
@@ -92,7 +92,9 @@ export class PokeFullDetails {
     const d = this.detail();
     if (!d) return null;
     const k = this.owned()
-      ? levelScale(this.owned()!.level) * (1 + STAR_STAT_BONUS * (this.owned()!.stars ?? 0))
+      ? levelScale(this.owned()!.level) *
+        (1 + STAR_STAT_BONUS * (this.owned()!.stars ?? 0)) *
+        (1 + (this.poke.isApex(this.name()) ? APEX_STAT_BONUS : 0))
       : 1;
     const scale = (v: number) => Math.max(1, Math.round(v * k));
     return {

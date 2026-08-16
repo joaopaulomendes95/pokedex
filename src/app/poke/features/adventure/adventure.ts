@@ -298,6 +298,8 @@ export class Adventure {
         mine.stats,
         champ.level,
         this.data.movesFor(champ.name),
+        champ.stars ?? 0,
+        this.data.isApex(champ.name),
       );
       const wildFighter = buildFighter(
         wild.name,

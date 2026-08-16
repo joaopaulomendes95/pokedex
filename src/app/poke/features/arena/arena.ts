@@ -20,6 +20,7 @@ import { gatedRivalPool, sampleRivalTeam, RIVAL_POOLS } from '@poke/rivals';
 import { generationFromId } from '@poke/generation';
 import { CupRuns } from '@poke/cup-run';
 import { EliteSeries } from '@poke/elite-series';
+import { DailyChallenge, DAILY_CHALLENGE_STAGES } from '@poke/daily-challenge';
 import { AppDialog, BasicView, BattleLog } from '@shared/ui';
 import { ManualBattle } from '@poke/manual-battle';
 import type { ArenaFighter, MatchSummary } from '@poke/match.runner';
@@ -73,6 +74,7 @@ export class Arena {
   readonly manual = inject(ManualBattle);
   readonly cupRuns = inject(CupRuns);
   readonly elite = inject(EliteSeries);
+  readonly challenge = inject(DailyChallenge);
   #notify = inject(Notify);
   #dialog = inject(AppDialog);
 
@@ -134,6 +136,22 @@ export class Arena {
 
   /** Rule chip label helper (exposed for the template). */
   readonly ruleLabel = ruleLabel;
+
+  /** Daily challenge ladder stages (1 → 3 → 5 → 10 wins). */
+  readonly challengeStages = DAILY_CHALLENGE_STAGES;
+
+  /** Reward of the stage at `index`. */
+  challengeReward(index: number): number {
+    return DAILY_CHALLENGE_STAGES[index]?.reward ?? 0;
+  }
+
+  /** Progress % toward the current challenge stage. */
+  challengePct = computed(() => {
+    const s = this.challenge.status();
+    if (s.done) return 100;
+    const need = DAILY_CHALLENGE_STAGES[Math.min(s.nextStage, s.total - 1)]!.fights;
+    return Math.round(Math.min(1, s.winsToday / need) * 100);
+  });
 
   /** Active cup run — lives on a root service so tab switches don't lose it. */
   get cupRun() {

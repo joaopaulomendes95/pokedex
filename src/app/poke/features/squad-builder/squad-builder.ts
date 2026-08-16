@@ -9,7 +9,7 @@ import { PokeData } from '@poke/poke-data';
 import { Game, SQUAD_MAX } from '@poke/game';
 import { OwnedPoke } from '@poke/poke.model';
 import { XpDisplay } from '@poke/xp-display';
-import { levelScale, STAR_STAT_BONUS } from '@poke/battle';
+import { levelScale, STAR_STAT_BONUS, APEX_STAT_BONUS } from '@poke/battle';
 import { Notify } from '@poke/notify';
 import { DetailPanel } from '@poke/features/shared/detail-panel/detail-panel';
 import { AppDialog, BasicView } from '@shared/ui';
@@ -166,7 +166,10 @@ export class SquadBuilder {
   private scaledStats(owned: OwnedPoke): ScaledStats | null {
     const base = this.data.pokeByName(owned.name);
     if (!base) return null;
-    const k = levelScale(owned.level) * (1 + STAR_STAT_BONUS * (owned.stars ?? 0));
+    const k =
+      levelScale(owned.level) *
+      (1 + STAR_STAT_BONUS * (owned.stars ?? 0)) *
+      (1 + (this.data.isApex(owned.name) ? APEX_STAT_BONUS : 0));
     return {
       hp: Math.max(1, Math.round(base.stats.hp * k)),
       attack: Math.max(1, Math.round(base.stats.attack * k)),

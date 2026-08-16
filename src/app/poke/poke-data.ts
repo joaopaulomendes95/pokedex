@@ -489,6 +489,23 @@ export class PokeData {
     return this.#chainCache.get(name) ?? [];
   }
 
+  /**
+   * True when the species' chain is known AND has no evolution edges at all
+   * (a single-stage pokémon like Lapras — it can never evolve).
+   */
+  isApex(name: string): boolean {
+    return this.#chainIdByName.has(name) && this.evolutionFor(name).length === 0;
+  }
+
+  /**
+   * True when the species is the LAST stage of a real chain (evolved into,
+   * but nothing evolves from it — e.g. Charizard). Unknown until warmed.
+   */
+  isFinalForm(name: string): boolean {
+    const steps = this.evolutionFor(name);
+    return steps.length > 0 && !steps.some((s) => s.species === name);
+  }
+
   /** Real location-areas (with URLs) where the player has seen this species. */
   habitatsFor(name: string): PokeLocation[] {
     return this.#discoveredHabitats.get(name.toLowerCase()) ?? [];

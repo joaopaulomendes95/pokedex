@@ -34,6 +34,11 @@
                 🎓 Mastery Lv {{ mp.level }}
               </span>
             }
+            @if (poke.isApex(name())) {
+              <span class="apex-chip" title="Single-stage pokémon">Apex · +8% stats</span>
+            } @else if (poke.isFinalForm(name())) {
+              <span class="final-chip">Final form</span>
+            }
           } @else {
             <span class="owned-chip muted">Not owned</span>
           }

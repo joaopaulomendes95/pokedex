@@ -447,3 +447,96 @@
     }
   }
 }
+
+.arena {
+  /* Daily challenge ladder */
+  .challenge-card {
+    margin-bottom: 14px;
+    border: 1px solid color-mix(in srgb, var(--app-color-main) 45%, transparent);
+
+    .challenge-stages {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+
+      .challenge-stage {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 8px 4px;
+        border-radius: 10px;
+        border: 1px solid var(--app-hairline);
+        background: var(--app-color-desat-a);
+        opacity: 0.6;
+        position: relative;
+
+        .stage-num {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          background: var(--app-color-desat-90);
+          font-size: 0.68rem;
+          font-weight: 800;
+        }
+
+        .stage-label {
+          font-size: 0.68rem;
+          font-weight: 600;
+        }
+
+        .stage-reward {
+          font-size: 0.62rem;
+          color: var(--app-color-orange);
+          font-weight: 700;
+        }
+
+        .stage-check {
+          position: absolute;
+          top: -6px;
+          right: -6px;
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+          color: var(--app-color-green);
+          background: var(--mat-sys-surface-container-low);
+          border-radius: 50%;
+        }
+
+        &.current {
+          opacity: 1;
+          border-color: var(--app-color-main-50);
+          box-shadow: 0 0 0 1px var(--app-color-main-a);
+        }
+
+        &.done {
+          opacity: 1;
+          border-color: color-mix(in srgb, var(--app-color-green) 55%, transparent);
+          background: var(--app-color-green-a);
+        }
+      }
+    }
+
+    .challenge-progress {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.72rem;
+      opacity: 0.8;
+      margin-bottom: 10px;
+
+      mat-progress-bar {
+        height: 7px;
+      }
+    }
+  }
+
+  @media (max-width: 640px) {
+    .challenge-stages {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}

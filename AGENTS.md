@@ -142,6 +142,12 @@ shiny)` — catches roll a 1/64 shiny variant (`OwnedPoke.shiny`, ✨ badge +
   the navbar Idle badge, and a root effect toasts newly-claimable missions
   (and tier unlocks) whenever the player is on another tab.
 
+- `poke/daily-challenge.ts` — the daily challenge ladder (win 1 → 3 → 5 → 10
+  battles today, rewards per stage, resets on date change; losses don't reset
+  progress; pure `dailyChallengeStatus` is unit-tested).
+- `PokeData.isApex`/`isFinalForm` — single-stage pokémon get an apex +8% stat
+  bonus (they can't evolve) and clear "final form"/"apex" labels everywhere.
+
 - `poke/achievements.ts` — permanent one-time goals (auto-rewarded with coins
   - toast the moment their predicate flips; persisted per save across
     prestiges). `poke/daily-reward.ts` — daily login streak reward (`dailyStatus`

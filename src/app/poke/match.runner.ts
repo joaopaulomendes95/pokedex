@@ -153,6 +153,7 @@ export class MatchRunner {
             finalLevel,
             this.#poke.movesFor(name),
             owned?.stars ?? 0,
+            !isRival && this.#poke.isApex(name),
           ),
         };
       })

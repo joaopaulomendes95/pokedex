@@ -27,6 +27,7 @@ function stubPoke(names: string[]): PokeData {
     ensureInCache: async () => undefined,
     ensureMoves: async () => undefined,
     movesFor: () => [],
+    isApex: () => false,
   } as unknown as PokeData;
 }
 

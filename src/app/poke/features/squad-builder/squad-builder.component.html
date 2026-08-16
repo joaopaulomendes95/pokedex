@@ -126,6 +126,11 @@
                 @if (row.pending > 0) {
                   <p class="pending">Ready: Level up!</p>
                 }
+                @if (data.isApex(row.owned.name)) {
+                  <p class="stage-tag apex">Apex form — can't evolve · +8% stats</p>
+                } @else if (data.isFinalForm(row.owned.name)) {
+                  <p class="stage-tag final">Final form — fully evolved</p>
+                }
                 @if (row.evolvesTo; as to) {
                   <button
                     type="button"

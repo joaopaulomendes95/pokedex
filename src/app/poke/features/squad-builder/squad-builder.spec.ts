@@ -33,6 +33,8 @@ function stubPokeData(): PokeData {
             { species: 'ivysaur', to: 'venusaur', trigger: 'level 32' },
           ]
         : [],
+    isApex: () => false,
+    isFinalForm: () => false,
     ensureInCache: async () => undefined,
     ensureSpecies: async () => undefined,
     ensureChainFor: async () => undefined,

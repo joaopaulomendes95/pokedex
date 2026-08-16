@@ -146,3 +146,22 @@ describe('Battle.simulate', () => {
     expect(res.events.filter((e) => e.text.includes('Scratch')).length).toBe(0);
   });
 });
+
+describe('buildFighter stars + apex', () => {
+  const base = { hp: 35, attack: 55, defense: 40, spAtk: 50, spDef: 50, speed: 90 };
+  it('stars add +8% stats each', () => {
+    const plain = buildFighter('pikachu', '', ['electric'], base, 10);
+    const starred = buildFighter('pikachu', '', ['electric'], base, 10, [], 3);
+    expect(starred.hp).toBeGreaterThan(plain.hp);
+    expect(starred.attack).toBe(Math.round(plain.attack * 1.24));
+  });
+
+  it('apex (no evolution) adds +8% stats', () => {
+    const plain = buildFighter('lapras', '', ['water'], base, 10);
+    const apex = buildFighter('lapras', '', ['water'], base, 10, [], 0, true);
+    expect(apex.hp).toBe(Math.round(plain.hp * 1.08));
+    // Stars and apex stack.
+    const both = buildFighter('lapras', '', ['water'], base, 10, [], 2, true);
+    expect(both.hp).toBe(Math.round(plain.hp * 1.16 * 1.08));
+  });
+});

@@ -228,6 +228,27 @@ h2 {
     line-height: 1.6;
   }
 
+  .stage-tag {
+    margin: 6px 0 0;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-align: center;
+
+    &.apex {
+      color: var(--app-color-orange);
+      background: var(--app-color-orange-a);
+      border: 1px solid color-mix(in srgb, var(--app-color-orange) 45%, transparent);
+    }
+
+    &.final {
+      color: var(--app-color-desat-30);
+      background: var(--app-color-desat-a);
+      border: 1px solid var(--app-hairline);
+    }
+  }
+
   &.fielded {
     border-color: color-mix(in srgb, var(--app-color-green) 60%, transparent);
     box-shadow: 0 0 0 1px var(--app-color-green-a);
