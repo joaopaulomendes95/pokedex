@@ -171,6 +171,12 @@ shiny)` — catches roll a 1/64 shiny variant (`OwnedPoke.shiny`, ✨ badge +
   Squad type synergy: 3+ fielded pokémon sharing a primary type get +10% stats
   (`SYNERGY_MIN`/`SYNERGY_MULT` in battle.ts).
 
+- `Summon` fragments (the Fragment Forge): a farmable gacha currency earned
+  from battle wins (+2 via `MatchRunner.collect` / manual wins), daily
+  challenge stages (+5) and catches (+1), traded in the Summon tab for a
+  guaranteed free pull (60 → Advanced, 150 → Legendary). `Summon.pull`
+  supports a `free` flag so forge pulls spend no coins.
+
 - `poke/boost.ts` — the Focus burst (Swarm-Sim-style mutation): spend 25 squad
   energy for a 60s ×2 income + ×2 passive XP window (no circular DI — the UI
   spends energy, Game reads the multiplier). `Game.elder` — Elder Shards, the

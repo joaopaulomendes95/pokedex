@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Game } from '@poke/game';
 import { PokeData } from '@poke/poke-data';
 import { Notify } from '@poke/notify';
+import { Summon, FRAGMENTS_PER_CATCH } from '@poke/summon';
 import { catchChance } from '@poke/economy';
 import { Battle, buildFighter } from '@poke/battle';
 import { generationFromId } from '@poke/generation';
@@ -83,6 +84,7 @@ export class Adventure {
   readonly data = inject(PokeData);
   readonly game = inject(Game);
   #notify = inject(Notify);
+  #summon = inject(Summon);
   #genFilter = inject(GenerationFilter);
 
   /** Travelable region groups for this save (macro-zones → in-gen regions). */
@@ -384,6 +386,7 @@ export class Adventure {
       }
       this.game.add(wild.name, 1, shiny);
       this.game.noteCatch();
+      this.#summon.addFragments(FRAGMENTS_PER_CATCH);
       this.data.registerNameId(wild.name, this.data.pokeByName(wild.name)?.id ?? 0);
       this.catchResult.set({
         success: true,

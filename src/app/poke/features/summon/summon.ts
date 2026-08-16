@@ -5,7 +5,17 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Game } from '@poke/game';
-import { Summon, SUMMON_TYPES, PullResult, RARITY_ORDER, type Rarity } from '@poke/summon';
+import {
+  Summon,
+  SUMMON_TYPES,
+  FRAGMENT_FORGE,
+  FRAGMENTS_PER_WIN,
+  FRAGMENTS_PER_CHALLENGE_STAGE,
+  FRAGMENTS_PER_CATCH,
+  PullResult,
+  RARITY_ORDER,
+  type Rarity,
+} from '@poke/summon';
 import { PokeData } from '@poke/poke-data';
 import { BasicView, CustomSpinner } from '@shared/ui';
 
@@ -40,6 +50,10 @@ export class SummonScreen {
 
   summonTypes = SUMMON_TYPES;
   rarities = RARITY_ORDER;
+  forgeOptions = FRAGMENT_FORGE;
+  fragmentsPerWin = FRAGMENTS_PER_WIN;
+  fragmentsPerChallenge = FRAGMENTS_PER_CHALLENGE_STAGE;
+  fragmentsPerCatch = FRAGMENTS_PER_CATCH;
   readonly rarityHex = RARITY_HEX;
 
   coins = computed(() => Math.floor(this.game.coins()));
@@ -71,6 +85,12 @@ export class SummonScreen {
     const type = SUMMON_TYPES.find((t) => t.id === typeId);
     if (!type) return;
     const result = this.summon.pull(type);
+    if (result) this.lastPull.set(result);
+  }
+
+  /** Trade fragments for a guaranteed free pull. */
+  forge(typeId: string) {
+    const result = this.summon.forgePull(typeId);
     if (result) this.lastPull.set(result);
   }
 

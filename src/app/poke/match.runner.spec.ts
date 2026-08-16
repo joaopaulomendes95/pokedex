@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatchRunner } from '@poke/match.runner';
 import { PokeData } from '@poke/poke-data';
 import { Game } from '@poke/game';
+import { Summon } from '@poke/summon';
 import { PokeDetail } from '@poke/poke.model';
 
 function detail(name: string): PokeDetail {
@@ -80,6 +81,24 @@ describe('MatchRunner', () => {
     expect(runner.player().length).toBeGreaterThan(0);
     for (const f of runner.player()) {
       expect(f.fighter.level).toBeGreaterThan(1); // level + owned level, not flat Lv 1
+    }
+  });
+});
+
+describe('MatchRunner fragments', () => {
+  it('collect grants summon fragments on a player win', async () => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: PokeData, useValue: stubPoke(['bulbasaur']) }],
+    });
+    const runner = TestBed.inject(MatchRunner);
+    const game = TestBed.inject(Game);
+    const summon = TestBed.inject(Summon);
+    game.setSquad(['bulbasaur']);
+    const before = summon.fragments();
+    const res = await runner.play(['bulbasaur'], 1);
+    runner.collect();
+    if (res.winner === 'player') {
+      expect(summon.fragments()).toBeGreaterThan(before);
     }
   });
 });

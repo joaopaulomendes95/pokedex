@@ -21,6 +21,7 @@ import { generationFromId } from '@poke/generation';
 import { CupRuns } from '@poke/cup-run';
 import { EliteSeries } from '@poke/elite-series';
 import { DailyChallenge, DAILY_CHALLENGE_STAGES } from '@poke/daily-challenge';
+import { Summon, FRAGMENTS_PER_WIN } from '@poke/summon';
 import { AppDialog, BasicView, BattleLog } from '@shared/ui';
 import { ManualBattle } from '@poke/manual-battle';
 import type { ArenaFighter, MatchSummary } from '@poke/match.runner';
@@ -75,6 +76,7 @@ export class Arena {
   readonly cupRuns = inject(CupRuns);
   readonly elite = inject(EliteSeries);
   readonly challenge = inject(DailyChallenge);
+  readonly summon = inject(Summon);
   #notify = inject(Notify);
   #dialog = inject(AppDialog);
 
@@ -255,6 +257,7 @@ export class Arena {
       this.game.award(winner);
       if (winner === 'player') {
         for (const f of this.manual.player()) this.game.grantXp(f.name, 8 + this.game.tier() * 2);
+        this.summon.addFragments(FRAGMENTS_PER_WIN);
         this.#notify.show('Manual battle won — coins + XP banked!');
       } else {
         this.#notify.show('Manual battle lost — your squad needs more training.');

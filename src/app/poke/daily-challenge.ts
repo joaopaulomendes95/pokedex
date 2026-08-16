@@ -3,6 +3,7 @@ import { Game } from '@poke/game';
 import { BrowserStorage } from '@core/services/storage';
 import { Notify } from '@poke/notify';
 import { dateKey } from '@poke/daily-reward';
+import { Summon, FRAGMENTS_PER_CHALLENGE_STAGE } from '@poke/summon';
 
 const CHALLENGE_KEY = 'poke-league-challenge';
 
@@ -74,6 +75,7 @@ export class DailyChallenge {
   #game = inject(Game);
   #storage = inject(BrowserStorage);
   #notify = inject(Notify);
+  #summon = inject(Summon);
 
   constructor() {
     this.load();
@@ -100,6 +102,7 @@ export class DailyChallenge {
     const idx = s.claimable;
     const stage = DAILY_CHALLENGE_STAGES[idx]!;
     this.#game.grantCoins(stage.reward);
+    this.#summon.addFragments(FRAGMENTS_PER_CHALLENGE_STAGE);
     this.#_claimed.update((set) => new Set(set).add(idx));
     this.persist();
     const next = this.status();

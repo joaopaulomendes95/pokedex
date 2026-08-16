@@ -90,5 +90,40 @@
       Pulls draw from your generation's pool — first stages, middle stages and evolved forms
       included. Duplicates go to your collection like any catch.
     </p>
+
+    <!-- Fragment Forge -->
+    <mat-card class="forge-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>diamond</mat-icon>
+        <mat-card-title>Fragment Forge</mat-card-title>
+        <mat-card-subtitle
+          >Win battles, catch creatures and clear daily challenges to earn fragments — then trade
+          them for a guaranteed summon.</mat-card-subtitle
+        >
+      </mat-card-header>
+      <mat-card-content>
+        <div class="forge-fragments">
+          <mat-icon>diamond</mat-icon>
+          <b>{{ summon.fragments() }}</b> fragments
+        </div>
+        <div class="forge-options">
+          @for (opt of forgeOptions; track opt.typeId) {
+            <button
+              type="button"
+              mat-stroked-button
+              (click)="forge(opt.typeId)"
+              [disabled]="!summon.bandsReady || summon.fragments() < opt.fragments"
+            >
+              <mat-icon>auto_awesome</mat-icon>
+              {{ summon.forgeCost(opt.typeId) }} ✦ → {{ opt.typeId }} pull
+            </button>
+          }
+        </div>
+        <p class="hint">
+          +{{ fragmentsPerWin }} per battle win · +{{ fragmentsPerChallenge }} per challenge stage ·
+          +{{ fragmentsPerCatch }} per catch.
+        </p>
+      </mat-card-content>
+    </mat-card>
   </app-basic-view>
 </div>

@@ -7,6 +7,19 @@ import { BrowserStorage } from '@core/services/storage';
 
 const SUMMON_KEY = 'poke-league-summon';
 
+/** Fragments earned per won battle (quick/auto/cup/manual). */
+export const FRAGMENTS_PER_WIN = 2;
+/** Fragments earned per claimed daily-challenge stage. */
+export const FRAGMENTS_PER_CHALLENGE_STAGE = 5;
+/** Fragments earned per successful catch. */
+export const FRAGMENTS_PER_CATCH = 1;
+
+/** The Fragment Forge: trade fragments for a guaranteed free pull. */
+export const FRAGMENT_FORGE: { typeId: 'advanced' | 'legendary'; fragments: number }[] = [
+  { typeId: 'advanced', fragments: 60 },
+  { typeId: 'legendary', fragments: 150 },
+];
+
 export type { Rarity };
 
 /** One gacha tier: cost, drop rates and pity guarantee. */
@@ -70,6 +83,7 @@ export interface PullResult {
 
 interface SummonSave {
   pity: Record<string, number>;
+  fragments: number;
 }
 
 /**
@@ -83,6 +97,39 @@ interface SummonSave {
 export class Summon {
   #_pity = signal<Record<string, number>>({ basic: 0, advanced: 0, legendary: 0 });
   readonly pity = this.#_pity.asReadonly();
+
+  /** Summon fragments — earned from battles/catches, spent at the Forge. */
+  #_fragments = signal(0);
+  readonly fragments = this.#_fragments.asReadonly();
+
+  /** Add earned fragments (persists). */
+  addFragments(n: number): void {
+    if (n <= 0) return;
+    this.#_fragments.update((f) => f + n);
+    this.persist();
+  }
+
+  /** Spend fragments (returns false when short). */
+  spendFragments(n: number): boolean {
+    if (this.#_fragments() < n) return false;
+    this.#_fragments.update((f) => f - n);
+    this.persist();
+    return true;
+  }
+
+  /** Cost (in fragments) of a forge pull for the given summon type id. */
+  forgeCost(typeId: string): number {
+    return FRAGMENT_FORGE.find((f) => f.typeId === typeId)?.fragments ?? 0;
+  }
+
+  /** Trade fragments for a guaranteed pull of the tier (no coins spent). */
+  forgePull(typeId: string, rng: () => number = Math.random): PullResult | null {
+    const type = SUMMON_TYPES.find((t) => t.id === typeId);
+    if (!type) return null;
+    const cost = this.forgeCost(typeId);
+    if (!this.spendFragments(cost)) return null;
+    return this.pull(type, rng, true);
+  }
 
   /** Pity count for a tier (pulls since the last pity-tier hit). */
   pityFor(typeId: string): number {
@@ -153,13 +200,13 @@ export class Summon {
     }
   }
 
-  /** Perform one pull on a summon tier (coins are spent here). */
-  pull(type: SummonType, rng: () => number = Math.random): PullResult | null {
+  /** Perform one pull on a summon tier (coins are spent here unless `free`). */
+  pull(type: SummonType, rng: () => number = Math.random, free = false): PullResult | null {
     if (!this.bandsReady) {
       this.#notify.show('The portal is still warming up…');
       return null;
     }
-    if (!this.#game.spend(type.cost)) {
+    if (!free && !this.#game.spend(type.cost)) {
       this.#notify.show(`Not enough coins for the ${type.name} (${type.cost}¢).`);
       return null;
     }
@@ -214,6 +261,7 @@ export class Summon {
       if (!raw) return;
       const s: SummonSave = JSON.parse(raw);
       this.#_pity.set({ basic: 0, advanced: 0, legendary: 0, ...(s.pity ?? {}) });
+      this.#_fragments.set(Math.max(0, Math.floor(s.fragments ?? 0)));
     } catch {
       /* corrupted save — start fresh */
     }
@@ -221,7 +269,10 @@ export class Summon {
 
   private persist() {
     try {
-      this.#storage.set(SUMMON_KEY, JSON.stringify({ pity: this.#_pity() } satisfies SummonSave));
+      this.#storage.set(
+        SUMMON_KEY,
+        JSON.stringify({ pity: this.#_pity(), fragments: this.#_fragments() } satisfies SummonSave),
+      );
     } catch {
       /* storage blocked — keep in memory */
     }

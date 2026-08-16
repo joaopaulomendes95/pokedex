@@ -3,6 +3,7 @@ import { BattleResult, Fighter, PokeDetail } from '@poke/poke.model';
 import { Battle, buildFighter, SYNERGY_MIN, SYNERGY_MULT } from '@poke/battle';
 import { Game } from '@poke/game';
 import { PokeData } from '@poke/poke-data';
+import { Summon, FRAGMENTS_PER_WIN } from '@poke/summon';
 
 /** A creature pinned into battle with its live fighter copy. */
 export interface ArenaFighter {
@@ -63,6 +64,7 @@ export class MatchRunner {
 
   #game = inject(Game);
   #poke = inject(PokeData);
+  #summon = inject(Summon);
 
   /** Builds and resolves a match between the current squad and rival names.
    *  Returns the result immediately (the `result()` signal still updates for
@@ -123,7 +125,10 @@ export class MatchRunner {
     if (!res || this.settled()) return;
     this.#_settled.set(true);
     this.#game.award(res.winner);
-    if (res.winner === 'player') this.#game.promote();
+    if (res.winner === 'player') {
+      this.#game.promote();
+      this.#summon.addFragments(FRAGMENTS_PER_WIN);
+    }
   }
 
   /** Build battle-ready teams for the given names (public for the manual mode). */

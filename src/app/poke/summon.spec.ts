@@ -105,3 +105,44 @@ describe('Summon service', () => {
     expect(game.collection().size).toBe(sizeBefore);
   });
 });
+
+describe('Summon fragments (Forge)', () => {
+  async function mount() {
+    TestBed.configureTestingModule({
+      providers: [{ provide: PokeData, useValue: stubData() }],
+    });
+    const summon = TestBed.inject(Summon);
+    const game = TestBed.inject(Game);
+    await summon.warmBands();
+    return { summon, game };
+  }
+
+  it('addFragments/spendFragments persist the balance', async () => {
+    const { summon } = await mount();
+    expect(summon.fragments()).toBe(0);
+    summon.addFragments(60);
+    expect(summon.fragments()).toBe(60);
+    expect(summon.spendFragments(60)).toBe(true);
+    expect(summon.fragments()).toBe(0);
+    expect(summon.spendFragments(1)).toBe(false);
+  });
+
+  it('forgePull spends fragments and pulls WITHOUT coins', async () => {
+    const { summon, game } = await mount();
+    const coinsBefore = game.coins();
+    summon.addFragments(60);
+    const r = summon.forgePull('advanced', () => 0.5);
+    expect(r).not.toBeNull();
+    expect(summon.fragments()).toBe(0);
+    expect(game.coins()).toBe(coinsBefore); // no coins spent
+    expect(game.own(r!.name)).toBeDefined();
+  });
+
+  it('forgePull refuses when short on fragments', async () => {
+    const { summon, game } = await mount();
+    const sizeBefore = game.collection().size;
+    summon.addFragments(10);
+    expect(summon.forgePull('legendary', () => 0.5)).toBeNull();
+    expect(game.collection().size).toBe(sizeBefore);
+  });
+});
