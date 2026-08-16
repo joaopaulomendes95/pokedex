@@ -2,6 +2,7 @@ import { computed, effect, inject, linkedSignal, signal, Service } from '@angula
 import { LocationArea, PokeDetail, PokeId, PokeLocation, FighterMove } from '@poke/poke.model';
 import { GenerationFilter } from '@poke/generation-filter';
 import { maxIdForGen } from '@poke/generation';
+import { LocalCatalog } from '@shared/catalog/local-catalog';
 import type { PokemonListParams } from '@shared/openapi/poke-api/model/pokemonListParams';
 import {
   pokemonListResource,
@@ -33,6 +34,7 @@ const DEFAULT_DEX_PAGE_SIZE = 30;
 @Service()
 export class PokeData {
   #genFilter = inject(GenerationFilter);
+  #localCatalog = inject(LocalCatalog);
 
   /** Changing this signal re-triggers the derived detail request. */
   #_selected = signal<PokeId | null>(null);
@@ -69,8 +71,16 @@ export class PokeData {
     defaultValue: { count: 0, results: [] },
   });
 
-  /** Read-only master list: every Pokémon up to the save's generation. */
+  /** Read-only master list: every Pokémon up to the save's generation — from
+   * the local catalog once it's loaded (offline), the network list otherwise. */
   readonly masterList = computed<PokeId[]>(() => {
+    if (this.#localCatalog.loaded()) {
+      const maxId = maxIdForGen(this.#genFilter.maxGen());
+      return this.#localCatalog
+        .creatures()
+        .filter((c) => c.id <= maxId)
+        .map((c) => ({ name: c.name, url: `https://pokeapi.co/api/v2/pokemon/${c.id}/` }));
+    }
     const maxId = maxIdForGen(this.#genFilter.maxGen());
     const out: PokeId[] = [];
     for (const e of this.#masterResource.value().results ?? []) {
@@ -187,8 +197,8 @@ export class PokeData {
     return all.slice(start, start + this.dexPageSize());
   });
 
-  readonly dexLoading = computed(() => this.masterLoading());
-  readonly dexError = computed(() => this.masterError());
+  readonly dexLoading = computed(() => !this.#localCatalog.loaded() && this.masterLoading());
+  readonly dexError = computed(() => this.masterError() && !this.#localCatalog.loaded());
 
   /** Total creatures in the save's generation (drives pagination bounds). */
   readonly dexTotal = computed(() => this.masterList().length);
@@ -402,6 +412,54 @@ export class PokeData {
         this.#areaDataCache.set(url, parseArea(raw));
       }
     });
+
+    // Load the local catalog (if present) and seed every cache with it, so the
+    // app stops hitting PokeAPI at runtime. Until it loads, the network path
+    // keeps working seamlessly.
+    void this.#localCatalog
+      .load()
+      .then(() => {
+        if (this.#localCatalog.loaded()) this.seedFromCatalog();
+      })
+      .catch(() => undefined);
+  }
+
+  /** Fill all in-memory caches from the local catalog (PokeAPI-free runtime). */
+  private seedFromCatalog() {
+    const local = this.#localCatalog;
+    for (const c of local.creatures()) {
+      this.#detailCache.set(c.name, {
+        id: c.id,
+        name: c.name,
+        types: c.types,
+        stats: c.stats,
+        spriteUrl: c.spriteUrl,
+        artworkUrl: c.artworkUrl,
+        baseExperience: c.baseExperience,
+        moves: c.moves,
+        abilities: c.abilities,
+      });
+      this.#nameToId.set(c.name, c.id);
+      if (c.flavor) this.#speciesCache.set(c.name, c.flavor);
+      this.#evolvesFromCache.set(c.name, c.evolvesFrom);
+      if (local.hasChain(c.name)) {
+        this.#chainCache.set(c.name, local.flatChain(c.name));
+        this.#chainIdByName.set(c.name, String(c.id));
+      }
+    }
+    for (const [name, m] of local.movesMap) this.#moveCache.set(name, m);
+    for (const [name, effect] of local.abilitiesMap) this.#abilityCache.set(name, effect);
+    for (const [url, z] of local.zonesMap) {
+      this.#areaDataCache.set(url, {
+        name: z.name,
+        pokemon_encounters: z.encounters.map((n) => ({
+          pokemon: {
+            name: n,
+            url: `https://pokeapi.co/api/v2/pokemon/${local.creature(n)?.id ?? 0}/`,
+          },
+        })),
+      });
+    }
   }
   select(entry: PokeId) {
     this.#_selected.set(entry);

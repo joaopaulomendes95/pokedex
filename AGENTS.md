@@ -37,6 +37,15 @@ component (`app.ts`) renders `<app-navbar>` + `<app-poke-hub>`.
 - **Services**: root services use the Angular 22 **`@Service()`** decorator
   and **`inject()`** — no constructor DI (NG2028 forbids it). Inject via
   class fields (`#x = inject(X)`).
+- **PokeAPI-free runtime (the "backend contract")**: `public/catalog.json` is a
+  local snapshot of everything the game consumes (988 creatures, moves,
+  abilities + the 52 adventure zones), regenerable with
+  `node tools/export-catalog.mjs`. `src/app/shared/catalog/local-catalog.ts`
+  loads it at boot and SEEDS PokeData's caches, so after ~2-4s the app stops
+  hitting PokeAPI entirely (works offline). The catalog JSON shape
+  (`docs/backend-catalog.md`) is the exact contract a future Rust/Go/TS
+  backend must serve to swap data sources with zero frontend changes.
+
 - **Infra lives in `core/`**: `config/game.config.ts` (`GAME_CONFIG` token +
   `DEFAULT_GAME_CONFIG`), `handlers/global-error-handler.ts` (wired in
   `app.config.ts` via `{ provide: ErrorHandler, useClass }`),
