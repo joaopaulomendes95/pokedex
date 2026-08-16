@@ -19,6 +19,27 @@ export interface Cup {
   minTier: number;
   /** Series number for infinite cups (0 = base cups). */
   series?: number;
+  /** Optional rule modifiers — challenge cups play by different rules. */
+  rules?: CupRule[];
+}
+
+/** One rule modifier for a challenge cup. */
+export interface CupRule {
+  id: 'squadSize' | 'levelCap' | 'genOnly';
+  /** squadSize = max fielded fighters; levelCap = max fighter level; genOnly = max generation. */
+  value: number;
+}
+
+/** Human label for a cup rule chip. */
+export function ruleLabel(r: CupRule): string {
+  switch (r.id) {
+    case 'squadSize':
+      return `👥 ${r.value} max`;
+    case 'levelCap':
+      return `🎚 Lv ≤ ${r.value}`;
+    case 'genOnly':
+      return `📜 Gen ${r.value} only`;
+  }
 }
 
 /** Squad energy drained per cup battle. */
@@ -56,6 +77,37 @@ export const BASE_CUPS: Cup[] = [
     minTier: 1,
   },
   {
+    id: 'mini',
+    name: 'Mini Cup',
+    tagline: 'Small squads only — bring your best three.',
+    icon: 'groups',
+    entryFee: 60,
+    battles: 3,
+    rivalLevel: 7,
+    rivalTeamSize: 3,
+    prizePerBattle: 40,
+    finalPrize: 200,
+    minTier: 1,
+    rules: [
+      { id: 'squadSize', value: 3 },
+      { id: 'levelCap', value: 40 },
+    ],
+  },
+  {
+    id: 'retro',
+    name: 'Retro Cup',
+    tagline: 'Original 151 only — nostalgia battles.',
+    icon: 'history_edu',
+    entryFee: 150,
+    battles: 4,
+    rivalLevel: 8,
+    rivalTeamSize: 3,
+    prizePerBattle: 50,
+    finalPrize: 240,
+    minTier: 2,
+    rules: [{ id: 'genOnly', value: 1 }],
+  },
+  {
     id: 'pro',
     name: 'Pro League Cup',
     tagline: 'Proper opponents. Keep your cool and your roster.',
@@ -80,6 +132,20 @@ export const BASE_CUPS: Cup[] = [
     prizePerBattle: 95,
     finalPrize: 480,
     minTier: 3,
+  },
+  {
+    id: 'veteran',
+    name: 'Veteran Cup',
+    tagline: 'Experienced squads, capped levels — skill over raw power.',
+    icon: 'military_tech',
+    entryFee: 250,
+    battles: 4,
+    rivalLevel: 12,
+    rivalTeamSize: 4,
+    prizePerBattle: 100,
+    finalPrize: 520,
+    minTier: 3,
+    rules: [{ id: 'levelCap', value: 30 }],
   },
   {
     id: 'champion',

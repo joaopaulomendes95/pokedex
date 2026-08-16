@@ -5,6 +5,8 @@ import { xpForLevel } from '@poke/economy';
 import { GenerationFilter } from '@poke/generation-filter';
 import { BrowserStorage } from '@core/services/storage';
 import { GAME_CONFIG, DEFAULT_GAME_CONFIG } from '@core/config/game.config';
+import { Upgrades } from '@poke/upgrades';
+import { Mastery, MASTERY_FEED } from '@poke/mastery';
 
 export const TIERS: TierDef[] = [
   { name: 'Novice', idleCoinsPerSec: 1, winsToPromote: 3, rivalLevel: 1 },
@@ -130,20 +132,35 @@ export class Game {
   /** Whole-number energy for display. */
   energyInt = computed(() => Math.floor(this.energy()));
   /** 0..100 percent for a bar. */
-  energyPct = computed(() => Math.floor((this.energy() / this.#config.energyMax) * 100));
+  energyPct = computed(() => Math.floor((this.energy() / this.energyMax()) * 100));
 
-  /** Free XP every owned pokémon banks per real second (idle grind), boosted by prestige. */
+  /** Free XP every owned pokémon banks per real second (idle grind), boosted by prestige + upgrades. */
   passiveXpPerSec = computed(
     () =>
-      1 + this.tier() + XP_PER_ROSTER * this.roster().length + PRESTIGE_XP_BONUS * this.prestige(),
+      (1 +
+        this.tier() +
+        XP_PER_ROSTER * this.roster().length +
+        PRESTIGE_XP_BONUS * this.prestige()) *
+      this.#upgrades.multiplier('xp'),
   );
 
-  /** Idle coins per second: tier base + per-creature bonus, boosted by prestige. */
-  incomePerSec = computed(
-    () =>
-      (this.tierDef().idleCoinsPerSec + COINS_PER_ROSTER * this.roster().length) *
-      (1 + PRESTIGE_INCOME_MULT * this.prestige()),
-  );
+  /** Idle coins per second: tier base + per-creature bonus (mastery-weighted), boosted by prestige + upgrades. */
+  incomePerSec = computed(() => {
+    const rosterIncome =
+      COINS_PER_ROSTER *
+      this.roster().reduce((sum, r) => sum + this.#mastery.incomeMultiplier(r.name), 0);
+    return (
+      (this.tierDef().idleCoinsPerSec + rosterIncome) *
+      (1 + PRESTIGE_INCOME_MULT * this.prestige()) *
+      this.#upgrades.multiplier('income')
+    );
+  });
+
+  /** Max squad energy: config base + the energy-cap upgrade. */
+  energyMax = computed(() => this.#config.energyMax + this.#upgrades.flatBonus('energyCap'));
+
+  /** Extra catch-chance multiplier from the catch upgrade. */
+  catchMultiplier = computed(() => this.#upgrades.multiplier('catch'));
 
   tierDef = computed(() => TIERS[this.tier()] ?? TIERS[TIERS.length - 1]!);
   winsToPromote = computed(() => this.tierDef().winsToPromote);
@@ -165,6 +182,8 @@ export class Game {
   #storage = inject(BrowserStorage);
   #config = inject(GAME_CONFIG);
   #document = inject(DOCUMENT);
+  #upgrades = inject(Upgrades);
+  #mastery = inject(Mastery);
 
   constructor() {
     this.load();
@@ -202,7 +221,10 @@ export class Game {
     this.#_coins.update((c) => c + this.incomePerSec());
     this.#_stats.update((s) => ({ ...s, coinsEarned: s.coinsEarned + this.incomePerSec() }));
     this.#_energy.update((e) =>
-      Math.min(this.#config.energyMax, e + this.#config.energyRegenPerSec),
+      Math.min(
+        this.energyMax(),
+        e + this.#config.energyRegenPerSec + this.#upgrades.flatBonus('energyRegen'),
+      ),
     );
     const xpPerSec = this.passiveXpPerSec();
     if (xpPerSec <= 0) return;
@@ -210,7 +232,9 @@ export class Game {
       if (map.size === 0) return map;
       const next = new Map<string, OwnedPoke>(map);
       for (const [name, entry] of next) {
-        next.set(name, { ...entry, xp: entry.xp + xpPerSec });
+        // Passive XP scales with species mastery; the XP also feeds mastery.
+        this.#mastery.addXp(name, xpPerSec * MASTERY_FEED);
+        next.set(name, { ...entry, xp: entry.xp + xpPerSec * this.#mastery.xpMultiplier(name) });
       }
       return next;
     });
@@ -261,7 +285,7 @@ export class Game {
   useConsumable(id: string): number {
     const gain = CONSUMABLE_ENERGY[id];
     if (gain === undefined || !this.consumeItem(id, 1)) return -1;
-    this.#_energy.update((e) => Math.min(this.#config.energyMax, e + gain));
+    this.#_energy.update((e) => Math.min(this.energyMax(), e + gain));
     this.persist();
     return gain;
   }
@@ -306,6 +330,27 @@ export class Game {
     return true;
   }
 
+  /** Max ascension stars per pokémon (duplicate catches feed them). */
+  readonly STAR_MAX = 5;
+
+  /**
+   * Ascend an owned pokémon one star (duplicate-catch reward). Returns the
+   * new star count, or -1 when the pokémon isn't owned / already maxed.
+   */
+  addStar(name: string): number {
+    const owned = this.collection().get(name);
+    if (!owned) return -1;
+    const stars = owned.stars ?? 0;
+    if (stars >= this.STAR_MAX) return -1;
+    this.#_collection.update((map) => {
+      const next = new Map(map);
+      next.set(name, { ...owned, stars: stars + 1 });
+      return next;
+    });
+    this.persist();
+    return stars + 1;
+  }
+
   addLevel(name: string, levels = 1) {
     this.#_collection.update((map) => {
       const next = new Map(map);
@@ -319,11 +364,14 @@ export class Game {
   }
 
   grantXp(name: string, amount: number) {
+    this.#mastery.addXp(name, amount * MASTERY_FEED);
+    const scaled = Math.round(amount * this.#mastery.xpMultiplier(name));
+    if (scaled <= 0) return;
     this.#_collection.update((map) => {
       const next = new Map(map);
       const cur = next.get(name);
       if (!cur) return map;
-      next.set(name, { ...cur, xp: cur.xp + amount });
+      next.set(name, { ...cur, xp: cur.xp + scaled });
       return next;
     });
     this.persist();
@@ -550,7 +598,10 @@ export class Game {
   /** Coins + passive XP earned while the tab slept (never negative). */
   private restoreOffline() {
     const away =
-      Math.min(Math.max(Date.now() - this.#savedAt, 0), this.#config.offlineCapMs) / 1000;
+      Math.min(
+        Math.max(Date.now() - this.#savedAt, 0),
+        this.#config.offlineCapMs + this.#upgrades.flatBonus('offlineCap'),
+      ) / 1000;
     const coins = Math.floor(away * TIERS[TIERS.length - 1]!.idleCoinsPerSec);
     this.#_coins.update((c) => c + coins);
     this.#_stats.update((s) => ({ ...s, coinsEarned: s.coinsEarned + coins }));
@@ -579,7 +630,7 @@ export class Game {
       this.#_tier.set(Math.min(s.tier ?? 0, TIERS.length - 1));
       this.#_visited.set(s.visited ?? []);
       this.#_inventory.set(s.inventory ?? {});
-      this.#_energy.set(Math.min(s.energy ?? this.#config.energyMax, this.#config.energyMax));
+      this.#_energy.set(Math.min(s.energy ?? this.energyMax(), this.energyMax()));
       this.#genFilter.setMaxGen(s.maxGen ?? DEFAULT_GEN);
       this.#_prestige.set(s.prestige ?? 0);
       this.#_stats.set(s.stats ?? { ...FRESH_STATS });

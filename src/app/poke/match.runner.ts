@@ -67,12 +67,17 @@ export class MatchRunner {
   /** Builds and resolves a match between the current squad and rival names.
    *  Returns the result immediately (the `result()` signal still updates for
    *  the template). */
-  async play(rivalNames: string[], rivalLevel?: number): Promise<BattleResult> {
+  async play(
+    rivalNames: string[],
+    rivalLevel?: number,
+    playerSquad?: string[],
+    levelCap?: number,
+  ): Promise<BattleResult> {
     this.#_busy.set(true);
     this.result.set(null);
     this.#_settled.set(false);
 
-    const squad = this.#game.squad();
+    const squad = playerSquad ?? this.#game.squad();
     try {
       await this.#poke.ensureInCache([...squad, ...rivalNames]);
     } catch {
@@ -86,7 +91,7 @@ export class MatchRunner {
       /* move warmup is best-effort */
     }
 
-    const playerTeam = this.spawn(squad, this.#game.tier() + 1, false);
+    const playerTeam = this.spawn(squad, this.#game.tier() + 1, false, levelCap);
     const level = rivalLevel ?? this.#game.tier() + 3;
     const rivalTeam = this.spawn(rivalNames, level, true);
 
@@ -122,12 +127,14 @@ export class MatchRunner {
   }
 
   /** Build battle-ready teams for the given names (public for the manual mode). */
-  spawn(names: string[], level: number, isRival: boolean): ArenaFighter[] {
+  spawn(names: string[], level: number, isRival: boolean, levelCap?: number): ArenaFighter[] {
     return names
       .map((name): ArenaFighter | null => {
         const detail = this.#poke.pokeByName(name);
         if (!detail) return null;
-        const ownedLevel = isRival ? 0 : (this.#game.own(name)?.level ?? 0);
+        const owned = isRival ? undefined : this.#game.own(name);
+        const ownedLevel = owned?.level ?? 0;
+        const finalLevel = levelCap ? Math.min(level + ownedLevel, levelCap) : level + ownedLevel;
         return {
           name,
           detail,
@@ -143,8 +150,9 @@ export class MatchRunner {
               spDef: detail.stats.spDef,
               speed: detail.stats.speed,
             },
-            level + ownedLevel,
+            finalLevel,
             this.#poke.movesFor(name),
+            owned?.stars ?? 0,
           ),
         };
       })

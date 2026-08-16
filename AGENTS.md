@@ -143,10 +143,10 @@ shiny)` — catches roll a 1/64 shiny variant (`OwnedPoke.shiny`, ✨ badge +
   (and tier unlocks) whenever the player is on another tab.
 
 - `poke/achievements.ts` — permanent one-time goals (auto-rewarded with coins
-  + toast the moment their predicate flips; persisted per save across
-  prestiges). `poke/daily-reward.ts` — daily login streak reward (`dailyStatus`
-  is a pure, unit-tested function; streak grows by returning day after day and
-  resets when a day is missed).
+  - toast the moment their predicate flips; persisted per save across
+    prestiges). `poke/daily-reward.ts` — daily login streak reward (`dailyStatus`
+    is a pure, unit-tested function; streak grows by returning day after day and
+    resets when a day is missed).
 
 - `poke/auto-battle.ts` — idle loop running quick fights every ~4s.
   `toggle()` starts/stops; inject into Arena for the UI button.

@@ -58,6 +58,8 @@ export interface OwnedPoke {
   xp: number;
   /** Shiny variant (caught with a low roll — renders the shiny sprite). */
   shiny?: boolean;
+  /** Ascension stars from duplicate catches (0-5, +8% stats each). */
+  stars?: number;
 }
 
 /** A real move a fighter can use in battle (from PokeAPI `/move/:name`). */

@@ -9,7 +9,7 @@ import { PokeData } from '@poke/poke-data';
 import { Game, SQUAD_MAX } from '@poke/game';
 import { OwnedPoke } from '@poke/poke.model';
 import { XpDisplay } from '@poke/xp-display';
-import { levelScale } from '@poke/battle';
+import { levelScale, STAR_STAT_BONUS } from '@poke/battle';
 import { Notify } from '@poke/notify';
 import { DetailPanel } from '@poke/features/shared/detail-panel/detail-panel';
 import { AppDialog, BasicView } from '@shared/ui';
@@ -162,11 +162,11 @@ export class SquadBuilder {
   /** Swap modal state. */
   readonly swapModal = signal<{ incoming: string } | null>(null);
 
-  /** Level-scaled stats for an owned pokémon (null until its detail is cached). */
+  /** Level-scaled stats for an owned pokémon. */
   private scaledStats(owned: OwnedPoke): ScaledStats | null {
     const base = this.data.pokeByName(owned.name);
     if (!base) return null;
-    const k = levelScale(owned.level);
+    const k = levelScale(owned.level) * (1 + STAR_STAT_BONUS * (owned.stars ?? 0));
     return {
       hp: Math.max(1, Math.round(base.stats.hp * k)),
       attack: Math.max(1, Math.round(base.stats.attack * k)),

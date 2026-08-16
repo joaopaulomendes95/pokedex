@@ -5,9 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Game, CONSUMABLE_ENERGY, ENERGY_MAX } from '@poke/game';
+import { Game, CONSUMABLE_ENERGY } from '@poke/game';
 import { SHOP_ITEMS, ShopItem } from '@poke/economy';
 import { Notify } from '@poke/notify';
+import { Upgrades, UPGRADES } from '@poke/upgrades';
 import { CustomChip, KpiBlock } from '@shared/ui';
 
 /**
@@ -31,14 +32,16 @@ import { CustomChip, KpiBlock } from '@shared/ui';
 })
 export class ShopDialog {
   public readonly game = inject(Game);
+  readonly upgrades = inject(Upgrades);
   #notify = inject(Notify);
   #dialogRef = inject(MatDialogRef<ShopDialog>);
 
   shopItems = SHOP_ITEMS;
+  upgradeCatalog = UPGRADES;
   coins = computed(() => Math.floor(this.game.coins()));
   energy = computed(() => this.game.energyInt());
-  energyMax = ENERGY_MAX;
-  isEnergyFull = computed(() => this.game.energy() >= ENERGY_MAX);
+  energyMax = computed(() => this.game.energyMax());
+  isEnergyFull = computed(() => this.game.energy() >= this.game.energyMax());
   energyPct = computed(() => this.game.energyPct());
 
   /** Total stocked items in the bag (not spent ones). */
@@ -86,6 +89,20 @@ export class ShopDialog {
       return;
     }
     this.#notify.showSuccess(`Used an item: +${gained} squad energy.`);
+  }
+
+  /** Buy one level of a permanent upgrade. */
+  buyUpgrade(id: string) {
+    const u = UPGRADES.find((x) => x.id === id);
+    if (!u) return;
+    const cost = this.upgrades.cost(u);
+    if (!this.upgrades.canLevel(u)) return;
+    if (!this.game.spend(cost)) {
+      this.#notify.show(`Not enough coins for ${u.name}.`);
+      return;
+    }
+    this.upgrades.levelUp(u);
+    this.#notify.show(`${u.name} upgraded — ${this.upgrades.effectLabel(u)}.`);
   }
 
   close(): void {

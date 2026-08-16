@@ -25,13 +25,13 @@
         [metricData]="{ name: 'Coins', current: coins(), faIcon: 'monetization_on' }"
       />
       <app-kpi-block
-        [metricData]="{ name: 'Energy', current: energy(), goal: energyMax, faIcon: 'bolt' }"
+        [metricData]="{ name: 'Energy', current: energy(), goal: energyMax(), faIcon: 'bolt' }"
       />
     </div>
 
     <div class="energy-bar">
       <mat-progress-bar mode="determinate" [value]="energyPct()" color="primary"></mat-progress-bar>
-      <span class="energy-label">{{ energy() }}/{{ energyMax }}</span>
+      <span class="energy-label">{{ energy() }}/{{ energyMax() }}</span>
     </div>
 
     <div class="item-grid">
@@ -75,6 +75,44 @@
               [disabled]="!game.canAfford(price)"
             >
               {{ price }}¢
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Permanent upgrades (coin sink) -->
+    <div class="upgrades-head">
+      <h3>
+        <mat-icon>upgrade</mat-icon>
+        Permanent Upgrades
+      </h3>
+      <p class="subtitle">Spend coins on lasting boosts — they survive prestige resets.</p>
+    </div>
+    <div class="upgrade-grid">
+      @for (u of upgradeCatalog; track u.id) {
+        @let level = upgrades.level(u.id);
+        @let cost = upgrades.cost(u);
+        <div class="upgrade-card">
+          <span class="item-icon">
+            <mat-icon>{{ u.icon }}</mat-icon>
+          </span>
+          <div class="item-info">
+            <span class="item-name"
+              >{{ u.name }} <small>Lv {{ level }}/{{ u.maxLevel }}</small></span
+            >
+            <span class="item-desc">{{ u.description }}</span>
+            <span class="upgrade-effect">{{ upgrades.effectLabel(u) }}</span>
+          </div>
+          <div class="item-actions">
+            <button
+              type="button"
+              mat-flat-button
+              color="primary"
+              (click)="buyUpgrade(u.id)"
+              [disabled]="!upgrades.canLevel(u) || !game.canAfford(cost)"
+            >
+              {{ upgrades.canLevel(u) ? cost + '¢' : 'MAX' }}
             </button>
           </div>
         </div>

@@ -230,7 +230,7 @@
             <div class="controls">
               <div class="energy-pill" [class.low]="game.energy() < quickCost">
                 <mat-icon>bolt</mat-icon>
-                {{ game.energyInt() }}/100 energy ({{ quickCost }} per fight)
+                {{ game.energyInt() }}/{{ game.energyMax() }} energy ({{ quickCost }} per fight)
               </div>
               @if (!runner.canCollect()) {
                 <button
@@ -278,7 +278,7 @@
                 <div class="controls">
                   <div class="energy-pill" [class.low]="game.energy() < quickCost">
                     <mat-icon>bolt</mat-icon>
-                    {{ game.energyInt() }}/100 energy ({{ quickCost }} per fight)
+                    {{ game.energyInt() }}/{{ game.energyMax() }} energy ({{ quickCost }} per fight)
                   </div>
                   <button
                     type="button"
@@ -432,6 +432,13 @@
                 </mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
+                @if (run.cup.rules?.length) {
+                  <div class="cup-rules">
+                    @for (r of run.cup.rules; track r.id) {
+                      <span class="rule-chip">{{ ruleLabel(r) }}</span>
+                    }
+                  </div>
+                }
                 <div class="cup-progress">
                   <mat-progress-bar
                     mode="determinate"
@@ -517,6 +524,13 @@
                         <span><mat-icon>star</mat-icon> Series {{ cup.series + 1 }}</span>
                       }
                     </div>
+                    @if (cup.rules?.length) {
+                      <div class="cup-rules">
+                        @for (r of cup.rules; track r.id) {
+                          <span class="rule-chip">{{ ruleLabel(r) }}</span>
+                        }
+                      </div>
+                    }
                   </mat-card-content>
                   <mat-card-actions>
                     <button

@@ -159,3 +159,54 @@
     gap: 4px;
   }
 }
+
+/* Permanent upgrades */
+.upgrades-head {
+  margin: 20px 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+
+    mat-icon {
+      font-size: 1.1rem;
+      width: 1.1rem;
+      height: 1.1rem;
+      color: var(--app-color-orange);
+    }
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: 0.72rem;
+    opacity: 0.6;
+  }
+}
+
+.upgrade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+
+  .upgrade-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid var(--app-hairline);
+    border-radius: 12px;
+    background: var(--mat-sys-surface-container-low);
+
+    .upgrade-effect {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--app-color-green);
+    }
+  }
+}

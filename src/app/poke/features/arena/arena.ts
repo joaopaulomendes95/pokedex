@@ -9,8 +9,15 @@ import { MatchRunner } from '@poke/match.runner';
 import { PokeData } from '@poke/poke-data';
 import { Notify } from '@poke/notify';
 import { AutoBattle } from '@poke/auto-battle';
-import { Cup, CUP_BATTLE_ENERGY, QUICK_BATTLE_ENERGY, getCupsForTier } from '@poke/tournament';
+import {
+  Cup,
+  CUP_BATTLE_ENERGY,
+  QUICK_BATTLE_ENERGY,
+  getCupsForTier,
+  ruleLabel,
+} from '@poke/tournament';
 import { gatedRivalPool, sampleRivalTeam, RIVAL_POOLS } from '@poke/rivals';
+import { generationFromId } from '@poke/generation';
 import { CupRuns } from '@poke/cup-run';
 import { EliteSeries } from '@poke/elite-series';
 import { AppDialog, BasicView, BattleLog } from '@shared/ui';
@@ -124,6 +131,9 @@ export class Arena {
   cups = computed(() =>
     this.game.tier() >= 4 ? this.elite.cups() : getCupsForTier(this.game.tier()),
   );
+
+  /** Rule chip label helper (exposed for the template). */
+  readonly ruleLabel = ruleLabel;
 
   /** Active cup run — lives on a root service so tab switches don't lose it. */
   get cupRun() {
@@ -269,13 +279,31 @@ export class Arena {
       this.#notify.show('Not enough squad energy for a cup battle — use a Potion or Revive.');
       return;
     }
+
+    // Apply the cup's rule modifiers to the player side before spending energy.
+    const rules = run.cup.rules ?? [];
+    let squad = this.game.squad();
+    const genOnly = rules.find((r) => r.id === 'genOnly')?.value;
+    if (genOnly) {
+      squad = squad.filter((n) => {
+        const id = this.data.pokeByName(n)?.id ?? 0;
+        return id > 0 && generationFromId(id) <= genOnly;
+      });
+    }
+    const sizeCap = rules.find((r) => r.id === 'squadSize')?.value;
+    if (sizeCap) squad = squad.slice(0, sizeCap);
+    if (squad.length === 0) {
+      this.#notify.show('No squad member is eligible for this cup — bench them or change rules.');
+      return;
+    }
+    const levelCap = rules.find((r) => r.id === 'levelCap')?.value;
     this.game.spendEnergy(CUP_BATTLE_ENERGY);
 
     const rival = sampleRivalTeam(
       poolForCup(run.cup, (n) => this.data.isInMasterList(n)),
       run.cup.rivalTeamSize,
     );
-    const res = await this.runner.play(rival, run.cup.rivalLevel);
+    const res = await this.runner.play(rival, run.cup.rivalLevel, squad, levelCap);
     this.runner.collect();
 
     if (res.winner === 'player') {

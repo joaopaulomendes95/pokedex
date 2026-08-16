@@ -168,7 +168,9 @@ export class Adventure {
     const w = this.selectedWild();
     if (!w) return 0;
     const mult = this.bestBall()?.mult ?? 1;
-    return Math.round(Math.min(1, catchChance(w.baseExperience) * mult) * 100);
+    return Math.round(
+      Math.min(1, catchChance(w.baseExperience) * mult * this.game.catchMultiplier()) * 100,
+    );
   });
 
   /** Wild fight level scales with the zone (and a little randomness). */
@@ -346,20 +348,35 @@ export class Adventure {
       return;
     }
 
-    const success = Math.random() < Math.min(1, catchChance(wild.baseExperience) * mult);
+    const success =
+      Math.random() <
+      Math.min(1, catchChance(wild.baseExperience) * mult * this.game.catchMultiplier());
     if (success) {
       const shiny = Math.random() < SHINY_CHANCE;
       const alreadyOwned = this.game.own(wild.name);
       if (alreadyOwned) {
-        // Duplicate catch → the professor takes it: coins scaled by wild level.
+        // Duplicate catch → ascend a star (up to 5); maxed species transfer
+        // for coins as before.
+        const next = this.game.addStar(wild.name);
+        if (next > 0) {
+          this.game.noteCatch();
+          this.catchResult.set({
+            success: true,
+            message: `Duplicate ${wild.name} — ascended to ★${next}!`,
+          });
+          this.#notify.show(`Duplicate ${wild.name} — ascended to ★${next}!`);
+          this.selectedWild.set(null);
+          return;
+        }
+        // Already 5★ → coins, scaled by wild level.
         const value = this.game.releaseValue(this.wildLevel());
         this.game.grantCoins(value);
         this.game.noteCatch();
         this.catchResult.set({
           success: true,
-          message: `You already own ${wild.name} — transferred it for +${value}¢!`,
+          message: `${wild.name} is maxed ★ — transferred it for +${value}¢!`,
         });
-        this.#notify.show(`You already own ${wild.name} — transferred it for +${value}¢.`);
+        this.#notify.show(`${wild.name} is maxed ★ — transferred it for +${value}¢.`);
         this.selectedWild.set(null);
         return;
       }

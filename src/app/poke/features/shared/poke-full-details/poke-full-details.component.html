@@ -23,8 +23,16 @@
               <mat-icon>catching_pokemon</mat-icon>
               Owned · Lv {{ o.level }}
             </span>
+            @if ((o.stars ?? 0) > 0) {
+              <span class="stars-chip" title="Ascension stars">★{{ o.stars }}</span>
+            }
             @if (o.shiny) {
               <span class="shiny-chip">✨ Shiny</span>
+            }
+            @if (masteryProgress(); as mp) {
+              <span class="mastery-chip" title="Species mastery">
+                🎓 Mastery Lv {{ mp.level }}
+              </span>
             }
           } @else {
             <span class="owned-chip muted">Not owned</span>

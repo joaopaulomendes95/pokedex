@@ -7,6 +7,7 @@ import { Game } from '@poke/game';
 import { Mission, Missions } from '@poke/missions';
 import { Achievements, ACHIEVEMENTS } from '@poke/achievements';
 import { DailyReward } from '@poke/daily-reward';
+import { Mastery } from '@poke/mastery';
 import { Notify } from '@poke/notify';
 import { KpiBlock, MetricData } from '@shared/ui/kpi-block/kpi-block';
 import { ProgressGauge } from '@shared/ui/progress-gauge/progress-gauge';
@@ -34,6 +35,7 @@ export class Quests {
   readonly missions = inject(Missions);
   readonly achievements = inject(Achievements);
   readonly daily = inject(DailyReward);
+  readonly mastery = inject(Mastery);
   #notify = inject(Notify);
   #dialog = inject(AppDialog);
 
@@ -96,6 +98,14 @@ export class Quests {
   /** Claim today's daily reward. */
   claimDaily() {
     this.daily.claim();
+  }
+
+  /** Most-mastered species (Idle hub list). */
+  readonly masteryTop = computed(() => this.mastery.top());
+
+  /** Mastery progress % for the hub bar. */
+  masteryProgressPct(species: string): number {
+    return Math.round(this.mastery.progress(species).pct * 100);
   }
 
   chipFor(m: Mission): { color: CustomChipColor; label: string; faIcon: string } {

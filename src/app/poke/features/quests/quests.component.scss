@@ -408,3 +408,63 @@
     }
   }
 }
+
+/* Species mastery */
+.mastery-head {
+  margin: 22px 0 8px;
+
+  .text-topic-title {
+    margin: 0;
+  }
+
+  .color-label {
+    margin: 2px 0 0;
+    font-size: 0.86rem;
+  }
+}
+
+.mastery-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 560px;
+
+  .mastery-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .mastery-name {
+      flex: 0 0 130px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: capitalize;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mastery-bar {
+      flex: 1;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--app-color-desat-90);
+      overflow: hidden;
+
+      .mastery-fill {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--app-color-purple-60), var(--app-color-purple));
+      }
+    }
+
+    .mastery-level {
+      flex: 0 0 44px;
+      text-align: right;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--app-color-purple);
+    }
+  }
+}

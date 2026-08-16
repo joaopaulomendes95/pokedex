@@ -1,13 +1,40 @@
 import { describe, expect, it } from 'vitest';
-import { BASE_CUPS, getCupsForTier, getEliteCups } from '@poke/tournament';
+import { BASE_CUPS, getCupsForTier, getEliteCups, ruleLabel } from '@poke/tournament';
 
 describe('tournaments', () => {
-  it('gates base cups behind ladder tiers', () => {
+  it('gates base cups behind ladder tiers (rule cups included)', () => {
     expect(getCupsForTier(0).map((c) => c.id)).toEqual(['rookie']);
-    expect(getCupsForTier(1).map((c) => c.id)).toEqual(['rookie', 'silver']);
-    expect(getCupsForTier(2).map((c) => c.id)).toEqual(['rookie', 'silver', 'pro']);
-    expect(getCupsForTier(3).map((c) => c.id)).toEqual(['rookie', 'silver', 'pro', 'grand']);
+    expect(getCupsForTier(1).map((c) => c.id)).toEqual(['rookie', 'silver', 'mini']);
+    expect(getCupsForTier(2).map((c) => c.id)).toEqual([
+      'rookie',
+      'silver',
+      'mini',
+      'retro',
+      'pro',
+    ]);
+    expect(getCupsForTier(3).map((c) => c.id)).toEqual([
+      'rookie',
+      'silver',
+      'mini',
+      'retro',
+      'pro',
+      'grand',
+      'veteran',
+    ]);
     expect(getCupsForTier(4).length).toBeGreaterThan(0);
+  });
+
+  it('challenge cups carry enforceable rules', () => {
+    const mini = BASE_CUPS.find((c) => c.id === 'mini')!;
+    const retro = BASE_CUPS.find((c) => c.id === 'retro')!;
+    const veteran = BASE_CUPS.find((c) => c.id === 'veteran')!;
+    expect(mini.rules).toEqual([
+      { id: 'squadSize', value: 3 },
+      { id: 'levelCap', value: 40 },
+    ]);
+    expect(retro.rules).toEqual([{ id: 'genOnly', value: 1 }]);
+    expect(veteran.rules).toEqual([{ id: 'levelCap', value: 30 }]);
+    expect(ruleLabel(mini.rules![0]!)).toMatch(/3/);
   });
 
   it('every base cup escalates difficulty and rewards', () => {

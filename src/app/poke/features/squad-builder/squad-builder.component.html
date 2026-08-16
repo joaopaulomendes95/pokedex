@@ -109,6 +109,9 @@
               @if (row.owned.shiny) {
                 <span class="shiny-badge" title="Shiny">✨</span>
               }
+              @if ((row.owned.stars ?? 0) > 0) {
+                <span class="stars-badge" title="Ascension stars">★{{ row.owned.stars }}</span>
+              }
               <mat-card-content>
                 <p class="name">{{ row.owned.name }}</p>
                 <p class="meta">Lv {{ row.owned.level }}</p>

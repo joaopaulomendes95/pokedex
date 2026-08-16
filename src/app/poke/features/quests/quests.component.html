@@ -223,4 +223,29 @@
       </mat-card>
     }
   </div>
+
+  <!-- Species mastery -->
+  <div class="mastery-head">
+    <h2 class="text-topic-title">Species Mastery</h2>
+    <p class="color-label">
+      Every XP a pokémon earns feeds its species mastery — mastered species gain more XP and earn a
+      little more idle income.
+    </p>
+  </div>
+
+  @if (masteryTop().length > 0) {
+    <div class="mastery-list">
+      @for (m of masteryTop(); track m.name) {
+        <div class="mastery-row">
+          <span class="mastery-name">{{ m.name }}</span>
+          <span class="mastery-bar">
+            <span class="mastery-fill" [style.width.%]="masteryProgressPct(m.name)"></span>
+          </span>
+          <span class="mastery-level">Lv {{ m.level }}</span>
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="color-label">No mastery yet — keep battling to master a species.</p>
+  }
 </div>

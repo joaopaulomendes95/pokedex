@@ -2,7 +2,10 @@ import { BattleResult, BattleTeam, Fighter, FighterMove } from '@poke/poke.model
 import { typeMultiplier } from '@poke/type-chart';
 import { BattleEvent } from '@shared/models/battle-event';
 
-/** Scales raw base stats to a battle-ready fighter at `level`. */
+/** Stat bonus per star on an ascended (duplicate-fed) pokémon. */
+export const STAR_STAT_BONUS = 0.08;
+
+/** Scales raw base stats to a battle-ready fighter at `level` (plus stars). */
 export function buildFighter(
   name: string,
   spriteUrl: string,
@@ -17,8 +20,10 @@ export function buildFighter(
   },
   level: number,
   moves: FighterMove[] = [],
+  stars = 0,
 ): Fighter {
-  const scale = (v: number) => Math.max(1, Math.round(v * levelScale(level)));
+  const scale = (v: number) =>
+    Math.max(1, Math.round(v * levelScale(level) * (1 + STAR_STAT_BONUS * stars)));
   return {
     name,
     spriteUrl,
