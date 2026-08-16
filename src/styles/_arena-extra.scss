@@ -540,3 +540,15 @@
     }
   }
 }
+
+.arena {
+  .challenge-elder {
+    margin: 0 0 8px;
+    font-size: 0.72rem;
+    opacity: 0.8;
+
+    b {
+      color: var(--app-color-orange);
+    }
+  }
+}

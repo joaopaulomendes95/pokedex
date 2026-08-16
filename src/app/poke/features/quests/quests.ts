@@ -8,6 +8,7 @@ import { Mission, Missions } from '@poke/missions';
 import { Achievements, ACHIEVEMENTS } from '@poke/achievements';
 import { DailyReward } from '@poke/daily-reward';
 import { Mastery } from '@poke/mastery';
+import { Boost, FOCUS_ENERGY, FOCUS_DURATION_S, FOCUS_MULT } from '@poke/boost';
 import { Notify } from '@poke/notify';
 import { KpiBlock, MetricData } from '@shared/ui/kpi-block/kpi-block';
 import { ProgressGauge } from '@shared/ui/progress-gauge/progress-gauge';
@@ -36,6 +37,10 @@ export class Quests {
   readonly achievements = inject(Achievements);
   readonly daily = inject(DailyReward);
   readonly mastery = inject(Mastery);
+  readonly boost = inject(Boost);
+  /** Focus constants exposed for the template. */
+  readonly focusEnergy = FOCUS_ENERGY;
+  readonly focusMult = FOCUS_MULT;
   #notify = inject(Notify);
   #dialog = inject(AppDialog);
 
@@ -98,6 +103,22 @@ export class Quests {
   /** Claim today's daily reward. */
   claimDaily() {
     this.daily.claim();
+  }
+
+  /** Spend energy to start a temporary ×2 income/XP Focus window. */
+  activateFocus() {
+    if (this.boost.active()) return;
+    if (this.game.spendEnergy(FOCUS_ENERGY)) {
+      this.boost.activate();
+      this.#notify.show(`⚡ Focus active — ${FOCUS_MULT}× income & XP for ${FOCUS_DURATION_S}s!`);
+    } else {
+      this.#notify.show(`Focus costs ${FOCUS_ENERGY} squad energy.`);
+    }
+  }
+
+  /** Elder Shard income label. */
+  elderIncomePct(): number {
+    return this.game.elder() * 5;
   }
 
   /** Most-mastered species (Idle hub list). */

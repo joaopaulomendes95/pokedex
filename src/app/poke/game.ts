@@ -7,6 +7,7 @@ import { BrowserStorage } from '@core/services/storage';
 import { GAME_CONFIG, DEFAULT_GAME_CONFIG } from '@core/config/game.config';
 import { Upgrades } from '@poke/upgrades';
 import { Mastery, MASTERY_FEED } from '@poke/mastery';
+import { Boost } from '@poke/boost';
 
 export const TIERS: TierDef[] = [
   { name: 'Novice', idleCoinsPerSec: 1, winsToPromote: 3, rivalLevel: 1 },
@@ -57,6 +58,7 @@ interface SaveState {
   energy: number;
   maxGen: number;
   prestige: number;
+  elder: number;
   stats: CareerStats;
   savedAt: number;
 }
@@ -88,6 +90,8 @@ const COINS_PER_ROSTER = 0.15;
 const XP_PER_ROSTER = 0.1;
 /** Income multiplier granted per prestige shard (permanent). */
 const PRESTIGE_INCOME_MULT = 0.25;
+/** Income bonus per Elder Shard (second prestige layer — never resets). */
+export const ELDER_INCOME_BONUS = 0.05;
 /** Passive XP bonus per prestige shard. */
 const PRESTIGE_XP_BONUS = 1;
 
@@ -125,6 +129,10 @@ export class Game {
   #_prestige = signal(0);
   readonly prestige = this.#_prestige.asReadonly();
 
+  /** Elder Shards — permanent second-prestige income (never reset). */
+  #_elder = signal(0);
+  readonly elder = this.#_elder.asReadonly();
+
   /** Lifetime career counters that drive missions. */
   #_stats = signal<CareerStats>({ ...FRESH_STATS });
   readonly stats = this.#_stats.asReadonly();
@@ -141,7 +149,8 @@ export class Game {
         this.tier() +
         XP_PER_ROSTER * this.roster().length +
         PRESTIGE_XP_BONUS * this.prestige()) *
-      this.#upgrades.multiplier('xp'),
+      this.#upgrades.multiplier('xp') *
+      this.#boost.multiplier(),
   );
 
   /** Idle coins per second: tier base + per-creature bonus (mastery-weighted), boosted by prestige + upgrades. */
@@ -152,7 +161,9 @@ export class Game {
     return (
       (this.tierDef().idleCoinsPerSec + rosterIncome) *
       (1 + PRESTIGE_INCOME_MULT * this.prestige()) *
-      this.#upgrades.multiplier('income')
+      (1 + ELDER_INCOME_BONUS * this.elder()) *
+      this.#upgrades.multiplier('income') *
+      this.#boost.multiplier()
     );
   });
 
@@ -184,6 +195,7 @@ export class Game {
   #document = inject(DOCUMENT);
   #upgrades = inject(Upgrades);
   #mastery = inject(Mastery);
+  #boost = inject(Boost);
 
   constructor() {
     this.load();
@@ -550,6 +562,13 @@ export class Game {
     this.persist();
   }
 
+  /** Bank an Elder Shard (second prestige layer — income bonus never resets). */
+  grantElder(amount = 1) {
+    if (amount <= 0) return;
+    this.#_elder.update((e) => e + amount);
+    this.persist();
+  }
+
   /** Records that the trainer caught a new wild creature (career counter). */
   noteCatch() {
     this.#_stats.update((s) => ({ ...s, catches: s.catches + 1 }));
@@ -633,6 +652,7 @@ export class Game {
       this.#_energy.set(Math.min(s.energy ?? this.energyMax(), this.energyMax()));
       this.#genFilter.setMaxGen(s.maxGen ?? DEFAULT_GEN);
       this.#_prestige.set(s.prestige ?? 0);
+      this.#_elder.set(s.elder ?? 0);
       this.#_stats.set(s.stats ?? { ...FRESH_STATS });
       this.#savedAt = s.savedAt ?? Date.now();
     } catch {
@@ -657,6 +677,7 @@ export class Game {
           energy: this.energy(),
           maxGen: this.#genFilter.maxGen(),
           prestige: this.prestige(),
+          elder: this.elder(),
           stats: this.stats(),
           savedAt: this.#savedAt,
         } satisfies SaveState),

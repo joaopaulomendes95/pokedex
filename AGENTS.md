@@ -162,6 +162,12 @@ shiny)` — catches roll a 1/64 shiny variant (`OwnedPoke.shiny`, ✨ badge +
   Squad type synergy: 3+ fielded pokémon sharing a primary type get +10% stats
   (`SYNERGY_MIN`/`SYNERGY_MULT` in battle.ts).
 
+- `poke/boost.ts` — the Focus burst (Swarm-Sim-style mutation): spend 25 squad
+  energy for a 60s ×2 income + ×2 passive XP window (no circular DI — the UI
+  spends energy, Game reads the multiplier). `Game.elder` — Elder Shards, the
+  second prestige layer (+5% income each, never reset), earned by completing
+  the daily challenge ladder.
+
 - `poke/auto-battle.ts` — idle loop running quick fights every ~4s.
   `toggle()` starts/stops; inject into Arena for the UI button.
 

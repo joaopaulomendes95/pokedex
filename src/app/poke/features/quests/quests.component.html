@@ -14,31 +14,68 @@
     <app-kpi-block [metricData]="missionsMetric()" />
   </div>
 
-  <!-- Daily login reward -->
-  <mat-card class="daily-card">
-    <mat-card-content>
-      <div class="daily-info">
-        <mat-icon class="daily-icon">calendar_today</mat-icon>
-        <div>
-          <h3>Daily reward — {{ daily.label() }}</h3>
-          <p class="hint">
-            Come back every day to grow the streak. Missing a day resets it — the reward grows with
-            your streak.
-          </p>
+  <!-- Daily login reward + Focus boost -->
+  <div class="daily-row">
+    <mat-card class="daily-card">
+      <mat-card-content>
+        <div class="daily-info">
+          <mat-icon class="daily-icon">calendar_today</mat-icon>
+          <div>
+            <h3>Daily reward — {{ daily.label() }}</h3>
+            <p class="hint">
+              Come back every day to grow the streak. Missing a day resets it — the reward grows
+              with your streak.
+            </p>
+          </div>
         </div>
-      </div>
-      <button
-        type="button"
-        mat-raised-button
-        color="primary"
-        [disabled]="!daily.available()"
-        (click)="claimDaily()"
-      >
-        <mat-icon>{{ daily.claimed() ? 'check_circle' : 'redeem' }}</mat-icon>
-        {{ daily.claimed() ? 'Claimed today' : `Claim +${daily.reward()}¢` }}
-      </button>
-    </mat-card-content>
-  </mat-card>
+        <button
+          type="button"
+          mat-raised-button
+          color="primary"
+          [disabled]="!daily.available()"
+          (click)="claimDaily()"
+        >
+          <mat-icon>{{ daily.claimed() ? 'check_circle' : 'redeem' }}</mat-icon>
+          {{ daily.claimed() ? 'Claimed today' : `Claim +${daily.reward()}¢` }}
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="focus-card" [class.active]="boost.active()">
+      <mat-card-content>
+        <div class="daily-info">
+          <mat-icon class="daily-icon">bolt</mat-icon>
+          <div>
+            <h3>Focus Boost</h3>
+            <p class="hint">
+              {{
+                boost.active()
+                  ? 'Active now'
+                  : 'Spend squad energy for a temporary ×2 income & XP burst.'
+              }}
+            </p>
+          </div>
+        </div>
+        @if (boost.active()) {
+          <div class="focus-countdown">
+            <mat-icon>timer</mat-icon>
+            {{ boost.secondsLeft() }}s left — ×{{ focusMult }}
+          </div>
+        } @else {
+          <button
+            type="button"
+            mat-raised-button
+            color="accent"
+            (click)="activateFocus()"
+            [disabled]="game.energy() < focusEnergy"
+          >
+            <mat-icon>local_fire_department</mat-icon>
+            Focus · {{ focusEnergy }}⚡
+          </button>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
 
   <mat-card class="prestige-card">
     <app-container-mark title="Prestige" edge="main">
@@ -53,6 +90,12 @@
         </div>
         <div class="prestige-info">
           <h2 class="text-topic-title">Shards: {{ game.prestige() }}</h2>
+          @if (game.elder() > 0) {
+            <p class="hint">
+              Elder Shards: <strong>{{ game.elder() }}</strong> —
+              <strong>+{{ elderIncomePct() }}%</strong> idle income (never reset).
+            </p>
+          }
           @let gain = game.prestigeGain();
           <p class="hint">
             Each shard permanently boosts idle income by +25% and passive XP by +1/sec. Reach the

@@ -104,8 +104,10 @@ export class DailyChallenge {
     this.persist();
     const next = this.status();
     if (next.done) {
+      // Full ladder cleared → an Elder Shard (permanent income, never resets).
+      this.#game.grantElder(1);
       this.#notify.show(
-        `🏆 Daily challenge complete — all ${s.total} stages claimed! Come back tomorrow.`,
+        `🏆 Daily challenge complete — +1 Elder Shard (+5% income forever)! Come back tomorrow.`,
       );
     } else {
       this.#notify.show(
