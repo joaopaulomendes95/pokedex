@@ -60,3 +60,6 @@ src/app/shared/openapi
 .context/
 __screenshots__/
 docs/solutions/
+
+# Rust build artifacts
+/backend/target/

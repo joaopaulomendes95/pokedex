@@ -1,1 +1,0 @@
-/home/joao/personal/projects/pokedex/backend/target/debug/poke-liga-backend: /home/joao/personal/projects/pokedex/backend/src/generator.rs /home/joao/personal/projects/pokedex/backend/src/main.rs /home/joao/personal/projects/pokedex/backend/src/models.rs
