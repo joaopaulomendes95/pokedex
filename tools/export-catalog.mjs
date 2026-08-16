@@ -145,10 +145,11 @@ await pool([...chainIds], concurrency, async (id) => {
     console.warn(`skip chain ${id}: ${err.message}`);
   }
 });
-// Denormalize evolvesTo onto each creature.
+// Denormalize evolvesTo + evolvesFrom onto each creature.
 for (const [name, info] of Object.entries(speciesInfo)) {
   const edges = info.chainId ? (edgesByChain.get(info.chainId) ?? []) : [];
   creatures[name].evolvesTo = edges.filter((e) => e.species === name);
+  creatures[name].evolvesFrom = info.evolvesFrom;
 }
 
 // --- 4. moves ---
