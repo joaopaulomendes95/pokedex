@@ -20,11 +20,13 @@ pub const ELEMENTS: &[&str] = &[
 /// Syllable pools — combine prefix + suffix for original names.
 const NAME_PRE: &[&str] = &[
     "fra", "spr", "bram", "vol", "glim", "kel", "ash", "lun", "tar", "zeph", "cry", "mor", "nyx",
-    "sol", "fer", "vap", "qua", "rhy", "shad", "aur",
+    "sol", "fer", "vap", "qua", "rhy", "shad", "aur", "ember", "ver", "myr", "ond", "skir", "thun",
+    "fros", "bram", "silt", "mag", "ign", "terr", "aqu", "verr", "luma", "nox",
 ];
 const NAME_SUF: &[&str] = &[
     "xel", "let", "burn", "tide", "ri", "thar", "gale", "pex", "une", "ra", "lyn", "dor", "ith",
-    "ock", "ara", "une", "ik", "ael", "yx", "orn",
+    "ock", "ara", "une", "ik", "ael", "yx", "orn", "wisp", "fang", "horn", "claw", "maw", "wing",
+    "shell", "spark", "stone", "petal", "surge", "haze",
 ];
 
 /// Stat archetypes (hp, atk, def, spA, spD, spe) — spread budgets.
@@ -170,7 +172,25 @@ pub fn generate_catalog(count: u32, max_gen: u32) -> Catalog {
                 speed: stats_vec[5],
             };
             let total: u32 = stats_vec.iter().sum();
-            let base_exp = (total / 3).max(20);
+            // Rarity pyramid by id hash (45% common / 30% uncommon / 15% rare /
+            // 8% epic / 2% legendary), each tier mapped onto the frontend's
+            // rarity bands (common <70, uncommon <110, rare <160, epic <220,
+            // legendary >=220) so the summon portal gets a natural pool.
+            let roll = this_id % 100;
+            let (lo, hi) = if roll < 45 {
+                (0.5, 0.62)
+            } else if roll < 75 {
+                (0.68, 0.98)
+            } else if roll < 90 {
+                (1.0, 1.45)
+            } else if roll < 98 {
+                (1.5, 2.0)
+            } else {
+                (2.1, 2.6)
+            };
+            let t = (this_id % 7) as f32 / 6.0;
+            let quality = lo + (hi - lo) * t;
+            let base_exp = (((total as f32 / 3.0) * quality) as u32).max(20);
 
             // Evolution wiring.
             let (name, evolves_from, evolves_to) = match slot {
@@ -238,12 +258,24 @@ pub fn generate_catalog(count: u32, max_gen: u32) -> Catalog {
 
             let gen = 1 + (this_id - 1) / (count / max_gen).max(1);
             let sprite = format!("/sprites/{this_id}.png");
+            let second = if rng.gen_bool(0.12) {
+                let e = ELEMENTS[rng.gen_range(0..ELEMENTS.len())];
+                if e == element {
+                    vec![]
+                } else {
+                    vec![e.to_string()]
+                }
+            } else {
+                vec![]
+            };
+            let mut types = vec![element.to_string()];
+            types.extend(second);
             creatures.insert(
                 name.clone(),
                 Creature {
                     id: this_id,
                     name,
-                    types: vec![element.to_string()],
+                    types,
                     stats,
                     base_experience: base_exp,
                     sprite_url: sprite.clone(),
@@ -260,9 +292,9 @@ pub fn generate_catalog(count: u32, max_gen: u32) -> Catalog {
         }
     }
 
-    // Zones: gather creatures by primary element into 4 habitats.
+    // Zones: a habitat per element, gathering that element's monsters.
     let mut zones = std::collections::HashMap::new();
-    for (i, element) in ELEMENTS.iter().take(4).enumerate() {
+    for element in ELEMENTS {
         let encounters: Vec<String> = creatures
             .values()
             .filter(|c| c.types[0] == *element)
@@ -275,7 +307,6 @@ pub fn generate_catalog(count: u32, max_gen: u32) -> Catalog {
                 encounters,
             },
         );
-        let _ = i;
     }
 
     Catalog {

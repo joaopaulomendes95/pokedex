@@ -63,3 +63,4 @@ docs/solutions/
 
 # Rust build artifacts
 /backend/target/
+/backend/out/

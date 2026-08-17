@@ -78,6 +78,28 @@ async fn main() {
         }
     };
 
+    // Optional: dump the catalog (generated or loaded) to a JSON file and exit,
+    // so the frontend can consume an ORIGINAL monster catalog like the snapshot.
+    if let Some(arg) = std::env::args().find(|a| a.starts_with("--emit-catalog=")) {
+        let path = arg.trim_start_matches("--emit-catalog=");
+        match serde_json::to_string_pretty(&catalog) {
+            Ok(json) => match std::fs::write(path, json) {
+                Ok(()) => {
+                    println!("catalog written to {path}");
+                    return;
+                }
+                Err(e) => {
+                    eprintln!("could not write {path}: {e}");
+                    std::process::exit(1);
+                }
+            },
+            Err(e) => {
+                eprintln!("serialize failed: {e}");
+                std::process::exit(1);
+            }
+        }
+    }
+
     let db_path = std::env::args()
         .find(|a| a.starts_with("--db="))
         .map(|a| a.trim_start_matches("--db=").to_string())
