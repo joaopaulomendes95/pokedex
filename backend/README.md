@@ -46,3 +46,15 @@ The catalog shape (`app`, `version`, `creatures`, `moves`, `abilities`,
 `zones`) is what `LocalCatalog` (`src/app/shared/catalog/local-catalog.ts`)
 already loads from `public/catalog.json` — the frontend is already consuming
 this exact JSON offline.
+
+## Original launch-theme catalog
+
+```bash
+cargo run -- --emit-catalog=out/original-catalog.json
+```
+
+Dumps the generated ORIGINAL monster catalog (license-safe) to a
+contract-shape JSON file the frontend's `LocalCatalog` can load. The set:
+120 monsters across a rarity pyramid (45/30/15/8/2 → common…legendary),
+~75% with base→mid→final evolution chains, occasional dual types, 8 element
+habitats. See `docs/brainstorms/2026-08-16-product-theme-original-monsters-requirements.md`.
